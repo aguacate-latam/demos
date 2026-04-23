@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ampara — Cuidado en casa para tu mamá</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            clinic: {
+              900: '#1E3A8A',
+              800: '#1E40AF',
+              700: '#1D4ED8',
+              600: '#2563EB',
+            },
+            teal: {
+              50: '#F0FDFA',
+              100: '#CCFBF1',
+              500: '#14B8A6',
+              600: '#0F766E',
+              700: '#115E59',
+            },
+            mint: {
+              50: '#ECFDF5',
+              100: '#D1FAE5',
+              300: '#6EE7B7',
+            },
+            coral: {
+              50: '#FEF2F2',
+              100: '#FEE2E2',
+              200: '#FECACA',
+              500: '#F87171',
+            },
+            sun: {
+              100: '#FEF3C7',
+              200: '#FDE68A',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+    .slide-down { animation: slideDown 0.25s ease-out; }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .scale-in { animation: scaleIn 0.35s ease-out; }
+    /* Hide scrollbar on horizontal carousel */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, Fragment } = React;
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ICONS (SVG inline, heroicons outline style)
+    // ────────────────────────────────────────────────────────────────────────
+    const Icon = ({ path, className = "w-5 h-5", fill = "none", stroke = "currentColor", strokeWidth = 1.5 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" fill={fill} stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className={className}>
+        {path}
+      </svg>
+    );
+
+    const IconHome = (p) => <Icon {...p} path={<><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></>} />;
+    const IconUsers = (p) => <Icon {...p} path={<><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 2-3.5 4-3.5"/></>} />;
+    const IconHeart = (p) => <Icon {...p} path={<path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/>} />;
+    const IconReport = (p) => <Icon {...p} path={<><path d="M8 3h8l4 4v14H4V3h4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></>} />;
+    const IconCalendar = (p) => <Icon {...p} path={<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></>} />;
+    const IconDollar = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="9"/><path d="M15 9h-4a2 2 0 100 4h2a2 2 0 110 4H9"/><path d="M12 7v10"/></>} />;
+    const IconDoc = (p) => <Icon {...p} path={<><path d="M7 3h8l4 4v14H7V3z"/><path d="M15 3v4h4"/><path d="M10 13h6"/><path d="M10 17h6"/></>} />;
+    const IconChat = (p) => <Icon {...p} path={<path d="M4 5h16v11H9l-5 4V5z"/>} />;
+    const IconPhone = (p) => <Icon {...p} path={<path d="M3 5c0 9 7 16 16 16l2-4-5-2-2 2c-3-1-5-3-6-6l2-2-2-5-5 1z"/>} />;
+    const IconCog = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.4 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.4 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.4l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.4-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.4-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.4H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.4l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.4 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></>} />;
+    const IconSearch = (p) => <Icon {...p} path={<><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></>} />;
+    const IconBell = (p) => <Icon {...p} path={<><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/></>} />;
+    const IconCheck = (p) => <Icon {...p} path={<path d="M5 12l5 5L20 7"/>} />;
+    const IconStar = (p) => <Icon {...p} fill="currentColor" stroke="none" path={<path d="M12 2l3 7 7 .5-5.5 4.5 2 7-6.5-4.5L5.5 21l2-7L2 9.5 9 9z"/>} />;
+    const IconStarHalf = (p) => <Icon {...p} path={<><path d="M12 2l3 7 7 .5-5.5 4.5 2 7-6.5-4.5L5.5 21l2-7L2 9.5 9 9z"/><path fill="currentColor" stroke="none" d="M12 2v16.5L5.5 21l2-7L2 9.5 9 9l3-7z"/></>} />;
+    const IconPlay = (p) => <Icon {...p} fill="currentColor" stroke="none" path={<path d="M8 5v14l11-7z"/>} />;
+    const IconArrowRight = (p) => <Icon {...p} path={<><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></>} />;
+    const IconPlus = (p) => <Icon {...p} path={<><path d="M12 5v14"/><path d="M5 12h14"/></>} />;
+    const IconDownload = (p) => <Icon {...p} path={<><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></>} />;
+    const IconEye = (p) => <Icon {...p} path={<><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></>} />;
+    const IconLogoMark = (p) => <Icon {...p} path={<><path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/><path d="M9 11h6"/><path d="M12 8v6"/></>} />;
+    const IconShield = (p) => <Icon {...p} path={<><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></>} />;
+    const IconFood = (p) => <Icon {...p} path={<><path d="M4 10h16"/><path d="M4 10c0-4 4-7 8-7s8 3 8 7"/><path d="M6 14h12l-1 6H7l-1-6z"/></>} />;
+    const IconWalk = (p) => <Icon {...p} path={<><circle cx="13" cy="4" r="2"/><path d="M9 21l2-8 4 3 2 5"/><path d="M15 13l4-2 1 2"/><path d="M11 13l-3-3-2 3"/></>} />;
+    const IconPill = (p) => <Icon {...p} path={<><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/></>} />;
+
+    const ChevronLeft = (p) => <Icon {...p} path={<path d="M15 19l-7-7 7-7"/>} />;
+    const ChevronRight = (p) => <Icon {...p} path={<path d="M9 5l7 7-7 7"/>} />;
+
+    // ────────────────────────────────────────────────────────────────────────
+    // DATA
+    // ────────────────────────────────────────────────────────────────────────
+    const CUIDADORAS = [
+      { id: 'carmen', nombre: 'Carmen Lopes', edad: 47, pais: 'BR', cert: 'COREN · BR', rating: 4.9, familias: 23, especialidad: 'Alzheimer temprano', tarifa: 12, localPrice: '~R$60 BRL', anos: 9, bio: 'Enfermera técnica con 9 años atendiendo adultos mayores en São Paulo y Recife. Especializada en demencias tempranas.' },
+      { id: 'luisa', nombre: 'Luisa Mercado', edad: 52, pais: 'MX', cert: 'IMSS Cuidador AM · MX', rating: 4.8, familias: 31, especialidad: 'Movilidad reducida', tarifa: 11, localPrice: '~$220 MXN', anos: 12, bio: 'Auxiliar de enfermería certificada IMSS, 12 años de experiencia en Ciudad de México y Guadalajara.' },
+      { id: 'rosa', nombre: 'Rosa Figueroa', edad: 38, pais: 'AR', cert: 'PAMI · AR', rating: 4.9, familias: 18, especialidad: 'Postoperatorio', tarifa: 10, localPrice: '~$10.500 ARS', anos: 7, bio: 'Cuidadora domiciliaria PAMI, experta en rehabilitación postoperatoria y acompañamiento oncológico.' },
+      { id: 'martha', nombre: 'Martha Quintero', edad: 44, pais: 'CO', cert: 'SENA Aux. Enfermería · CO', rating: 4.7, familias: 15, especialidad: 'Alzheimer avanzado', tarifa: 10, localPrice: '~$42.000 COP', anos: 8, bio: 'Auxiliar SENA con enfoque en demencia avanzada y cuidado paliativo en Bogotá y Medellín.' },
+      { id: 'ines', nombre: 'Inés Santoro', edad: 50, pais: 'AR', cert: 'PAMI · AR', rating: 4.8, familias: 27, especialidad: 'Parkinson', tarifa: 11, localPrice: '~$11.500 ARS', anos: 11, bio: 'Especialista en Parkinson y trastornos del movimiento, Buenos Aires.' },
+      { id: 'dora', nombre: 'Dora Mendes', edad: 41, pais: 'BR', cert: 'COREN · BR', rating: 4.9, familias: 21, especialidad: 'Postoperatorio', tarifa: 13, localPrice: '~R$65 BRL', anos: 10, bio: 'Técnica en enfermería, 10 años en cuidado postoperatorio domiciliario en Recife y Salvador.' },
+      { id: 'ana', nombre: 'Ana Villanueva', edad: 48, pais: 'MX', cert: 'IMSS Cuidador AM · MX', rating: 4.8, familias: 19, especialidad: 'Hipertensión y diabetes', tarifa: 11, localPrice: '~$220 MXN', anos: 9, bio: 'Enfermera IMSS con 9 años atendiendo pacientes con condiciones crónicas en Monterrey.' },
+      { id: 'sonia', nombre: 'Sonia Ruiz', edad: 45, pais: 'CO', cert: 'SENA Aux. Enfermería · CO', rating: 4.6, familias: 13, especialidad: 'Movilidad reducida', tarifa: 10, localPrice: '~$42.000 COP', anos: 7, bio: 'Auxiliar SENA especializada en pacientes con movilidad reducida, Medellín.' },
+    ];
+
+    const REPORTES = [
+      { fecha: 'Hoy', hora: '11:42 am', cuidadora: 'Carmen Lopes', animo: 'estable', bullets: ['Desayuno completo · frutas + huevo', 'Caminata corta al jardín · 20 min', 'Medicamentos de las 9am tomados · Donepezil 10mg'], quote: 'Conversamos de su nieto, se rió bastante.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Ayer', hora: '11:30 am', cuidadora: 'Carmen Lopes', animo: 'activo', bullets: ['Desayuno completo · avena con frutas', 'Ejercicios suaves en silla · 15 min', 'Donepezil y Losartán tomados puntual'], quote: 'Me pidió que pusiera música de su época. Bailó sentada.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Hace 2 días', hora: '11:55 am', cuidadora: 'Carmen Lopes', animo: 'estable', bullets: ['Desayuno parcial · solo fruta', 'Lectura en voz alta · 30 min', 'Todos los medicamentos puntuales'], quote: 'Un poco callada hoy, pero cooperativa.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Hace 3 días', hora: '12:10 pm', cuidadora: 'Luisa Mercado', animo: 'estable', bullets: ['Desayuno completo', 'Visita del vecino · 45 min', 'Medicamentos al día'], quote: 'Disfrutó mucho la visita del señor Arturo.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Hace 4 días', hora: '11:20 am', cuidadora: 'Luisa Mercado', animo: 'bajo', bullets: ['Desayuno parcial', 'Rechazo parcial a caminata', 'Medicamentos puntuales'], quote: 'Prefirió quedarse en el sillón hoy. Hablamos de fotos viejas.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Hace 5 días', hora: '11:45 am', cuidadora: 'Luisa Mercado', animo: 'estable', bullets: ['Desayuno completo', 'Caminata corta al jardín', 'Medicamentos al día'], quote: 'Contenta con el clima. Día tranquilo.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+      { fecha: 'Hace 6 días', hora: '12:00 pm', cuidadora: 'Carmen Lopes', animo: 'activo', bullets: ['Desayuno completo', 'Actividad de memoria · 25 min', 'Medicamentos al día'], quote: 'Recordó el nombre de 3 primos sin ayuda. Se puso feliz.', supervisor: 'Supervisora Ampara: María Rodríguez' },
+    ];
+
+    const PAGOS = [
+      { fecha: '17 abr 2026', cuidadora: 'Carmen Lopes', horas: 20, usd: 240, local: 'R$1.200', rail: 'Pix', estado: 'Pagado' },
+      { fecha: '10 abr 2026', cuidadora: 'Carmen Lopes', horas: 20, usd: 240, local: 'R$1.200', rail: 'Pix', estado: 'Pagado' },
+      { fecha: '03 abr 2026', cuidadora: 'Luisa Mercado', horas: 16, usd: 176, local: '$3.520 MXN', rail: 'SPEI', estado: 'Pagado' },
+      { fecha: '27 mar 2026', cuidadora: 'Carmen Lopes', horas: 20, usd: 240, local: 'R$1.200', rail: 'Pix', estado: 'Pagado' },
+      { fecha: '20 mar 2026', cuidadora: 'Rosa Figueroa', horas: 12, usd: 120, local: '$126.000 ARS', rail: 'Transferencias 3.0', estado: 'Pagado' },
+      { fecha: '13 mar 2026', cuidadora: 'Martha Quintero', horas: 15, usd: 150, local: '$630.000 COP', rail: 'PSE', estado: 'Pagado' },
+      { fecha: '24 abr 2026', cuidadora: 'Carmen Lopes', horas: 20, usd: 240, local: 'R$1.200', rail: 'Pix', estado: 'Programado' },
+      { fecha: '01 may 2026', cuidadora: 'Carmen Lopes', horas: 20, usd: 240, local: 'R$1.200', rail: 'Pix', estado: 'Pendiente' },
+    ];
+
+    const MENSAJES_CARMEN = [
+      { from: 'carmen', text: 'Buenos días Sofía. Acabo de llegar a casa de María Elena, todo tranquilo.', time: '8:03 am' },
+      { from: 'sofia', text: 'Gracias Carmen. ¿Cómo la encontraste hoy?', time: '8:12 am' },
+      { from: 'carmen', text: 'Bien. Ya desayunó y se tomó los medicamentos. Ánimo estable, contenta.', time: '9:47 am' },
+      { from: 'sofia', text: 'Me alegra. ¿Puedes pasarle el teléfono más tarde?', time: '10:05 am' },
+      { from: 'carmen', text: 'Todo listo para mañana. ¿Quieres que la llame al despertar?', time: '11:42 am' },
+    ];
+
+    // ────────────────────────────────────────────────────────────────────────
+    // HELPERS
+    // ────────────────────────────────────────────────────────────────────────
+    const Avatar = ({ name, size = 'w-10 h-10', color = 'bg-teal-100 text-teal-700' }) => {
+      const initials = name.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
+      return (
+        <div className={`${size} ${color} rounded-full flex items-center justify-center font-semibold text-sm`}>
+          {initials}
+        </div>
+      );
+    };
+
+    const StarRating = ({ rating, size = 'w-4 h-4' }) => {
+      const full = Math.floor(rating);
+      const half = rating - full >= 0.4 && rating - full < 0.9;
+      const empty = 5 - full - (half ? 1 : 0);
+      return (
+        <div className="flex items-center gap-0.5 text-amber-400">
+          {Array.from({ length: full }).map((_, i) => <IconStar key={`f${i}`} className={size} />)}
+          {half && <IconStarHalf className={size} />}
+          {Array.from({ length: empty }).map((_, i) => <IconStar key={`e${i}`} className={`${size} text-slate-200`} />)}
+        </div>
+      );
+    };
+
+    const Pill = ({ children, color = 'teal' }) => {
+      const palette = {
+        teal: 'bg-teal-50 text-teal-700 border-teal-100',
+        mint: 'bg-mint-100 text-teal-700 border-mint-300',
+        coral: 'bg-coral-50 text-red-700 border-coral-200',
+        slate: 'bg-slate-100 text-slate-700 border-slate-200',
+        sun: 'bg-sun-100 text-amber-800 border-sun-200',
+        blue: 'bg-blue-50 text-clinic-800 border-blue-100',
+      };
+      return <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-lg border ${palette[color]}`}>{children}</span>;
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // SIDEBAR
+    // ────────────────────────────────────────────────────────────────────────
+    const Sidebar = ({ section, setSection }) => {
+      const items = [
+        { id: 'inicio', label: 'Inicio', Icon: IconHome },
+        { id: 'cuidadores', label: 'Cuidadores', Icon: IconUsers },
+        { id: 'mamá', label: 'Mi Mamá', Icon: IconHeart },
+        { id: 'reportes', label: 'Reportes Diarios', Icon: IconReport },
+        { id: 'calendario', label: 'Calendario', Icon: IconCalendar },
+        { id: 'pagos', label: 'Pagos', Icon: IconDollar },
+        { id: 'documentos', label: 'Documentos', Icon: IconDoc },
+        { id: 'mensajes', label: 'Mensajes', Icon: IconChat, badge: 2 },
+        { id: 'emergencias', label: 'Emergencias', Icon: IconPhone, dot: true },
+        { id: 'config', label: 'Configuración', Icon: IconCog },
+      ];
+
+      return (
+        <aside className="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0">
+          <div className="px-5 pt-6 pb-4 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-clinic-900 flex items-center justify-center text-white">
+              <IconLogoMark className="w-5 h-5" strokeWidth={2} />
+            </div>
+            <span className="text-lg font-bold text-clinic-900 tracking-tight">Ampara</span>
+          </div>
+          <div className="h-px bg-slate-100 mx-5"></div>
+          <div className="px-4 py-4">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <Avatar name="Sofía Restrepo" size="w-10 h-10" color="bg-clinic-900 text-white" />
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-slate-900 truncate">Sofía Restrepo</div>
+                <div className="text-xs text-slate-500">Miami, FL</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Familiar de María Elena</div>
+              </div>
+            </div>
+          </div>
+          <nav className="px-3 flex-1 overflow-y-auto no-scrollbar">
+            {items.map(item => {
+              const active = section === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setSection(item.id)}
+                  className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mb-0.5 ${active ? 'bg-teal-50 text-teal-700 border-l-4 border-teal-600 pl-2' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                >
+                  <item.Icon className={`w-5 h-5 ${active ? 'text-teal-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && <span className="bg-teal-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{item.badge}</span>}
+                  {item.dot && <span className="w-2 h-2 rounded-full bg-coral-500"></span>}
+                </button>
+              );
+            })}
+          </nav>
+          <div className="p-3">
+            <div className="bg-mint-100 rounded-xl p-3 border border-mint-300">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+                <span className="text-[11px] font-semibold text-teal-700 uppercase tracking-wide">Próximo turno</span>
+              </div>
+              <div className="text-sm font-semibold text-slate-900">Mañana 8:00 am</div>
+              <div className="text-xs text-slate-600">Carmen Lopes</div>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-3 text-center leading-tight">
+              Idea original: Aguacate newsletter<br />
+              <span className="text-slate-300">aguacate.beehiiv.com</span>
+            </p>
+          </div>
+        </aside>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // TOPBAR
+    // ────────────────────────────────────────────────────────────────────────
+    const Topbar = ({ extraNotif }) => {
+      const [openNotif, setOpenNotif] = useState(false);
+      const baseNotifs = [
+        'Carmen subió el reporte de hoy · 11:42 am',
+        'Pago de $240 USD programado para viernes · vence en 2 días',
+        'Certificación de primeros auxilios de Carmen vence en 3 meses',
+      ];
+      const notifs = extraNotif ? [extraNotif, ...baseNotifs] : baseNotifs;
+      const totalNotifs = notifs.length;
+
+      return (
+        <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-20 flex items-center justify-between px-6">
+          <div className="relative max-w-md w-full">
+            <IconSearch className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Buscar cuidador, reporte, documento..."
+              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-teal-500 focus:bg-white transition-colors"
+            />
+          </div>
+          <div className="flex items-center gap-2 relative">
+            <button
+              onClick={() => setOpenNotif(o => !o)}
+              className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              <IconBell className="w-5 h-5 text-slate-600" />
+              <span className="absolute top-1 right-1 bg-coral-500 text-white text-[10px] font-semibold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                {totalNotifs}
+              </span>
+            </button>
+            {openNotif && (
+              <div className="absolute right-14 top-12 w-80 bg-white border border-slate-200 rounded-xl shadow-lg slide-down z-30">
+                <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-900">Notificaciones</span>
+                  <span className="text-[11px] text-teal-600 font-medium cursor-pointer">Marcar todas</span>
+                </div>
+                <ul className="py-1">
+                  {notifs.map((n, i) => (
+                    <li key={i} className="px-3 py-2.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
+                      {n}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
+              <IconChat className="w-5 h-5 text-slate-600" />
+              <span className="absolute top-1 right-1 bg-teal-600 text-white text-[10px] font-semibold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">2</span>
+            </button>
+            <Avatar name="Sofía Restrepo" size="w-9 h-9" color="bg-clinic-900 text-white" />
+          </div>
+        </header>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // INICIO SECTION
+    // ────────────────────────────────────────────────────────────────────────
+    const Inicio = ({ state, actions }) => {
+      const [targetAmount] = useState(240);
+      const [displayAmount, setDisplayAmount] = useState(0);
+      const [expandedId, setExpandedId] = useState(null);
+      const [modalOpen, setModalOpen] = useState(false);
+      const [confirmed, setConfirmed] = useState(false);
+
+      useEffect(() => {
+        const duration = 1200;
+        const steps = 60;
+        const increment = targetAmount / steps;
+        let current = 0;
+        const interval = setInterval(() => {
+          current += increment;
+          if (current >= targetAmount) {
+            current = targetAmount;
+            clearInterval(interval);
+          }
+          setDisplayAmount(Math.round(current));
+        }, duration / steps);
+        return () => clearInterval(interval);
+      }, [targetAmount]);
+
+      const suggested = CUIDADORAS.slice(0, 3);
+      const hours = new Date().getHours();
+      const greeting = hours < 12 ? 'Buenos días' : hours < 19 ? 'Buenas tardes' : 'Buenas noches';
+
+      return (
+        <div className="p-8 space-y-6">
+          {/* HEADER */}
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{greeting}, Sofía</h1>
+            <p className="text-sm text-slate-500 mt-1">María Elena tuvo un buen día. Aquí tu resumen.</p>
+          </div>
+
+          {/* KPI GRID */}
+          <div className="grid grid-cols-4 gap-4">
+            {/* KPI 1 */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
+              <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Cuidadora activa</div>
+              <div className="flex items-center gap-3">
+                <Avatar name="Carmen Lopes" size="w-10 h-10" color="bg-teal-100 text-teal-700" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-900 truncate">Carmen Lopes</div>
+                  <div className="text-xs text-slate-500">{state.activeHours}h esta semana</div>
+                </div>
+              </div>
+              <div className="mt-3"><Pill color="mint"><span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>Activa</Pill></div>
+            </div>
+
+            {/* KPI 2 */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
+              <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Último check-in</div>
+              <div className="flex items-center gap-2 text-slate-900">
+                <div className="w-8 h-8 rounded-full bg-mint-100 flex items-center justify-center">
+                  <IconCheck className="w-4 h-4 text-teal-600" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Hace 2 horas</div>
+                  <div className="text-xs text-slate-500">Ánimo estable</div>
+                </div>
+              </div>
+            </div>
+
+            {/* KPI 3 - animated counter */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
+              <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Próximo cobro</div>
+              <div className="text-2xl font-bold text-clinic-900 tabular-nums">${displayAmount} <span className="text-sm text-slate-500 font-medium">USD</span></div>
+              <div className="text-xs text-slate-500 mt-1">viernes · Pix Brasil</div>
+            </div>
+
+            {/* KPI 4 */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
+              <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Reportes pendientes</div>
+              <div className="text-2xl font-bold text-slate-900">2 <span className="text-sm text-slate-500 font-medium">nuevos</span></div>
+              <button onClick={() => actions.go('reportes')} className="text-xs text-teal-600 font-semibold mt-2 flex items-center gap-1 hover:text-teal-700">
+                Ver todos <IconArrowRight className="w-3 h-3" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
+
+          {/* SUGGESTED CAROUSEL */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Cuidador sugerido esta semana</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Matching con IA basado en el perfil médico de tu mamá</p>
+              </div>
+              <button onClick={() => actions.go('cuidadores')} className="text-xs text-teal-600 font-semibold flex items-center gap-1 hover:text-teal-700">
+                Ver todos <IconArrowRight className="w-3 h-3" strokeWidth={2} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {suggested.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
+                  className={`text-left rounded-xl border p-5 transition-all cursor-pointer ${expandedId === c.id ? 'border-teal-500 bg-teal-50/30 shadow-sm' : 'border-slate-200 hover:border-teal-500 hover:shadow-sm'}`}
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <Avatar name={c.nombre} size="w-14 h-14" color="bg-clinic-900 text-white" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">{c.nombre}</div>
+                      <div className="text-xs text-slate-500">{c.edad} años</div>
+                      <div className="mt-1"><Pill color="blue">{c.cert}</Pill></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <StarRating rating={c.rating} />
+                    <span className="text-xs text-slate-600 font-medium">{c.rating} · {c.familias} familias</span>
+                  </div>
+                  <Pill color="teal">{c.especialidad}</Pill>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-lg font-bold text-clinic-900">${c.tarifa}/h <span className="text-xs text-slate-500 font-normal">USD</span></span>
+                    <span className="text-xs text-slate-400">{c.localPrice}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* EXPANDED PANEL */}
+            {expandedId && (() => {
+              const c = CUIDADORAS.find(x => x.id === expandedId);
+              return (
+                <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/50 p-6 slide-down">
+                  <div className="grid grid-cols-3 gap-6">
+                    {/* VIDEO placeholder */}
+                    <div className="col-span-1">
+                      <div className="aspect-video bg-slate-100 rounded-lg flex items-center justify-center group cursor-pointer">
+                        <div className="w-14 h-14 rounded-full bg-teal-600 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                          <IconPlay className="w-7 h-7 ml-1" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2 text-center">Presentación de {c.nombre.split(' ')[0]} · 90s</p>
+                    </div>
+                    <div className="col-span-2 space-y-4">
+                      <p className="text-sm text-slate-700 leading-relaxed">{c.bio}</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          'Antecedentes penales 7 años verificados',
+                          'Entrevista 60 min completada',
+                          'Test práctico aprobado',
+                        ].map((txt, i) => (
+                          <div key={i} className="flex items-start gap-2 p-3 bg-white rounded-lg border border-slate-200">
+                            <div className="shrink-0 w-5 h-5 rounded-full bg-mint-100 flex items-center justify-center mt-0.5">
+                              <IconCheck className="w-3 h-3 text-teal-600" strokeWidth={2.5} />
+                            </div>
+                            <span className="text-xs text-slate-700 leading-snug">{txt}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Referencias verificadas</div>
+                        <ul className="space-y-1.5">
+                          {[
+                            'María P. — São Paulo — 2 años con mamá',
+                            'Antonia R. — Recife — 8 meses con abuela',
+                            'Cláudia F. — Salvador — 1 año con tía',
+                          ].map((r, i) => (
+                            <li key={i} className="text-xs text-slate-600 flex items-center gap-2">
+                              <IconShield className="w-3.5 h-3.5 text-teal-600" />
+                              {r}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setModalOpen(true)}
+                    className="w-full mt-5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg py-4 font-semibold transition-colors"
+                  >
+                    Contratar por 20 horas · $240 USD
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* REPORTE DE HOY */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-slate-900">Reporte de hoy</h2>
+                <span className="text-xs text-slate-500">23 abr 2026 · 11:42 am</span>
+                <Pill color="mint"><IconShield className="w-3 h-3"/>Verificado por supervisor</Pill>
+              </div>
+              <button onClick={() => actions.go('reportes')} className="text-xs text-teal-600 font-semibold flex items-center gap-1 hover:text-teal-700">
+                Ver todos los reportes <IconArrowRight className="w-3 h-3" strokeWidth={2} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-5">
+              <div className="col-span-1">
+                <div className="aspect-square bg-gradient-to-br from-mint-100 to-teal-50 rounded-lg flex items-center justify-center">
+                  <IconFood className="w-16 h-16 text-teal-600 opacity-40" />
+                </div>
+              </div>
+              <div className="col-span-2 space-y-3">
+                <ul className="space-y-2">
+                  {[
+                    { Icon: IconFood, txt: 'Desayuno completo · frutas + huevo' },
+                    { Icon: IconWalk, txt: 'Caminata corta al jardín · 20 min' },
+                    { Icon: IconPill, txt: 'Medicamentos de las 9am tomados · Donepezil 10mg' },
+                  ].map((b, i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-sm text-slate-700">
+                      <b.Icon className="w-4 h-4 text-teal-600 shrink-0" />
+                      {b.txt}
+                    </li>
+                  ))}
+                </ul>
+                <Pill color="mint">Ánimo: estable</Pill>
+                <blockquote className="border-l-4 border-teal-500 pl-4 py-1 text-sm text-slate-600 italic">
+                  "Conversamos de su nieto, se rió bastante."
+                  <footer className="text-xs text-slate-400 not-italic mt-1">— Carmen Lopes</footer>
+                </blockquote>
+              </div>
+            </div>
+          </div>
+
+          {/* MODAL */}
+          {modalOpen && (
+            <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4 fade-in" onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
+              <div className="bg-white rounded-xl p-8 max-w-md w-full scale-in">
+                {!confirmed ? (
+                  <Fragment>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Confirmar contratación</h3>
+                    <p className="text-sm text-slate-500 mb-5">Revisa los detalles antes de confirmar.</p>
+                    <ul className="space-y-3 mb-6">
+                      {[
+                        { Icon: IconDollar, txt: 'Pago desde EE.UU. · $240 USD' },
+                        { Icon: IconShield, txt: 'Débito de tu cuenta Bank of America ****4721' },
+                        { Icon: IconCheck, txt: 'Carmen recibe R$1.200 BRL vía Pix' },
+                        { Icon: IconShield, txt: 'Cobertura de responsabilidad civil incluida' },
+                      ].map((b, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <div className="shrink-0 w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                            <b.Icon className="w-4 h-4 text-teal-600" strokeWidth={2} />
+                          </div>
+                          <span className="text-sm text-slate-700 pt-1.5">{b.txt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-3">
+                      <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
+                      <button onClick={() => { setConfirmed(true); actions.onConfirm(); }} className="flex-1 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-colors">Confirmar contratación</button>
+                    </div>
+                  </Fragment>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="w-16 h-16 mx-auto bg-mint-100 rounded-full flex items-center justify-center scale-in">
+                      <IconCheck className="w-9 h-9 text-teal-600" strokeWidth={2.5} />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mt-4">Match confirmado</h3>
+                    <p className="text-sm text-slate-600 mt-2 px-4">Carmen empieza mañana a las 8am. Recibirás reporte diario.</p>
+                    <button onClick={() => { setModalOpen(false); setConfirmed(false); setExpandedId(null); }} className="mt-5 px-5 py-2 text-sm text-teal-600 font-semibold hover:text-teal-700">Cerrar</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CUIDADORES SECTION
+    // ────────────────────────────────────────────────────────────────────────
+    const Cuidadores = () => {
+      const [pais, setPais] = useState('all');
+      const [minRating, setMinRating] = useState(0);
+      const [maxTarifa, setMaxTarifa] = useState(15);
+      const [especialidad, setEspecialidad] = useState('all');
+      const [openId, setOpenId] = useState(null);
+
+      const filtered = CUIDADORAS.filter(c =>
+        (pais === 'all' || c.pais === pais) &&
+        c.rating >= minRating &&
+        c.tarifa <= maxTarifa &&
+        (especialidad === 'all' || c.especialidad === especialidad)
+      );
+
+      const especialidades = ['all', ...new Set(CUIDADORAS.map(c => c.especialidad))];
+
+      return (
+        <div className="p-8 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Explora cuidadores verificados</h1>
+            <p className="text-sm text-slate-500 mt-1">Todos con antecedentes penales, entrevista 60 min y test práctico aprobado.</p>
+          </div>
+
+          {/* FILTERS */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide w-20">País</span>
+              <div className="flex gap-2">
+                {['all', 'BR', 'MX', 'AR', 'CO'].map(p => (
+                  <button key={p} onClick={() => setPais(p)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${pais === p ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                    {p === 'all' ? 'Todos' : p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide w-20">Especialidad</span>
+              <select value={especialidad} onChange={(e) => setEspecialidad(e.target.value)} className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-teal-500">
+                {especialidades.map(e => <option key={e} value={e}>{e === 'all' ? 'Todas' : e}</option>)}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide w-20">Tarifa máx</span>
+              <input type="range" min="10" max="15" step="1" value={maxTarifa} onChange={(e) => setMaxTarifa(Number(e.target.value))} className="flex-1 max-w-xs accent-teal-600" />
+              <span className="text-sm font-semibold text-slate-900">${maxTarifa}/h</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide w-20">Rating mín</span>
+              <div className="flex gap-1">
+                {[0, 4, 4.5, 4.8].map(r => (
+                  <button key={r} onClick={() => setMinRating(r)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${minRating === r ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                    {r === 0 ? 'Todos' : `≥ ${r}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RESULT GRID */}
+          <div className="grid grid-cols-3 gap-4">
+            {filtered.map(c => (
+              <div
+                key={c.id}
+                onClick={() => setOpenId(openId === c.id ? null : c.id)}
+                className={`bg-white rounded-xl border p-5 cursor-pointer transition-all ${openId === c.id ? 'border-teal-500 shadow-sm' : 'border-slate-200 hover:border-teal-500 hover:shadow-sm'}`}
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <Avatar name={c.nombre} size="w-12 h-12" color="bg-clinic-900 text-white" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-900">{c.nombre}</div>
+                    <div className="text-xs text-slate-500">{c.edad} años · {c.pais}</div>
+                  </div>
+                </div>
+                <Pill color="blue">{c.cert}</Pill>
+                <div className="flex items-center gap-2 mt-3">
+                  <StarRating rating={c.rating} />
+                  <span className="text-xs text-slate-600">{c.rating} · {c.familias} familias</span>
+                </div>
+                <div className="mt-2"><Pill color="teal">{c.especialidad}</Pill></div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="text-lg font-bold text-clinic-900">${c.tarifa}/h</span>
+                  <span className="text-xs text-slate-400">{c.localPrice}</span>
+                </div>
+                {openId === c.id && (
+                  <div className="mt-4 pt-4 border-t border-slate-100 slide-down space-y-2">
+                    <p className="text-xs text-slate-600 leading-relaxed">{c.bio}</p>
+                    <div className="flex items-center gap-2 text-xs text-teal-600 font-medium">
+                      <IconShield className="w-3.5 h-3.5" />
+                      3 verificaciones aprobadas
+                    </div>
+                    <button className="w-full mt-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+                      Solicitar match
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          {filtered.length === 0 && (
+            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+              <p className="text-sm text-slate-500">Ningún cuidador coincide con estos filtros. Ajusta los criterios.</p>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // MI MAMÁ
+    // ────────────────────────────────────────────────────────────────────────
+    const MiMama = () => (
+      <div className="p-8 space-y-6">
+        <div className="flex items-center gap-5 bg-white rounded-xl border border-slate-200 p-6">
+          <Avatar name="María Elena" size="w-20 h-20" color="bg-mint-100 text-teal-700" />
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">María Elena Restrepo</h1>
+            <p className="text-sm text-slate-500 mt-1">78 años · Bogotá, Colombia</p>
+            <div className="flex gap-2 mt-2">
+              <Pill color="slate">Nacida 15 mar 1948</Pill>
+              <Pill color="slate">CC 24.391.782</Pill>
+              <Pill color="blue">EPS Sanitas</Pill>
+              <Pill color="coral">Sangre O+</Pill>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-5">
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3">Condiciones médicas</h2>
+            <div className="space-y-2">
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-sm font-semibold text-slate-900">Alzheimer temprano</div>
+                <div className="text-xs text-slate-500 mt-0.5">Diagnóstico 2024</div>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-sm font-semibold text-slate-900">Hipertensión</div>
+                <div className="text-xs text-slate-500 mt-0.5">Controlada</div>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-sm font-semibold text-slate-900">Osteoartritis</div>
+                <div className="text-xs text-slate-500 mt-0.5">Rodilla izquierda</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3">Medicamentos activos</h2>
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-slate-100">
+                {[
+                  ['Donepezil', '10mg', '9am'],
+                  ['Losartán', '50mg', '8am'],
+                  ['Calcio+D3', '1 cap', '12pm'],
+                  ['Omega 3', '1 cap', '8pm'],
+                ].map((m, i) => (
+                  <tr key={i}>
+                    <td className="py-2 font-semibold text-slate-900">{m[0]}</td>
+                    <td className="py-2 text-slate-600">{m[1]}</td>
+                    <td className="py-2 text-right"><Pill color="teal">{m[2]}</Pill></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3">Contactos médicos</h2>
+            <div className="space-y-3">
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-sm font-semibold text-slate-900">Dr. Alberto García</div>
+                <div className="text-xs text-slate-500">Neurólogo</div>
+                <div className="text-xs text-teal-600 font-medium mt-1">+57 300 123 4567</div>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-sm font-semibold text-slate-900">Dra. Paola Hernández</div>
+                <div className="text-xs text-slate-500">Geriatra</div>
+                <div className="text-xs text-teal-600 font-medium mt-1">+57 310 987 6543</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Rutina diaria</h2>
+          <div className="grid grid-cols-6 gap-3">
+            {[
+              { h: '7:00 am', act: 'Despertar' },
+              { h: '8:00 am', act: 'Desayuno · Losartán' },
+              { h: '9:00 am', act: 'Donepezil' },
+              { h: '10:00 am', act: 'Caminata / lectura' },
+              { h: '12:00 pm', act: 'Almuerzo · Calcio+D3' },
+              { h: '1:00 pm', act: 'Siesta' },
+              { h: '4:00 pm', act: 'Merienda / TV' },
+              { h: '6:00 pm', act: 'Familia llama' },
+              { h: '7:00 pm', act: 'Cena' },
+              { h: '8:00 pm', act: 'Omega 3' },
+              { h: '9:00 pm', act: 'Preparación dormir' },
+              { h: '10:00 pm', act: 'Dormir' },
+            ].map((r, i) => (
+              <div key={i} className="p-3 bg-slate-50 rounded-lg">
+                <div className="text-xs font-semibold text-teal-600">{r.h}</div>
+                <div className="text-xs text-slate-700 mt-1">{r.act}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    // ────────────────────────────────────────────────────────────────────────
+    // REPORTES DIARIOS
+    // ────────────────────────────────────────────────────────────────────────
+    const Reportes = () => {
+      const [cuidadora, setCuidadora] = useState('all');
+      const [animo, setAnimo] = useState('all');
+
+      const filtered = REPORTES.filter(r =>
+        (cuidadora === 'all' || r.cuidadora === cuidadora) &&
+        (animo === 'all' || r.animo === animo)
+      );
+
+      const animoColor = { estable: 'mint', activo: 'teal', bajo: 'sun' };
+
+      return (
+        <div className="p-8 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Reportes diarios</h1>
+            <p className="text-sm text-slate-500 mt-1">Últimos 7 días · todos verificados por supervisión Ampara.</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-600 font-medium">Cuidadora:</span>
+              <select value={cuidadora} onChange={(e) => setCuidadora(e.target.value)} className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-teal-500">
+                <option value="all">Todas</option>
+                <option>Carmen Lopes</option>
+                <option>Luisa Mercado</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-600 font-medium">Ánimo:</span>
+              <div className="flex gap-1">
+                {['all', 'estable', 'activo', 'bajo'].map(a => (
+                  <button key={a} onClick={() => setAnimo(a)} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${animo === a ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                    {a === 'all' ? 'Todos' : a}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {filtered.map((r, i) => (
+              <div key={i} className="bg-white rounded-xl border-l-4 border-teal-500 border-t border-r border-b border-slate-200 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-slate-900">{r.fecha}</span>
+                    <span className="text-xs text-slate-500">{r.hora}</span>
+                    <span className="text-xs text-slate-600">· {r.cuidadora}</span>
+                  </div>
+                  <Pill color="mint"><IconShield className="w-3 h-3"/>Verificado</Pill>
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="aspect-square bg-gradient-to-br from-mint-100 to-teal-50 rounded-lg flex items-center justify-center">
+                    <IconFood className="w-10 h-10 text-teal-600 opacity-40" />
+                  </div>
+                  <div className="col-span-3 space-y-2">
+                    <ul className="space-y-1.5">
+                      {r.bullets.map((b, j) => (
+                        <li key={j} className="text-sm text-slate-700 flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" strokeWidth={2.5}/>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                    <Pill color={animoColor[r.animo]}>Ánimo: {r.animo}</Pill>
+                    <blockquote className="border-l-2 border-slate-200 pl-3 text-xs text-slate-600 italic mt-2">
+                      "{r.quote}"
+                    </blockquote>
+                    <p className="text-[11px] text-slate-400 mt-1">{r.supervisor}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filtered.length > 0 && (
+            <button className="w-full bg-white border border-slate-200 rounded-lg py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+              Cargar más reportes
+            </button>
+          )}
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CALENDARIO
+    // ────────────────────────────────────────────────────────────────────────
+    const Calendario = ({ newBlock }) => {
+      const [view, setView] = useState('semana');
+      const [tooltip, setTooltip] = useState(null);
+
+      const dias = [
+        { d: 'Lun', fecha: '21', turnos: [{ start: 8, end: 12, label: 'Carmen Lopes · 4h', color: 'mint' }] },
+        { d: 'Mar', fecha: '22', turnos: [{ start: 8, end: 16, label: 'Carmen Lopes · 8h', color: 'mint' }] },
+        { d: 'Mié', fecha: '23', turnos: newBlock ? [{ start: 9, end: 13, label: 'Carmen Lopes · 4h · NUEVO', color: 'teal-new' }] : [] },
+        { d: 'Jue', fecha: '24', turnos: [{ start: 10, end: 14, label: 'Luisa Mercado · 4h', color: 'mint' }] },
+        { d: 'Vie', fecha: '25', turnos: [{ start: 8, end: 12, label: 'Buscando match · IA 3 candidatas', color: 'sun' }] },
+        { d: 'Sáb', fecha: '26', turnos: [] },
+        { d: 'Dom', fecha: '27', turnos: [] },
+      ];
+
+      const horas = Array.from({ length: 13 }, (_, i) => i + 7); // 7am to 7pm
+
+      const blockColor = {
+        mint: 'bg-mint-100 border border-teal-500/30 text-teal-700',
+        sun: 'bg-sun-100 border border-amber-300 text-amber-800',
+        'teal-new': 'bg-teal-100 border border-teal-500 text-teal-700 fade-in',
+      };
+
+      return (
+        <div className="p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Agenda de cuidado</h1>
+              <p className="text-sm text-slate-500 mt-1">Semana del 21 al 27 de abril 2026.</p>
+            </div>
+            <div className="flex bg-slate-100 rounded-lg p-1">
+              <button onClick={() => setView('semana')} className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors ${view === 'semana' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>Semana</button>
+              <button onClick={() => setView('mes')} className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors ${view === 'mes' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>Mes</button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-6 overflow-x-auto">
+            <div className="grid grid-cols-8 gap-2 min-w-[700px]">
+              <div></div>
+              {dias.map(d => (
+                <div key={d.d} className="text-center">
+                  <div className="text-xs font-semibold text-slate-500 uppercase">{d.d}</div>
+                  <div className="text-lg font-bold text-slate-900">{d.fecha}</div>
+                </div>
+              ))}
+
+              {horas.map(h => (
+                <Fragment key={h}>
+                  <div className="text-[10px] text-slate-400 text-right pr-2 h-12 pt-1">
+                    {h > 12 ? `${h - 12}pm` : h === 12 ? '12pm' : `${h}am`}
+                  </div>
+                  {dias.map((d, di) => {
+                    const turno = d.turnos.find(t => h >= t.start && h < t.end);
+                    const isStart = d.turnos.find(t => t.start === h);
+                    if (isStart) {
+                      const len = isStart.end - isStart.start;
+                      return (
+                        <div
+                          key={di}
+                          onMouseEnter={() => setTooltip({ label: isStart.label, dia: d.d })}
+                          onMouseLeave={() => setTooltip(null)}
+                          className={`rounded-lg p-2 text-[10px] font-medium cursor-pointer relative ${blockColor[isStart.color]}`}
+                          style={{ gridRow: `span ${len}` }}
+                        >
+                          {isStart.label}
+                          <div className="text-[9px] opacity-70 mt-0.5">{isStart.start}am–{isStart.end > 12 ? `${isStart.end - 12}pm` : `${isStart.end}pm`}</div>
+                        </div>
+                      );
+                    } else if (turno) {
+                      return null;
+                    }
+                    return <div key={di} className="h-12 border-t border-slate-50"></div>;
+                  })}
+                </Fragment>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-mint-100 rounded-xl p-4 border border-mint-300">
+              <div className="text-xs font-semibold text-teal-700 uppercase tracking-wide">Horas esta semana</div>
+              <div className="text-2xl font-bold text-slate-900 mt-1">{newBlock ? 24 : 20}h</div>
+            </div>
+            <div className="bg-sun-100 rounded-xl p-4 border border-sun-200">
+              <div className="text-xs font-semibold text-amber-800 uppercase tracking-wide">Turnos sin asignar</div>
+              <div className="text-2xl font-bold text-slate-900 mt-1">1</div>
+              <div className="text-xs text-amber-800 mt-1">Viernes · IA buscando</div>
+            </div>
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+              <div className="text-xs font-semibold text-clinic-800 uppercase tracking-wide">Próximo cobro</div>
+              <div className="text-2xl font-bold text-slate-900 mt-1">${newBlock ? 288 : 240}</div>
+              <div className="text-xs text-clinic-800 mt-1">Viernes · Pix Brasil</div>
+            </div>
+          </div>
+
+          {tooltip && (
+            <div className="fixed bottom-6 right-6 bg-slate-900 text-white rounded-lg px-4 py-2 text-xs shadow-lg">
+              {tooltip.dia}: {tooltip.label}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PAGOS
+    // ────────────────────────────────────────────────────────────────────────
+    const Pagos = () => {
+      const [tooltip, setTooltip] = useState(null);
+
+      const railInfo = {
+        'Pix': 'Pix · transferencia instantánea Brasil',
+        'SPEI': 'SPEI · transferencia México',
+        'Transferencias 3.0': 'Transferencias 3.0 · pago instantáneo Argentina',
+        'PSE': 'PSE · pago seguro en línea Colombia',
+      };
+
+      const estadoColor = {
+        'Pagado': 'mint',
+        'Programado': 'blue',
+        'Pendiente': 'sun',
+      };
+
+      return (
+        <div className="p-8 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Pagos y facturación</h1>
+            <p className="text-sm text-slate-500 mt-1">Pagas en USD desde EE.UU. · Ampara maneja el rail local.</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-clinic-900 to-teal-700 rounded-xl p-8 text-white">
+            <div className="text-xs uppercase tracking-wide opacity-80 font-semibold">Pagado este mes</div>
+            <div className="text-5xl font-bold mt-2">$480 <span className="text-2xl opacity-80 font-medium">USD</span></div>
+            <div className="text-sm opacity-80 mt-3">Próximo cobro: $240 USD · viernes · Pix Brasil</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <h2 className="text-sm font-semibold text-slate-900">Historial (últimos 60 días)</h2>
+              <div className="flex gap-2">
+                <button className="text-xs font-medium text-teal-600 flex items-center gap-1 hover:text-teal-700">
+                  <IconPlus className="w-3 h-3" strokeWidth={2}/>Agregar método
+                </button>
+                <button className="text-xs font-medium text-slate-600 flex items-center gap-1 hover:text-slate-900">
+                  <IconDownload className="w-3 h-3" strokeWidth={2}/>Descargar CSV
+                </button>
+              </div>
+            </div>
+            <table className="w-full">
+              <thead className="bg-slate-50">
+                <tr>
+                  {['Fecha', 'Cuidadora', 'Horas', 'USD', 'Local', 'Rail', 'Estado'].map(h => (
+                    <th key={h} className="text-xs font-semibold text-slate-500 uppercase tracking-wide text-left px-5 py-3">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {PAGOS.map((p, i) => (
+                  <tr key={i} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-3 text-sm text-slate-900">{p.fecha}</td>
+                    <td className="px-5 py-3 text-sm text-slate-700">{p.cuidadora}</td>
+                    <td className="px-5 py-3 text-sm text-slate-700">{p.horas}h</td>
+                    <td className="px-5 py-3 text-sm font-semibold text-slate-900">${p.usd}</td>
+                    <td className="px-5 py-3 text-sm text-slate-500">{p.local}</td>
+                    <td className="px-5 py-3">
+                      <span
+                        onMouseEnter={() => setTooltip({ text: railInfo[p.rail], x: 0, y: 0 })}
+                        onMouseLeave={() => setTooltip(null)}
+                      >
+                        <Pill color="blue">{p.rail}</Pill>
+                      </span>
+                    </td>
+                    <td className="px-5 py-3"><Pill color={estadoColor[p.estado]}>{p.estado}</Pill></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {tooltip && (
+            <div className="fixed bottom-6 right-6 bg-slate-900 text-white rounded-lg px-4 py-2 text-xs shadow-lg">
+              {tooltip.text}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // DOCUMENTOS
+    // ────────────────────────────────────────────────────────────────────────
+    const Documentos = () => {
+      const carmenDocs = [
+        { name: 'COREN vigente', fecha: 'Vigente hasta 2028', color: 'teal' },
+        { name: 'Certificado Alzheimer 40h', fecha: 'Obtenido ene 2025', color: 'teal' },
+        { name: 'Primeros auxilios', fecha: 'Vence jul 2026', color: 'sun' },
+        { name: 'Contrato marco Ampara', fecha: 'Firmado ene 2026', color: 'teal' },
+      ];
+      const mamaDocs = [
+        { name: 'Cédula escaneada', fecha: 'Subido mar 2024', color: 'teal' },
+        { name: 'Receta Donepezil · Dr. García', fecha: 'Abril 2026', color: 'teal' },
+        { name: 'Afiliación EPS Sanitas', fecha: 'Subido mar 2024', color: 'teal' },
+        { name: 'Directiva anticipada', fecha: 'Firmado dic 2024', color: 'teal' },
+      ];
+
+      const DocCard = ({ d }) => (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 hover:border-teal-500 hover:shadow-sm transition-all">
+          <div className={`w-10 h-10 rounded-lg ${d.color === 'sun' ? 'bg-sun-100' : 'bg-teal-50'} flex items-center justify-center`}>
+            <IconDoc className={`w-5 h-5 ${d.color === 'sun' ? 'text-amber-700' : 'text-teal-600'}`}/>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-slate-900 truncate">{d.name}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{d.fecha}</div>
+          </div>
+          <button className="p-1.5 rounded hover:bg-slate-100"><IconEye className="w-4 h-4 text-slate-500"/></button>
+          <button className="p-1.5 rounded hover:bg-slate-100"><IconDownload className="w-4 h-4 text-slate-500"/></button>
+        </div>
+      );
+
+      return (
+        <div className="p-8 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Documentos</h1>
+            <p className="text-sm text-slate-500 mt-1">Todos los documentos relevantes organizados en un lugar.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3">De Carmen · cuidadora activa</h2>
+              <div className="space-y-3">
+                {carmenDocs.map((d, i) => <DocCard key={i} d={d} />)}
+              </div>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3">De María Elena · mamá</h2>
+              <div className="space-y-3">
+                {mamaDocs.map((d, i) => <DocCard key={i} d={d} />)}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // MENSAJES
+    // ────────────────────────────────────────────────────────────────────────
+    const Mensajes = () => {
+      const convos = [
+        { id: 'carmen', nombre: 'Carmen Lopes', role: 'cuidadora', last: 'Todo listo para mañana...', time: '11:42 am', unread: 1 },
+        { id: 'maria', nombre: 'María Rodríguez', role: 'supervisora Ampara', last: 'Gracias por la confirmación...', time: 'hace 2 días', unread: 0 },
+        { id: 'luisa', nombre: 'Luisa Mercado', role: 'cuidadora suplente', last: 'Disponible para fin de mes', time: 'hace 5 días', unread: 0 },
+      ];
+      const [active, setActive] = useState('carmen');
+
+      return (
+        <div className="p-8">
+          <h1 className="text-2xl font-bold text-slate-900 mb-6">Mensajes</h1>
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden h-[calc(100vh-14rem)] flex">
+            <aside className="w-80 border-r border-slate-200 overflow-y-auto">
+              {convos.map(c => (
+                <button key={c.id} onClick={() => setActive(c.id)} className={`w-full text-left p-4 border-b border-slate-100 flex items-start gap-3 transition-colors ${active === c.id ? 'bg-teal-50' : 'hover:bg-slate-50'}`}>
+                  <Avatar name={c.nombre} size="w-11 h-11" color="bg-clinic-900 text-white" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-semibold text-slate-900 truncate">{c.nombre}</div>
+                      <span className="text-[10px] text-slate-400">{c.time}</span>
+                    </div>
+                    <div className="text-xs text-slate-500 mb-1">{c.role}</div>
+                    <div className="text-xs text-slate-600 truncate">{c.last}</div>
+                  </div>
+                  {c.unread > 0 && <span className="bg-teal-600 text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{c.unread}</span>}
+                </button>
+              ))}
+            </aside>
+            <main className="flex-1 flex flex-col">
+              <header className="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+                <Avatar name={convos.find(c => c.id === active).nombre} size="w-10 h-10" color="bg-clinic-900 text-white" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{convos.find(c => c.id === active).nombre}</div>
+                  <div className="text-xs text-teal-600">● En línea</div>
+                </div>
+              </header>
+              <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-slate-50/50">
+                {MENSAJES_CARMEN.map((m, i) => (
+                  <div key={i} className={`flex ${m.from === 'sofia' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-md rounded-2xl px-4 py-2.5 ${m.from === 'sofia' ? 'bg-teal-600 text-white rounded-br-md' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'}`}>
+                      <p className="text-sm">{m.text}</p>
+                      <div className={`text-[10px] mt-1 ${m.from === 'sofia' ? 'text-teal-100' : 'text-slate-400'}`}>{m.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-slate-200 p-4 bg-white">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Escribe un mensaje..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-colors"
+                  />
+                  <button className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors">Enviar</button>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // EMERGENCIAS
+    // ────────────────────────────────────────────────────────────────────────
+    const Emergencias = () => (
+      <div className="p-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Contactos de emergencia</h1>
+          <p className="text-sm text-slate-500 mt-1">Todos los contactos a un clic · 24/7 disponibles.</p>
+        </div>
+
+        <div className="bg-coral-50 border-2 border-coral-200 rounded-xl p-8 flex items-center gap-6">
+          <div className="w-16 h-16 rounded-full bg-coral-100 flex items-center justify-center">
+            <IconPhone className="w-8 h-8 text-red-700" />
+          </div>
+          <div className="flex-1">
+            <div className="text-xs font-semibold text-red-700 uppercase tracking-wide">Contacto médico principal</div>
+            <div className="text-xl font-bold text-slate-900 mt-1">Dr. Alberto García · Neurólogo</div>
+            <div className="text-2xl font-bold text-red-700 mt-2">+57 300 123 4567</div>
+          </div>
+          <button className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-8 py-4 text-base font-semibold transition-colors">
+            Llamar ahora
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { n: 'Dra. Paola Hernández', r: 'Geriatra', t: '+57 310 987 6543' },
+            { n: 'EPS Sanitas · Línea 24/7', r: 'Afiliación médica', t: '+57 601 487 3000' },
+            { n: 'Hospital Santa Fe', r: 'Más cercano · 1.2 km', t: '+57 601 603 0303' },
+            { n: 'Carmen Lopes · cuidadora activa', r: 'En turno ahora', t: '+55 11 9 8765 4321' },
+          ].map((c, i) => (
+            <div key={i} className="bg-white rounded-xl border border-slate-200 p-5 flex items-center gap-4">
+              <div className="w-11 h-11 rounded-full bg-teal-50 flex items-center justify-center">
+                <IconPhone className="w-5 h-5 text-teal-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-slate-900 truncate">{c.n}</div>
+                <div className="text-xs text-slate-500">{c.r}</div>
+                <div className="text-xs text-teal-600 font-medium mt-1">{c.t}</div>
+              </div>
+              <button className="text-xs font-medium text-teal-600 hover:text-teal-700 px-3 py-1.5 rounded-lg border border-teal-600 hover:bg-teal-50">Llamar</button>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Plan de emergencia</h2>
+          <ol className="space-y-3">
+            {[
+              'Llama al Dr. García (neurólogo principal) primero.',
+              'Si no responde en 5 min, llama a Dra. Hernández (geriatra).',
+              'Si es caída o pérdida de conciencia, llama al Hospital Santa Fe directamente.',
+              'Avisa a Carmen (cuidadora) si no está en turno.',
+              'Registra el evento en "Reportes Diarios" con detalle de qué pasó.',
+            ].map((p, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="shrink-0 w-7 h-7 rounded-full bg-clinic-900 text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                <span className="text-sm text-slate-700 pt-1">{p}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    );
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CONFIGURACIÓN
+    // ────────────────────────────────────────────────────────────────────────
+    const Config = () => {
+      const [tab, setTab] = useState('perfil');
+      const tabs = [
+        { id: 'perfil', label: 'Perfil' },
+        { id: 'notif', label: 'Notificaciones' },
+        { id: 'pagos', label: 'Pagos' },
+        { id: 'priv', label: 'Privacidad' },
+      ];
+
+      return (
+        <div className="p-8 space-y-6">
+          <h1 className="text-2xl font-bold text-slate-900">Configuración</h1>
+
+          <div className="bg-white rounded-xl border border-slate-200">
+            <div className="flex border-b border-slate-200">
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setTab(t.id)} className={`px-6 py-4 text-sm font-semibold transition-colors ${tab === t.id ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-900'}`}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div className="p-8">
+              {tab === 'perfil' && (
+                <div className="space-y-4 max-w-lg">
+                  {[
+                    ['Nombre completo', 'Sofía Restrepo'],
+                    ['Email', 'sofia.restrepo@gmail.com'],
+                    ['Teléfono', '+1 305 555 8712'],
+                    ['Zona horaria', 'America/New_York (Miami)'],
+                    ['Idioma', 'Español'],
+                  ].map(([label, val]) => (
+                    <div key={label}>
+                      <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">{label}</label>
+                      <input type="text" defaultValue={val} disabled className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 cursor-not-allowed"/>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {tab === 'notif' && (
+                <div className="space-y-4 max-w-lg">
+                  {[
+                    ['Email diario de reporte', true],
+                    ['Push de reportes en tiempo real', true],
+                    ['Alerta de medicamentos perdidos', true],
+                    ['Recordatorio de cobros próximos', false],
+                    ['Resumen semanal del cuidado', true],
+                  ].map(([label, val]) => (
+                    <div key={label} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                      <span className="text-sm text-slate-700">{label}</span>
+                      <div className={`w-11 h-6 rounded-full p-0.5 transition-colors ${val ? 'bg-teal-600' : 'bg-slate-300'}`}>
+                        <div className={`w-5 h-5 bg-white rounded-full transition-transform ${val ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {tab === 'pagos' && (
+                <div className="max-w-lg space-y-3">
+                  <div className="p-4 border border-slate-200 rounded-lg flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Bank of America ****4721</div>
+                      <div className="text-xs text-slate-500 mt-0.5">Cuenta corriente · Miami, FL</div>
+                    </div>
+                    <Pill color="mint">Principal</Pill>
+                  </div>
+                  <button className="text-xs font-medium text-teal-600 flex items-center gap-1">
+                    <IconPlus className="w-3 h-3" strokeWidth={2}/>Agregar método de pago
+                  </button>
+                </div>
+              )}
+              {tab === 'priv' && (
+                <div className="max-w-lg text-sm text-slate-600 space-y-3">
+                  <p>Tus datos y los de María Elena están protegidos bajo Ley de Habeas Data (Colombia) y CCPA (California).</p>
+                  <p>Los reportes diarios son compartidos solo con los familiares autorizados: Sofía Restrepo, Andrés Restrepo (hermano), y el Dr. García.</p>
+                  <button className="text-xs text-teal-600 font-medium">Administrar permisos</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // APP SHELL
+    // ────────────────────────────────────────────────────────────────────────
+    const App = () => {
+      const [section, setSection] = useState('inicio');
+      const [state, setState] = useState({ activeHours: 20, newBlock: false, extraNotif: null });
+
+      const actions = {
+        go: (s) => setSection(s),
+        onConfirm: () => {
+          setState(s => ({
+            activeHours: 24,
+            newBlock: true,
+            extraNotif: 'Match nuevo confirmado · Carmen · miércoles 9am',
+          }));
+        },
+      };
+
+      return (
+        <div className="min-h-screen flex bg-slate-50">
+          <Sidebar section={section} setSection={setSection} />
+          <div className="flex-1 min-w-0 flex flex-col">
+            <Topbar extraNotif={state.extraNotif} />
+            <main className="flex-1 overflow-y-auto">
+              {section === 'inicio' && <Inicio state={state} actions={actions} />}
+              {section === 'cuidadores' && <Cuidadores />}
+              {section === 'mamá' && <MiMama />}
+              {section === 'reportes' && <Reportes />}
+              {section === 'calendario' && <Calendario newBlock={state.newBlock} />}
+              {section === 'pagos' && <Pagos />}
+              {section === 'documentos' && <Documentos />}
+              {section === 'mensajes' && <Mensajes />}
+              {section === 'emergencias' && <Emergencias />}
+              {section === 'config' && <Config />}
+            </main>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
