@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talenta — Reclutador IA por WhatsApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#EEF2FF',
+              100: '#E0E7FF',
+              200: '#C7D2FE',
+              300: '#A5B4FC',
+              400: '#818CF8',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              800: '#3730A3',
+              900: '#312E81',
+            },
+            accent: {
+              400: '#FB923C',
+              500: '#F97316',
+              600: '#EA580C',
+            },
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body, #root { height: 100%; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #F8FAFC; color: #0F172A; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    @keyframes pulse-ring {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.7; }
+    }
+    .typing-dot { animation: typing 1.4s infinite ease-in-out; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-slide { animation: fadeSlide 0.35s ease-out; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 8px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    .toast-in { animation: toastIn 0.3s ease-out; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef } = React;
+
+    // ============ ICONS (inline SVG paths, heroicons-style) ============
+    const Icon = ({ path, className = "w-5 h-5", stroke = 2 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        strokeWidth={stroke} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+      </svg>
+    );
+    const ICONS = {
+      send: "M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5",
+      play: "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z",
+      mic: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z",
+      check: "M4.5 12.75l6 6 9-13.5",
+      x: "M6 18L18 6M6 6l12 12",
+      users: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
+      briefcase: "M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0",
+      trending: "M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941",
+      clock: "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
+      check2: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+      star: "M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z",
+      phone: "M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z",
+      chevronDown: "M19.5 8.25l-7.5 7.5-7.5-7.5",
+    };
+
+    // ============ DATA ============
+    const INITIAL_MESSAGES = [
+      { id: 1, from: "agent", text: "Hola! Vi que aplicaste a la vacante de Cajera turno tarde en Farmacias Miraflores. Soy el asistente de reclutamiento de Talenta. Te voy a hacer 8 preguntas cortas — toma 3 minutos. ¿Estás lista?" },
+    ];
+
+    const CHAT_FLOW = [
+      { reply: "Sí, estoy lista", agent: "Perfecto. 1 de 8: ¿Cuántos años de experiencia tienes en retail o farmacia?" },
+      { reply: "2 años", agent: "Genial. 2 de 8: ¿En qué zona de Lima estás y qué turnos puedes cubrir?" },
+      { reply: "Miraflores · tarde o noche", agent: "Listo. 3 de 8: ¿Tienes experiencia manejando caja registradora y sistemas de punto de venta?" },
+      { reply: "Sí, ambas cosas", agent: "Genial. Ahora un test de voz rápido (pregunta 4 de 8). Reproduce la pregunta y graba tu respuesta en 60 segundos." },
+      { reply: "Grabar respuesta", agent: "Recibido. Última parte: 5 de 8. ¿Tienes un ex-empleador que pueda recomendarte? Pásame su número de WhatsApp." },
+      { reply: "999-XXX-XXX (Carlos, Botica San Isidro)", agent: "Listo! Te avisamos en menos de 24 horas si pasas a entrevista. Si no avanzas, te pasamos 3 vacantes similares activas en tu zona. Gracias." },
+    ];
+
+    const INITIAL_FINALISTS = [
+      {
+        id: "ana",
+        name: "Ana P.",
+        initials: "AP",
+        avatarBg: "bg-brand-50",
+        avatarText: "text-brand-600",
+        location: "Miraflores",
+        summary: "2 años en retail · disponible turno tarde",
+        score: 92,
+        scoreColor: "text-emerald-500",
+        bars: { experiencia: 90, disponibilidad: 95, referencias: 85, voz: 80 },
+        barColor: "bg-emerald-500",
+        voiceSec: 57,
+        refs: 2,
+        salary: { usd: 280, local: "S/1.050", period: "sem" },
+      },
+      {
+        id: "karina",
+        name: "Karina M.",
+        initials: "KM",
+        avatarBg: "bg-amber-100",
+        avatarText: "text-amber-600",
+        location: "Surco",
+        summary: "1 año en farmacia · turno tarde o noche",
+        score: 78,
+        scoreColor: "text-amber-500",
+        bars: { experiencia: 70, disponibilidad: 85, referencias: 75, voz: 82 },
+        barColor: "bg-amber-500",
+        voiceSec: 52,
+        refs: 1,
+        salary: { usd: 260, local: "S/975", period: "sem" },
+      },
+      {
+        id: "rosa",
+        name: "Rosa E.",
+        initials: "RE",
+        avatarBg: "bg-rose-100",
+        avatarText: "text-rose-600",
+        location: "Barranco",
+        summary: "6 meses en retail · tarde o mañana",
+        score: 71,
+        scoreColor: "text-amber-500",
+        bars: { experiencia: 60, disponibilidad: 75, referencias: 80, voz: 68 },
+        barColor: "bg-amber-500",
+        voiceSec: 49,
+        refs: 2,
+        salary: { usd: 240, local: "S/900", period: "sem" },
+      },
+    ];
+
+    // ============ ANIMATED COUNTER ============
+    const useAnimatedCounter = (target, duration = 1400, startAt = 0) => {
+      const [value, setValue] = useState(startAt);
+      useEffect(() => {
+        let raf;
+        const start = performance.now();
+        const animate = (now) => {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          setValue(Math.round(startAt + (target - startAt) * eased));
+          if (t < 1) raf = requestAnimationFrame(animate);
+        };
+        raf = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(raf);
+      }, [target, duration]);
+      return value;
+    };
+
+    // ============ TOAST ============
+    const Toast = ({ message, onDone }) => {
+      useEffect(() => {
+        const t = setTimeout(onDone, 3200);
+        return () => clearTimeout(t);
+      }, []);
+      return (
+        <div className="toast-in fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-full shadow-lg text-sm flex items-center gap-2">
+          <Icon path={ICONS.check2} className="w-4 h-4 text-emerald-400" />
+          {message}
+        </div>
+      );
+    };
+
+    // ============ TYPING BUBBLE ============
+    const TypingBubble = () => (
+      <div className="flex items-center gap-1 bg-slate-100 px-3 py-2 rounded-2xl rounded-bl-sm w-14">
+        <span className="typing-dot w-1.5 h-1.5 bg-slate-500 rounded-full inline-block"></span>
+        <span className="typing-dot w-1.5 h-1.5 bg-slate-500 rounded-full inline-block"></span>
+        <span className="typing-dot w-1.5 h-1.5 bg-slate-500 rounded-full inline-block"></span>
+      </div>
+    );
+
+    // ============ CANDIDATE PANEL ============
+    const CandidatePanel = ({ onCandidateCompleted, mobile }) => {
+      const [messages, setMessages] = useState(INITIAL_MESSAGES);
+      const [step, setStep] = useState(0);
+      const [isTyping, setIsTyping] = useState(false);
+      const [isRecording, setIsRecording] = useState(false);
+      const [recordingSec, setRecordingSec] = useState(0);
+      const scrollRef = useRef(null);
+
+      useEffect(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, [messages, isTyping]);
+
+      useEffect(() => {
+        let interval;
+        if (isRecording) {
+          interval = setInterval(() => {
+            setRecordingSec((s) => {
+              if (s >= 60) {
+                setIsRecording(false);
+                return 0;
+              }
+              return s + 1;
+            });
+          }, 150);
+        }
+        return () => clearInterval(interval);
+      }, [isRecording]);
+
+      const handleReply = (replyText) => {
+        if (step >= CHAT_FLOW.length) return;
+        const currentFlow = CHAT_FLOW[step];
+        const newId = messages.length + 1;
+        setMessages((m) => [...m, { id: newId, from: "candidate", text: replyText }]);
+        setIsTyping(true);
+        setTimeout(() => {
+          setMessages((m) => [...m, { id: newId + 1, from: "agent", text: currentFlow.agent }]);
+          setIsTyping(false);
+          setStep((s) => s + 1);
+          if (step + 1 === CHAT_FLOW.length) {
+            setTimeout(() => onCandidateCompleted && onCandidateCompleted("Mariela S."), 800);
+          }
+        }, 900);
+      };
+
+      const currentFlow = CHAT_FLOW[step];
+      const isVoiceStep = step === 3;
+      const isDone = step >= CHAT_FLOW.length;
+
+      return (
+        <div className={`${mobile ? "" : "w-full lg:w-[420px] shrink-0"} bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-[640px]`}>
+          {/* Header */}
+          <div className="bg-brand-600 px-4 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+              <span className="text-white text-sm font-bold">FM</span>
+            </div>
+            <div>
+              <div className="text-white text-sm font-semibold">Farmacias Miraflores</div>
+              <div className="text-brand-100 text-xs">en línea · agente de reclutamiento</div>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-slate-50 scrollbar-thin">
+            {messages.map((m) => (
+              <div key={m.id} className={`mb-2 flex ${m.from === "candidate" ? "justify-end" : "justify-start"} fade-slide`}>
+                <div className={`max-w-[78%] px-3 py-2 text-sm rounded-2xl ${
+                  m.from === "candidate"
+                    ? "bg-brand-600 text-white rounded-br-sm"
+                    : "bg-slate-100 text-slate-900 rounded-bl-sm"
+                }`}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="mb-2 flex justify-start fade-slide">
+                <TypingBubble />
+              </div>
+            )}
+            {isVoiceStep && !isTyping && (
+              <div className="mt-2 fade-slide">
+                <div className="bg-brand-50 border border-brand-200 rounded-2xl p-3 flex items-center gap-3">
+                  <button className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 hover:bg-brand-700">
+                    <Icon path={ICONS.play} className="w-4 h-4" />
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-slate-900">Pregunta 4 de 8</div>
+                    <div className="text-[11px] text-slate-500 truncate">Cuéntame una situación donde resolviste un problema de un cliente.</div>
+                    <div className="flex items-center gap-0.5 mt-1 h-4">
+                      {Array.from({ length: 28 }).map((_, i) => {
+                        const active = isRecording && i < (recordingSec / 60) * 28;
+                        const heights = [10, 14, 6, 18, 10, 14, 6, 18, 10, 14, 6, 18, 10, 14, 6, 18, 10, 14, 6, 18, 10, 14, 6, 18, 10, 14, 6, 18];
+                        return (
+                          <div key={i}
+                            className={`w-0.5 rounded-sm ${active ? "bg-brand-600" : "bg-slate-300"}`}
+                            style={{ height: heights[i] + "px" }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 shrink-0">
+                    0:{String(recordingSec).padStart(2, "0")} / 1:00
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Suggestion chips */}
+          {!isDone && !isTyping && currentFlow && (
+            <div className="px-4 py-2 bg-white border-t border-slate-200 flex gap-2 flex-wrap">
+              {isVoiceStep && !isRecording && (
+                <button
+                  onClick={() => { setIsRecording(true); setTimeout(() => { handleReply(currentFlow.reply); }, 1800); }}
+                  className="px-3 py-1.5 text-xs rounded-full bg-brand-600 text-white hover:bg-brand-700 flex items-center gap-1.5"
+                >
+                  <Icon path={ICONS.mic} className="w-3 h-3" stroke={2.2} />
+                  Grabar respuesta
+                </button>
+              )}
+              {!isVoiceStep && (
+                <button
+                  onClick={() => handleReply(currentFlow.reply)}
+                  className="px-3 py-1.5 text-xs rounded-full bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
+                  {currentFlow.reply}
+                </button>
+              )}
+            </div>
+          )}
+          {isDone && (
+            <div className="px-4 py-2 bg-emerald-50 border-t border-emerald-200 text-xs text-emerald-700 flex items-center gap-1.5">
+              <Icon path={ICONS.check} className="w-3.5 h-3.5" stroke={2.4} />
+              Screening completo · en revisión
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="bg-white px-3 py-2 border-t border-slate-200 flex items-center gap-2">
+            <div className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-xs text-slate-400">
+              Escribe un mensaje…
+            </div>
+            <button className="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700">
+              <Icon path={ICONS.send} className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // ============ FINALIST CARD ============
+    const FinalistCard = ({ f, expanded, onToggle, onApprove, onDiscard, approved }) => {
+      return (
+        <div className={`bg-white rounded-xl border ${approved ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200"} p-4 fade-slide transition`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-11 h-11 rounded-full ${f.avatarBg} flex items-center justify-center shrink-0`}>
+              <span className={`text-sm font-bold ${f.avatarText}`}>{f.initials}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <div className="text-slate-900 text-sm font-bold truncate">{f.name}</div>
+                {approved && (
+                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">APROBADA</span>
+                )}
+              </div>
+              <div className="text-slate-500 text-xs mt-0.5">
+                {f.location} · {f.summary}
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <div className={`text-3xl font-extrabold ${f.scoreColor} leading-none`}>{f.score}</div>
+              <div className="text-[9px] text-slate-500 tracking-wider mt-1">SCORE</div>
+            </div>
+          </div>
+
+          {expanded && !approved && (
+            <div className="mt-4 fade-slide">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                {[
+                  ["Experiencia", f.bars.experiencia],
+                  ["Disponibilidad", f.bars.disponibilidad],
+                  ["Referencias", f.bars.referencias],
+                  ["Test voz", f.bars.voz],
+                ].map(([label, val]) => (
+                  <div key={label}>
+                    <div className="text-[10px] text-slate-500">{label}</div>
+                    <div className="h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                      <div className={`h-full ${f.barColor} rounded-full`} style={{ width: val + "%" }}></div>
+                    </div>
+                    <div className="text-[10px] text-slate-600 mt-0.5">{val}/100</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <button className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5">
+                  <Icon path={ICONS.play} className="w-3 h-3" stroke={2.2} />
+                  Escuchar test ({f.voiceSec}s)
+                </button>
+                <button className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5">
+                  <Icon path={ICONS.phone} className="w-3 h-3" stroke={2.2} />
+                  Ver referencias ({f.refs})
+                </button>
+                <div className="text-xs text-slate-500 ml-auto">
+                  Esperado: ${f.salary.usd}/{f.salary.period} (~{f.salary.local})
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onApprove(f)}
+                  className="flex-1 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 flex items-center justify-center gap-1.5"
+                >
+                  <Icon path={ICONS.check} className="w-3.5 h-3.5" stroke={2.4} />
+                  Aprobar y coordinar entrevista
+                </button>
+                <button
+                  onClick={() => onDiscard(f)}
+                  className="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 flex items-center gap-1.5"
+                >
+                  <Icon path={ICONS.x} className="w-3.5 h-3.5" stroke={2.4} />
+                  Descartar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!approved && !expanded && (
+            <button
+              onClick={onToggle}
+              className="mt-3 w-full py-1.5 text-xs text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg flex items-center justify-center gap-1"
+            >
+              Ver detalle
+              <Icon path={ICONS.chevronDown} className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      );
+    };
+
+    // ============ DASHBOARD PANEL ============
+    const DashboardPanel = ({ pipelineCount, onApprove, toasts }) => {
+      const processed = useAnimatedCounter(147, 1400);
+      const rate = useAnimatedCounter(23, 1400);
+      const time = useAnimatedCounter(18, 1400);
+      const retention = useAnimatedCounter(91, 1400);
+      const hired = useAnimatedCounter(8, 1400);
+
+      const [finalists, setFinalists] = useState(INITIAL_FINALISTS);
+      const [expanded, setExpanded] = useState("ana");
+      const [approved, setApproved] = useState([]);
+      const [hiredThisMonth, setHiredThisMonth] = useState(0);
+
+      const handleApprove = (f) => {
+        setApproved((a) => [...a, f.id]);
+        setHiredThisMonth((h) => h + 1);
+        onApprove && onApprove(f);
+      };
+
+      const handleDiscard = (f) => {
+        setFinalists((list) => list.filter((x) => x.id !== f.id));
+      };
+
+      const activeFinalists = finalists.filter((f) => !approved.includes(f.id));
+      const totalHired = hired + hiredThisMonth;
+      const totalPending = pipelineCount;
+
+      return (
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[640px] flex flex-col">
+          {/* Header */}
+          <div className="px-5 py-3 border-b border-slate-200 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-accent-500 flex items-center justify-center">
+              <span className="text-white text-sm font-extrabold">T</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-slate-900 text-sm font-bold">Talenta</div>
+              <div className="text-slate-500 text-xs">Lucía G. · Farmacias Miraflores</div>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Agente activo
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-5">
+            {/* Metrics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <MetricCard label="PROCESADOS" value={processed} hint="+12 hoy" hintColor="text-emerald-600" />
+              <MetricCard label="TASA CIERRE" value={rate + "%"} hint="+3pts" hintColor="text-emerald-600" />
+              <MetricCard label="TIEMPO PROM." value={time + "h"} hint="a finalista" hintColor="text-slate-500" />
+              <MetricCard label="RETENCIÓN 30d" value={retention + "%"} hint="+4pts" hintColor="text-emerald-600" />
+            </div>
+
+            {/* Section title */}
+            <div className="mb-3">
+              <h2 className="text-base font-bold text-slate-900">
+                {activeFinalists.length} finalistas para aprobar
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Vacante: Cajera turno tarde · Farmacias Miraflores · publicada hace 18h
+              </p>
+            </div>
+
+            {/* Finalist cards */}
+            <div className="space-y-3">
+              {finalists.map((f) => (
+                <FinalistCard
+                  key={f.id}
+                  f={f}
+                  expanded={expanded === f.id}
+                  onToggle={() => setExpanded(expanded === f.id ? null : f.id)}
+                  onApprove={handleApprove}
+                  onDiscard={handleDiscard}
+                  approved={approved.includes(f.id)}
+                />
+              ))}
+              {activeFinalists.length === 0 && approved.length === finalists.length && (
+                <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center">
+                  <div className="text-sm text-slate-600">Todas las finalistas fueron procesadas.</div>
+                  <div className="text-xs text-slate-500 mt-1">El agente ya está buscando la siguiente vacante en tu pipeline.</div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom summary */}
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <SummaryPill icon={ICONS.users} label="En pipeline" value={totalPending} />
+              <SummaryPill icon={ICONS.briefcase} label="Vacantes activas" value={3} />
+              <SummaryPill icon={ICONS.star} label="Contratadas (mes)" value={totalHired} />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-slate-200 px-5 py-2.5 bg-slate-50 flex items-center justify-between">
+            <div className="text-[10px] text-slate-400">Pipeline activo · nueva vacante en 2h</div>
+            <div className="text-[10px] text-slate-400">Idea original: Aguacate newsletter — aguacate.beehiiv.com</div>
+          </div>
+        </div>
+      );
+    };
+
+    const MetricCard = ({ label, value, hint, hintColor }) => (
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <div className="text-[9px] font-semibold text-slate-500 tracking-wider">{label}</div>
+        <div className="flex items-baseline gap-2 mt-1">
+          <div className="text-2xl font-extrabold text-slate-900">{value}</div>
+          <div className={`text-xs ${hintColor}`}>{hint}</div>
+        </div>
+      </div>
+    );
+
+    const SummaryPill = ({ icon, label, value }) => (
+      <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex items-center gap-2">
+        <Icon path={icon} className="w-4 h-4 text-slate-500" />
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] text-slate-500">{label}</div>
+          <div className="text-sm font-bold text-slate-900">{value}</div>
+        </div>
+      </div>
+    );
+
+    // ============ APP ============
+    const App = () => {
+      const [pipelineCount, setPipelineCount] = useState(47);
+      const [toasts, setToasts] = useState([]);
+      const [mobileTab, setMobileTab] = useState("dashboard");
+
+      const addToast = (message) => {
+        const id = Date.now() + Math.random();
+        setToasts((t) => [...t, { id, message }]);
+      };
+      const removeToast = (id) => {
+        setToasts((t) => t.filter((x) => x.id !== id));
+      };
+
+      const handleApprove = (f) => {
+        addToast(`Entrevista coordinada con ${f.name} para mañana 10am`);
+      };
+
+      const handleCandidateCompleted = (name) => {
+        setPipelineCount((p) => p + 1);
+        addToast(`Nuevo candidato en pipeline: ${name}`);
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-100">
+          {/* Top nav */}
+          <div className="bg-white border-b border-slate-200">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 h-14 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-accent-500 flex items-center justify-center">
+                  <span className="text-white text-sm font-extrabold">T</span>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 leading-none">Talenta</div>
+                  <div className="text-[10px] text-slate-500 leading-none mt-0.5">Reclutador IA · demo</div>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Split view — vista del candidato + panel de la dueña
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile tabs */}
+          <div className="lg:hidden bg-white border-b border-slate-200">
+            <div className="max-w-7xl mx-auto px-4 flex gap-1">
+              {[
+                ["dashboard", "Panel de la dueña"],
+                ["candidate", "Vista del candidato"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setMobileTab(key)}
+                  className={`px-3 py-2.5 text-xs font-semibold ${
+                    mobileTab === key
+                      ? "text-brand-600 border-b-2 border-brand-600"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Main layout */}
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-5">
+            <div className="flex flex-col lg:flex-row gap-5">
+              {/* Section labels desktop */}
+              <div className="hidden lg:block w-[420px] shrink-0">
+                <div className="text-[11px] font-semibold text-slate-500 tracking-wider mb-2 pl-1">
+                  VISTA DEL CANDIDATO
+                </div>
+                <CandidatePanel onCandidateCompleted={handleCandidateCompleted} />
+              </div>
+              <div className="hidden lg:block flex-1">
+                <div className="text-[11px] font-semibold text-slate-500 tracking-wider mb-2 pl-1">
+                  PANEL DE LA DUEÑA
+                </div>
+                <DashboardPanel pipelineCount={pipelineCount} onApprove={handleApprove} />
+              </div>
+
+              {/* Mobile: single pane */}
+              <div className="lg:hidden w-full">
+                {mobileTab === "candidate" && <CandidatePanel onCandidateCompleted={handleCandidateCompleted} mobile />}
+                {mobileTab === "dashboard" && <DashboardPanel pipelineCount={pipelineCount} onApprove={handleApprove} />}
+              </div>
+            </div>
+          </div>
+
+          {/* Toasts */}
+          {toasts.map((t) => (
+            <Toast key={t.id} message={t.message} onDone={() => removeToast(t.id)} />
+          ))}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
