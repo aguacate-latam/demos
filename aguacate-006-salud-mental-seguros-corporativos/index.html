@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sereno · Salud mental corporativa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FAF7F2',
+            paper: '#FFFFFF',
+            sand: '#FBF6EE',
+            stone: '#F4EDE2',
+            border: '#E5DDD0',
+            mute: '#8A7B68',
+            ink: '#2D3A3A',
+            soft: '#4F4A42',
+            terracotta: '#C97E5C',
+            terracottaSoft: '#FBE9DD',
+            teal: '#2D6A6A',
+            tealSoft: '#E8F0E8',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Source Serif 4', 'Georgia', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #FAF7F2; color: #2D3A3A; }
+    .serif { font-family: 'Source Serif 4', Georgia, serif; }
+    .label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #8A7B68; font-weight: 500; }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #8A7B68;
+      display: inline-block; margin: 0 2px; animation: typing 1.4s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-3px); }
+    }
+    .glow { animation: glow 1.2s ease-out; }
+    @keyframes glow {
+      0% { box-shadow: 0 0 0 0 rgba(45, 106, 106, 0.4); }
+      100% { box-shadow: 0 0 0 12px rgba(45, 106, 106, 0); }
+    }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .scroll-pane { overflow-y: auto; max-height: 100vh; }
+    .scroll-pane::-webkit-scrollbar { width: 6px; }
+    .scroll-pane::-webkit-scrollbar-thumb { background: #E5DDD0; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // SVG icons inline
+    const ChevronRight = ({ size = 14, color = 'currentColor' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    );
+    const Check = ({ size = 12, color = 'currentColor' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    );
+    const Alert = ({ size = 14, color = 'currentColor' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
+    );
+    const Video = ({ size = 12, color = '#fff' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+    );
+    const Search = ({ size = 12, color = 'currentColor' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    );
+    const Download = ({ size = 12, color = '#2D6A6A' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    );
+    const X = ({ size = 14, color = 'currentColor' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    );
+
+    // Mood face SVGs
+    const MoodFace = ({ kind, size = 36, fill = '#F4EDE2', stroke = '#8A7B68' }) => {
+      const paths = {
+        great: { mouth: 'M 11 21 Q 18 28 25 21', eyes: [[12, 13], [24, 13]] },
+        good: { mouth: 'M 12 21 Q 18 25 24 21', eyes: [[12, 13], [24, 13]] },
+        neutral: { mouth: 'M 12 22 L 24 22', eyes: [[12, 13], [24, 13]] },
+        low: { mouth: 'M 12 23 Q 18 19 24 23', eyes: [[12, 14], [24, 14]] },
+        verylow: { mouth: 'M 11 24 Q 18 17 25 24', eyes: [[12, 14], [24, 14]] },
+      };
+      const p = paths[kind];
+      return (
+        <svg width={size} height={size} viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="17" fill={fill} stroke={stroke} strokeWidth="0.5"/>
+          {p.eyes.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.5" fill={stroke}/>)}
+          <path d={p.mouth} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      );
+    };
+
+    // Animated counter
+    const AnimatedNumber = ({ value, duration = 1200, decimals = 0, suffix = '' }) => {
+      const [display, setDisplay] = useState(0);
+      const startRef = useRef(null);
+      const valueRef = useRef(value);
+
+      useEffect(() => {
+        valueRef.current = value;
+        startRef.current = null;
+        let raf;
+        const initial = display;
+        const step = (ts) => {
+          if (!startRef.current) startRef.current = ts;
+          const elapsed = ts - startRef.current;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = initial + (value - initial) * eased;
+          setDisplay(current);
+          if (progress < 1) raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(raf);
+      }, [value, duration]);
+
+      return <span>{display.toFixed(decimals)}{suffix}</span>;
+    };
+
+    // ===== EMPLOYEE PANEL =====
+    const EmployeePanel = ({ onMoodSelect, onChatTurn, onCheckExercise, onSearchPsy, onSessionView, exercisesChecked }) => {
+      const [mood, setMood] = useState('neutral');
+      const [chatTurns, setChatTurns] = useState(['vera-greeting']);
+      const [typing, setTyping] = useState(false);
+      const [showSearchModal, setShowSearchModal] = useState(false);
+      const [chatInput, setChatInput] = useState('');
+
+      const handleMood = (m) => {
+        setMood(m);
+        onMoodSelect && onMoodSelect(m);
+        if ((m === 'low' || m === 'verylow') && !chatTurns.includes('vera-empathy')) {
+          setTyping(true);
+          setTimeout(() => {
+            setChatTurns(prev => [...prev, 'vera-empathy']);
+            setTyping(false);
+            onChatTurn && onChatTurn();
+          }, 800);
+        }
+      };
+
+      const handleChatChoice = (choice) => {
+        setChatTurns(prev => [...prev, `user-${choice}`]);
+        onChatTurn && onChatTurn();
+        setTyping(true);
+        setTimeout(() => {
+          setChatTurns(prev => [...prev, `vera-${choice}-reply`]);
+          setTyping(false);
+          onChatTurn && onChatTurn();
+        }, 800);
+      };
+
+      const handleCheck = (id) => {
+        onCheckExercise && onCheckExercise(id);
+      };
+
+      const exercises = [
+        { id: 'ex1', label: 'Diario de gratitud', dur: '1 min' },
+        { id: 'ex2', label: 'Identificar pensamiento automático', dur: '3 min' },
+        { id: 'ex3', label: 'Respiración 4-7-8', dur: '2 min' },
+        { id: 'ex4', label: 'Revisar metas de exposición', dur: '5 min' },
+      ];
+
+      const psychologists = [
+        { name: 'Lic. Paula Carrasco', country: 'Chile', specialty: 'ansiedad laboral', rating: '4.8', avail: 'Mié 10am · Vie 4pm' },
+        { name: 'Dr. Mateo Vergara', country: 'Uruguay', specialty: 'terapia ACT', rating: '4.7', avail: 'Jue 11am · Vie 7pm' },
+        { name: 'Dra. Isabela Núñez', country: 'México', specialty: 'mindfulness corporativo', rating: '4.9', avail: 'Mar 5pm · Mié 9am' },
+      ];
+
+      return (
+        <div className="bg-paper p-6 lg:p-8 space-y-6 scroll-pane">
+          <div className="label">Vista del empleado</div>
+
+          {/* Avatar greeting */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-terracotta flex items-center justify-center text-white font-semibold text-sm">SM</div>
+            <div>
+              <div className="font-semibold text-ink">Hola, Sofía</div>
+              <div className="serif text-base text-soft italic">¿Cómo estás esta mañana?</div>
+            </div>
+          </div>
+
+          {/* Mood quick check */}
+          <div>
+            <div className="label mb-3">Check-in de hoy</div>
+            <div className="flex gap-3">
+              {[
+                { k: 'great', label: 'Muy bien' },
+                { k: 'good', label: 'Bien' },
+                { k: 'neutral', label: 'Neutral' },
+                { k: 'low', label: 'Baja' },
+                { k: 'verylow', label: 'Muy baja' },
+              ].map(({ k, label }) => (
+                <button key={k} onClick={() => handleMood(k)}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${mood === k ? 'bg-terracottaSoft ring-2 ring-terracotta' : 'hover:bg-stone'}`}>
+                  <MoodFace kind={k} fill={mood === k ? '#FBE9DD' : '#F4EDE2'} stroke={mood === k ? '#C97E5C' : '#8A7B68'}/>
+                  <span className="text-[10px] text-mute">{label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="text-xs text-mute mt-2">
+              Hoy: <span className="text-soft font-medium">{
+                ({great: 'Muy bien', good: 'Bien', neutral: 'Neutral', low: 'Baja', verylow: 'Muy baja'})[mood]
+              }</span>
+            </div>
+          </div>
+
+          {/* IA Companion */}
+          <div>
+            <div className="label mb-3">Vera · IA Companion</div>
+            <div className="bg-stone rounded-2xl p-4 space-y-3">
+              {chatTurns.includes('vera-greeting') && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[85%] fade-in">
+                  <div className="text-sm text-soft">Buenos días, Sofía. Tienes sesión hoy a las 6pm con Dr. Silveira. ¿Quieres revisar tus notas de la semana antes?</div>
+                </div>
+              )}
+              {chatTurns.includes('vera-empathy') && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[85%] fade-in">
+                  <div className="text-sm text-soft">Veo que la mañana arranca pesada. ¿Quieres que repasemos un ejercicio corto antes de tu primera reunión?</div>
+                </div>
+              )}
+              {chatTurns.includes('user-show') && (
+                <div className="bg-teal text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] ml-auto fade-in">
+                  <div className="text-sm">Sí, muéstramelas</div>
+                </div>
+              )}
+              {chatTurns.includes('vera-show-reply') && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[85%] fade-in">
+                  <div className="text-sm text-soft">Esta semana anotaste 3 patrones: agotamiento los lunes, ansiedad antes de las reuniones grandes, y mejor descanso después de las sesiones del jueves. Te dejo eso listo para Tomás.</div>
+                </div>
+              )}
+              {chatTurns.includes('user-later') && (
+                <div className="bg-teal text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] ml-auto fade-in">
+                  <div className="text-sm">Después, gracias</div>
+                </div>
+              )}
+              {chatTurns.includes('vera-later-reply') && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[85%] fade-in">
+                  <div className="text-sm text-soft">Listo. Te envío recordatorio 30 minutos antes de tu sesión con un resumen rápido.</div>
+                </div>
+              )}
+              {chatTurns.includes('user-write') && (
+                <div className="bg-teal text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] ml-auto fade-in">
+                  <div className="text-sm">Mejor escribo algo nuevo</div>
+                </div>
+              )}
+              {chatTurns.includes('vera-write-reply') && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[85%] fade-in">
+                  <div className="text-sm text-soft serif italic mb-2">Si tuvieras que describir tu semana en 3 palabras, ¿cuáles serían?</div>
+                  <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Escribe aquí..." className="w-full bg-cream rounded-lg p-2 text-sm border border-border focus:outline-none focus:border-teal" />
+                </div>
+              )}
+              {typing && (
+                <div className="bg-paper rounded-2xl rounded-tl-sm p-3 max-w-[80px] fade-in">
+                  <span className="typing-dot"></span>
+                  <span className="typing-dot"></span>
+                  <span className="typing-dot"></span>
+                </div>
+              )}
+
+              {chatTurns.length === 1 && !typing && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <button onClick={() => handleChatChoice('show')} className="bg-teal text-white text-xs px-3 py-2 rounded-full hover:bg-ink transition">Sí, muéstramelas</button>
+                  <button onClick={() => handleChatChoice('later')} className="bg-paper border border-border text-soft text-xs px-3 py-2 rounded-full hover:bg-cream transition">Después, gracias</button>
+                  <button onClick={() => handleChatChoice('write')} className="bg-paper border border-border text-soft text-xs px-3 py-2 rounded-full hover:bg-cream transition">Mejor escribo algo nuevo</button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Próxima sesión */}
+          <div>
+            <div className="label mb-3">Próxima sesión</div>
+            <div className="bg-paper border border-border rounded-2xl p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-teal flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">TS</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-ink">Dr. Tomás Silveira · Argentina</div>
+                <div className="text-sm text-soft">Terapia cognitivo-conductual · 8 años</div>
+                <div className="text-xs text-mute">Hoy 6:00pm · 50 min · ★ 4.9</div>
+              </div>
+              <button onClick={() => onSessionView && onSessionView()} className="bg-terracotta text-white text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5 hover:bg-soft transition flex-shrink-0">
+                <Video size={11} color="#fff"/> Unirme
+              </button>
+            </div>
+          </div>
+
+          {/* Mi semana */}
+          <div>
+            <div className="label mb-3">Mi semana · ejercicios</div>
+            <div className="space-y-2">
+              {exercises.map(ex => (
+                <button key={ex.id} onClick={() => handleCheck(ex.id)}
+                  className="w-full bg-paper border border-border rounded-xl p-3 flex items-center gap-3 hover:bg-cream transition text-left">
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition ${exercisesChecked.includes(ex.id) ? 'bg-teal' : 'bg-paper border border-border'}`}>
+                    {exercisesChecked.includes(ex.id) && <Check size={11} color="#fff"/>}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`text-sm ${exercisesChecked.includes(ex.id) ? 'text-mute line-through' : 'text-soft'}`}>{ex.label}</div>
+                    <div className="text-xs text-mute">{ex.dur}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Buscar otro */}
+          <button onClick={() => { setShowSearchModal(true); onSearchPsy && onSearchPsy(); }}
+            className="w-full bg-paper border border-teal text-teal text-sm font-medium px-4 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-tealSoft transition">
+            <Search size={12} color="#2D6A6A"/> Buscar otro psicólogo · red regional AR · UY · CL · MX
+          </button>
+
+          {/* Modal */}
+          {showSearchModal && (
+            <div onClick={() => setShowSearchModal(false)} className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4">
+              <div onClick={(e) => e.stopPropagation()} className="bg-paper rounded-2xl p-6 max-w-md w-full max-h-[85vh] overflow-y-auto fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="serif text-lg font-semibold text-ink">3 psicólogos sugeridos</div>
+                  <button onClick={() => setShowSearchModal(false)} className="text-mute hover:text-ink"><X size={16}/></button>
+                </div>
+                <div className="text-xs text-mute mb-4">La IA evaluó tu PHQ-9 y mood reciente. Estos perfiles matchean tu necesidad esta semana.</div>
+                <div className="space-y-3">
+                  {psychologists.map((p, i) => (
+                    <div key={i} className="border border-border rounded-xl p-3">
+                      <div className="font-semibold text-ink text-sm">{p.name}</div>
+                      <div className="text-xs text-soft">{p.country} · {p.specialty}</div>
+                      <div className="text-xs text-mute mt-1">★ {p.rating} · disponible: {p.avail}</div>
+                      <button className="text-xs text-teal mt-2 font-medium hover:underline flex items-center gap-1">Agendar <ChevronRight size={11} color="#2D6A6A"/></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ===== HR DASHBOARD =====
+    const HRDashboard = ({ score, sessions, activeEmployees, iaConversations, regionalExplorers, totalScoreBoost }) => {
+      const [showRecModal, setShowRecModal] = useState(false);
+
+      // Generate chart points
+      const chartWeeks = 12;
+      const baseScore = 6.4;
+      const baseUtil = 35;
+      const scorePoints = Array.from({ length: chartWeeks }, (_, i) => baseScore + (i * 0.07));
+      const utilPoints = Array.from({ length: chartWeeks }, (_, i) => baseUtil + (i * 2.1));
+
+      const toCoords = (vals, yMin, yMax, w, h) => {
+        return vals.map((v, i) => {
+          const x = (i / (vals.length - 1)) * w;
+          const y = h - ((v - yMin) / (yMax - yMin)) * h;
+          return `${x},${y}`;
+        }).join(' ');
+      };
+
+      return (
+        <div className="bg-sand p-6 lg:p-8 space-y-6 scroll-pane">
+          <div className="label">Vista de RRHH · Diego B.</div>
+          <div>
+            <h1 className="serif text-2xl font-semibold text-ink">Patagonia Labs · Bienestar</h1>
+            <div className="text-xs text-mute mt-1">Mes actual · 80 empleados · actualizado hace 2 min</div>
+          </div>
+
+          {/* Three big numbers */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-paper border border-border rounded-2xl p-4">
+              <div className="label mb-3">Empleados activos</div>
+              <div className="serif text-4xl font-semibold text-ink">
+                <AnimatedNumber value={activeEmployees}/>
+                <span className="text-xl text-mute font-normal"> / 80</span>
+              </div>
+              <div className="text-xs text-mute mt-1">{Math.round(activeEmployees/80*100)}% del headcount</div>
+            </div>
+
+            <div className="bg-paper border border-border rounded-2xl p-4">
+              <div className="label mb-3">Sesiones este mes</div>
+              <div className="serif text-4xl font-semibold text-ink">
+                <AnimatedNumber value={sessions}/>
+              </div>
+              <div className="text-xs text-mute mt-1">↑ 22 vs mes anterior</div>
+            </div>
+
+            <div className="bg-paper border border-border rounded-2xl p-4">
+              <div className="label mb-3">Score bienestar</div>
+              <div className="serif text-4xl font-semibold text-ink">
+                <AnimatedNumber value={score} decimals={1}/>
+                <span className="text-xl text-mute font-normal"> / 10</span>
+              </div>
+              <div className="text-xs text-teal mt-1">↑ 0.6 vs mes anterior</div>
+            </div>
+          </div>
+
+          {/* Live counters */}
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="bg-paper border border-border rounded-xl p-3">
+              <div className="text-mute uppercase tracking-wider text-[10px]">Sesiones IA Companion · semana</div>
+              <div className="serif text-2xl font-semibold text-ink mt-1"><AnimatedNumber value={iaConversations} duration={400}/></div>
+            </div>
+            <div className="bg-paper border border-border rounded-xl p-3">
+              <div className="text-mute uppercase tracking-wider text-[10px]">Empleados que exploraron red regional</div>
+              <div className="serif text-2xl font-semibold text-ink mt-1"><AnimatedNumber value={regionalExplorers} duration={400}/></div>
+            </div>
+          </div>
+
+          {/* Chart */}
+          <div>
+            <div className="label mb-3">Score agregado · últimas 12 semanas</div>
+            <div className="bg-paper border border-border rounded-2xl p-4">
+              <svg viewBox="0 0 500 140" className="w-full h-32" preserveAspectRatio="none">
+                {/* gridlines */}
+                {[0, 25, 50, 75, 100].map((p) => (
+                  <line key={p} x1="0" y1={140 - (p/100)*140} x2="500" y2={140 - (p/100)*140} stroke="#E5DDD0" strokeWidth="0.5"/>
+                ))}
+                {/* score line (terracotta) */}
+                <polyline points={toCoords(scorePoints, 5.5, 8.5, 500, 140)} fill="none" stroke="#C97E5C" strokeWidth="2.5" strokeLinejoin="round"/>
+                {/* utilization line (teal, dashed) */}
+                <polyline points={toCoords(utilPoints, 25, 65, 500, 140)} fill="none" stroke="#2D6A6A" strokeWidth="2" strokeDasharray="4,4" strokeLinejoin="round"/>
+              </svg>
+              <div className="flex gap-4 text-xs text-mute mt-2">
+                <span><span className="inline-block w-3 h-0.5 bg-terracotta mr-1.5 align-middle"></span>Score 0-10</span>
+                <span><span className="inline-block w-3 h-0.5 border-t border-dashed border-teal mr-1.5 align-middle"></span>Utilización %</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Alertas */}
+          <div>
+            <div className="label mb-3">Alertas activas</div>
+            <div className="bg-terracottaSoft border border-terracotta rounded-2xl p-4 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-terracotta flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Alert size={12} color="#fff"/>
+                </div>
+                <div>
+                  <div className="font-semibold text-ink text-sm">Equipo Ingeniería · 73% utilización</div>
+                  <div className="text-xs text-soft mt-0.5">Sobre umbral del 60% — patrón compatible con sobrecarga sostenida.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-terracotta flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Alert size={12} color="#fff"/>
+                </div>
+                <div>
+                  <div className="font-semibold text-ink text-sm">Equipo Ventas · 4 mood baja sostenida</div>
+                  <div className="text-xs text-soft mt-0.5">3+ días esta semana, agregado anonimizado, sin nombres.</div>
+                </div>
+              </div>
+              <button onClick={() => setShowRecModal(true)} className="text-xs text-teal font-medium hover:underline flex items-center gap-1">
+                Ver recomendaciones <ChevronRight size={11} color="#2D6A6A"/>
+              </button>
+            </div>
+          </div>
+
+          {/* Compliance */}
+          <div>
+            <div className="label mb-3">Compliance · reportes listos</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { code: 'NOM-035', country: 'México' },
+                { code: 'Ley Karin', country: 'Chile' },
+                { code: 'Ley 26.657', country: 'Argentina' },
+              ].map(({ code, country }) => (
+                <div key={code} className="bg-tealSoft rounded-xl p-3 flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-teal flex items-center justify-center flex-shrink-0">
+                    <Check size={14} color="#fff"/>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-ink text-sm">{code}</div>
+                    <div className="text-xs text-mute">{country}</div>
+                  </div>
+                  <Download size={14} color="#2D6A6A"/>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Anonymized list */}
+          <div>
+            <div className="label mb-3">Empleados activos · anonimizado</div>
+            <div className="bg-paper border border-border rounded-2xl divide-y divide-border">
+              {[
+                { ini: 'S.M.', sess: '1 sesión · esta semana', trend: '↑' },
+                { ini: 'C.R.', sess: '0 sesiones', trend: 'neutral' },
+                { ini: 'A.S.', sess: '2 sesiones · esta semana', trend: '↑' },
+                { ini: 'M.V.', sess: '1 sesión · esta semana', trend: '↑' },
+                { ini: 'P.B.', sess: '3 sesiones · esta semana', trend: '↑↑' },
+                { ini: 'D.L.', sess: '0 sesiones', trend: 'neutral' },
+              ].map((e, i) => (
+                <div key={i} className="flex items-center justify-between p-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-stone flex items-center justify-center text-xs text-soft font-semibold">{e.ini}</div>
+                    <span className="text-soft">{e.sess}</span>
+                  </div>
+                  <span className={`text-sm ${e.trend === 'neutral' ? 'text-mute' : 'text-teal font-semibold'}`}>{e.trend}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="pt-4 border-t border-border space-y-1">
+            <div className="serif text-sm text-soft italic">Sereno — Salud mental corporativa con red regional de psicólogos certificados.</div>
+            <div className="text-[10px] text-mute">Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com</div>
+          </div>
+
+          {/* Recommendations modal */}
+          {showRecModal && (
+            <div onClick={() => setShowRecModal(false)} className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4">
+              <div onClick={(e) => e.stopPropagation()} className="bg-paper rounded-2xl p-6 max-w-md w-full fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="serif text-lg font-semibold text-ink">3 acciones sugeridas</div>
+                  <button onClick={() => setShowRecModal(false)} className="text-mute hover:text-ink"><X size={16}/></button>
+                </div>
+                <div className="space-y-3 text-sm text-soft">
+                  <div className="border-l-2 border-terracotta pl-3"><span className="font-semibold text-ink">Ingeniería:</span> revisar sprint capacity del trimestre con líderes; el patrón de utilización sugiere carga >100%.</div>
+                  <div className="border-l-2 border-terracotta pl-3"><span className="font-semibold text-ink">Ventas:</span> agendar 1:1 con cada miembro del equipo afectado; ofrecer día libre flexible esta semana.</div>
+                  <div className="border-l-2 border-teal pl-3"><span className="font-semibold text-ink">Cultura:</span> comunicar a toda la empresa que el benefit es confidencial y no afecta evaluación de desempeño.</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ===== APP =====
+    const App = () => {
+      const [exercisesChecked, setExercisesChecked] = useState([]);
+      const [iaConversations, setIaConversations] = useState(28);
+      const [regionalExplorers, setRegionalExplorers] = useState(11);
+      const [activeEmployees, setActiveEmployees] = useState(47);
+      const [score, setScore] = useState(7.2);
+      const [sessions, setSessions] = useState(134);
+      const [mobilePane, setMobilePane] = useState('split'); // split | employee | hr
+      const [glow, setGlow] = useState(false);
+
+      const handleMoodSelect = (m) => {
+        // mood selection has no direct counter effect, but if low/verylow it triggers chat
+      };
+
+      const handleChatTurn = () => {
+        setIaConversations(prev => prev + 1);
+        setGlow(true);
+        setTimeout(() => setGlow(false), 1200);
+      };
+
+      const handleCheckExercise = (id) => {
+        setExercisesChecked(prev => {
+          if (prev.includes(id)) return prev;
+          const next = [...prev, id];
+          setScore(s => Math.min(s + 0.1, 10));
+          return next;
+        });
+      };
+
+      const handleSearchPsy = () => {
+        setRegionalExplorers(prev => prev + 1);
+      };
+
+      const handleSessionView = () => {
+        setSessions(prev => prev + 1);
+        setActiveEmployees(prev => Math.min(prev + 1, 80));
+      };
+
+      return (
+        <div className="min-h-screen">
+          {/* Top bar */}
+          <div className="bg-paper border-b border-border">
+            <div className="max-w-[1600px] mx-auto px-4 lg:px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-teal flex items-center justify-center">
+                  <span className="text-white serif text-sm font-semibold">S</span>
+                </div>
+                <div className="serif text-lg font-semibold text-ink">Sereno</div>
+              </div>
+              <div className="text-[10px] text-mute uppercase tracking-wider hidden sm:block">
+                Vista demo · split: empleado / RRHH
+              </div>
+              <div className="flex gap-1 lg:hidden">
+                <button onClick={() => setMobilePane('employee')} className={`text-xs px-3 py-1 rounded-full ${mobilePane === 'employee' ? 'bg-teal text-white' : 'bg-stone text-soft'}`}>Empleado</button>
+                <button onClick={() => setMobilePane('hr')} className={`text-xs px-3 py-1 rounded-full ${mobilePane === 'hr' ? 'bg-teal text-white' : 'bg-stone text-soft'}`}>RRHH</button>
+                <button onClick={() => setMobilePane('split')} className={`text-xs px-3 py-1 rounded-full ${mobilePane === 'split' ? 'bg-teal text-white' : 'bg-stone text-soft'}`}>Ambos</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Split view */}
+          <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 lg:divide-x lg:divide-border">
+            <div className={`${mobilePane === 'hr' ? 'hidden lg:block' : 'block'}`}>
+              <EmployeePanel
+                onMoodSelect={handleMoodSelect}
+                onChatTurn={handleChatTurn}
+                onCheckExercise={handleCheckExercise}
+                onSearchPsy={handleSearchPsy}
+                onSessionView={handleSessionView}
+                exercisesChecked={exercisesChecked}
+              />
+            </div>
+            <div className={`${mobilePane === 'employee' ? 'hidden lg:block' : 'block'} ${glow ? 'glow' : ''}`}>
+              <HRDashboard
+                score={score}
+                sessions={sessions}
+                activeEmployees={activeEmployees}
+                iaConversations={iaConversations}
+                regionalExplorers={regionalExplorers}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App/>, document.getElementById('root'));
+  </script>
+</body>
+</html>

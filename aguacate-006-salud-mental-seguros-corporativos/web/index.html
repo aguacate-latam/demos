@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sereno — Salud mental corporativa embebida en tu póliza</title>
+  <meta name="description" content="El motor white-label que las aseguradoras LatAm enchufan a sus pólizas corporativas: red de psicólogos certificados + IA companion + compliance NOM-035, Ley Karin y Ley 26.657 en un click." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FAF7F2',
+            paper: '#FFFFFF',
+            sand: '#FBF6EE',
+            stone: '#F4EDE2',
+            border: '#E5DDD0',
+            mute: '#8A7B68',
+            ink: '#2D3A3A',
+            soft: '#4F4A42',
+            terracotta: '#C97E5C',
+            terracottaSoft: '#FBE9DD',
+            terracottaDark: '#A05F40',
+            teal: '#2D6A6A',
+            tealSoft: '#E8F0E8',
+            tealDark: '#1F4F4F',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #FAF7F2; color: #2D3A3A; }
+    .serif { font-family: 'Source Serif 4', Georgia, serif; }
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .btn-solid-teal { background: #2D6A6A; color: #fff; padding: 0.875rem 1.5rem; border-radius: 0.375rem; font-weight: 500; transition: all 0.18s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-solid-teal:hover { background: #1F4F4F; transform: translateY(-1px); }
+    .btn-solid-terracotta { background: #C97E5C; color: #fff; padding: 0.875rem 1.5rem; border-radius: 0.375rem; font-weight: 500; transition: all 0.18s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-solid-terracotta:hover { background: #A05F40; transform: translateY(-1px); }
+    .btn-ghost { color: #2D6A6A; padding: 0.875rem 1.25rem; border-radius: 0.375rem; font-weight: 500; transition: all 0.18s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-ghost:hover { background: #E8F0E8; }
+    .step-number { font-family: 'Source Serif 4', serif; font-size: 3rem; font-weight: 600; color: #C97E5C; line-height: 1; }
+    .label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A7B68; font-weight: 500; }
+    .divider-line { display: flex; align-items: center; gap: 1rem; margin: 0 auto; max-width: 240px; }
+    .divider-line::before, .divider-line::after { content: ''; flex: 1; height: 1px; background: #E5DDD0; }
+    .divider-line .dot { width: 6px; height: 6px; border-radius: 50%; background: #C97E5C; }
+    @media (max-width: 768px) {
+      .hero-h1 { font-size: 2.4rem !important; line-height: 1.1 !important; }
+      .h2-big { font-size: 1.8rem !important; line-height: 1.2 !important; }
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- Header sticky -->
+  <header class="sticky top-0 z-40 bg-cream/85 backdrop-blur border-b border-border">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-full bg-teal flex items-center justify-center">
+          <span class="text-white serif text-sm font-semibold">S</span>
+        </span>
+        <span class="serif text-xl font-semibold text-ink">Sereno</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm text-soft">
+        <a href="#como-funciona" class="hover:text-ink transition">Cómo funciona</a>
+        <a href="#aseguradoras" class="hover:text-ink transition">Para aseguradoras</a>
+        <a href="#demo" class="hover:text-ink transition">Pruébalo</a>
+      </nav>
+      <a href="../" class="text-sm bg-ink text-cream px-4 py-2 rounded-md hover:bg-soft transition hidden md:inline-flex">Probar el demo</a>
+      <button id="menuBtn" class="md:hidden text-ink" aria-label="Menú">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden border-t border-border bg-cream">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 text-soft">
+        <a href="#como-funciona" class="py-2">Cómo funciona</a>
+        <a href="#aseguradoras" class="py-2">Para aseguradoras</a>
+        <a href="#demo" class="py-2">Pruébalo</a>
+        <a href="../" class="bg-ink text-cream px-4 py-2.5 rounded-md text-center">Probar el demo</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="px-6 py-20 lg:py-28">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-7 reveal">
+        <div class="label mb-6">Sereno · Disponible en AR · UY · CL · MX</div>
+        <h1 class="hero-h1 serif text-5xl lg:text-6xl font-semibold text-ink leading-[1.05] tracking-tight">
+          La capa de salud mental que tu póliza corporativa <span class="text-terracotta">ya debería incluir</span>.
+        </h1>
+        <p class="mt-6 text-lg text-soft leading-relaxed max-w-xl">
+          Sereno es el motor white-label que las aseguradoras enchufan a sus pólizas para PyMEs y mid-market. Red de psicólogos certificados por país. IA companion entre sesiones. Compliance NOM-035, Ley Karin y Ley 26.657 listo en un click.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="../" class="btn-solid-terracotta">Probar el demo</a>
+          <a href="#como-funciona" class="btn-ghost">Cómo funciona</a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 reveal">
+        <!-- Embedded layers visualization -->
+        <div class="relative">
+          <svg viewBox="0 0 400 360" class="w-full">
+            <!-- Outer rectangle: Póliza corporativa -->
+            <rect x="20" y="40" width="360" height="280" rx="14" fill="#FBE9DD" stroke="#C97E5C" stroke-width="1"/>
+            <text x="40" y="68" font-family="Inter" font-size="10" letter-spacing="1.5" fill="#A05F40" font-weight="600">PÓLIZA CORPORATIVA · ASEGURADORA</text>
+
+            <!-- Middle rectangle: Wellness -->
+            <rect x="56" y="98" width="288" height="200" rx="12" fill="#E8F0E8" stroke="#2D6A6A" stroke-width="1"/>
+            <text x="76" y="124" font-family="Inter" font-size="10" letter-spacing="1.5" fill="#1F4F4F" font-weight="600">BENEFIT DE WELLNESS</text>
+
+            <!-- Inner rectangle: Sereno -->
+            <rect x="92" y="156" width="216" height="124" rx="10" fill="#FFFFFF" stroke="#2D3A3A" stroke-width="1.5"/>
+            <text x="116" y="200" font-family="Source Serif 4" font-size="22" fill="#2D3A3A" font-weight="600">Sereno</text>
+            <text x="116" y="222" font-family="Inter" font-size="11" fill="#4F4A42">Salud mental corporativa</text>
+            <line x1="116" y1="240" x2="284" y2="240" stroke="#E5DDD0" stroke-width="1"/>
+            <text x="116" y="258" font-family="Inter" font-size="10" fill="#8A7B68">Red regional · IA companion · compliance</text>
+
+            <!-- Connector dots -->
+            <circle cx="200" cy="98" r="3" fill="#C97E5C"/>
+            <circle cx="200" cy="156" r="3" fill="#2D6A6A"/>
+          </svg>
+          <div class="text-center text-xs text-mute mt-4 italic">Sereno se embebe en lo que la aseguradora ya cobra. No es otra app que la PyME tenga que comprar.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="divider-line"><span class="dot"></span></div>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="px-6 py-20 lg:py-28">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12">
+      <div class="lg:col-span-5 reveal">
+        <div class="label mb-4">Cómo funciona</div>
+        <h2 class="h2-big serif text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight">
+          Tu aseguradora ya tiene la relación. Nosotros ponemos la capa que falta.
+        </h2>
+        <p class="mt-6 text-base text-soft leading-relaxed">
+          La aseguradora aporta licencia regulatoria, facturación recurrente y la relación con el cliente corporativo. Sereno aporta la red curada de psicólogos certificados por país, la IA companion entre sesiones y el dashboard de compliance que RRHH necesita para auditorías. Tú no compites con la aseguradora — eres lo que le falta para que su benefit se use.
+        </p>
+      </div>
+
+      <div class="lg:col-span-7 reveal space-y-10">
+        <div class="flex gap-6">
+          <div class="step-number flex-shrink-0">01</div>
+          <div>
+            <h3 class="serif text-xl font-semibold text-ink">La aseguradora bundlea Sereno en su póliza</h3>
+            <p class="mt-2 text-base text-soft leading-relaxed">Sin reescribir su sistema. Integración por API o SSO. Sereno aparece en la póliza como un módulo más de wellness.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="step-number flex-shrink-0">02</div>
+          <div>
+            <h3 class="serif text-xl font-semibold text-ink">La PyME activa subiendo nómina</h3>
+            <p class="mt-2 text-base text-soft leading-relaxed">RRHH hace upload del CSV de empleados. Sereno genera deep links personalizados y los manda por correo en un solo paso.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="step-number flex-shrink-0">03</div>
+          <div>
+            <h3 class="serif text-xl font-semibold text-ink">El empleado activa con su documento</h3>
+            <p class="mt-2 text-base text-soft leading-relaxed">DNI en Argentina, CURP en México, CC en Colombia, CI en Uruguay y Chile. La IA companion arranca el primer check-in en menos de tres minutos.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="step-number flex-shrink-0">04</div>
+          <div>
+            <h3 class="serif text-xl font-semibold text-ink">RRHH exporta compliance al instante</h3>
+            <p class="mt-2 text-base text-soft leading-relaxed">Reporte NOM-035, Ley Karin o Ley 26.657 listo en formato PDF y CSV. La auditoría que antes tomaba semanas pasa a un click.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARA ASEGURADORAS -->
+  <section id="aseguradoras" class="bg-sand px-6 py-20 lg:py-28">
+    <div class="max-w-3xl mx-auto text-center">
+      <div class="label mb-4 reveal">Para directores de productos digitales y heads of innovation</div>
+      <h2 class="h2-big serif text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight reveal">
+        Tu cliente corporativo va a pedir cobertura de salud mental usable. Es cuestión de meses, no años.
+      </h2>
+      <p class="mt-6 text-lg text-soft leading-relaxed reveal">
+        Cuatro reguladores LatAm apretaron en paralelo. Las empresas ya están pagando multas y perdiendo talento. La aseguradora que primero les ofrezca un benefit que sus empleados realmente usan se queda con la renovación.
+      </p>
+    </div>
+
+    <div class="max-w-5xl mx-auto mt-14 grid md:grid-cols-3 gap-8 md:gap-0 md:divide-x md:divide-border reveal">
+      <div class="px-6 text-center md:text-left">
+        <div class="label mb-2">NOM-035 · México</div>
+        <p class="text-base text-ink leading-relaxed">Multas hasta <span class="font-semibold">~$30.000 USD</span> por incumplimiento. La STPS intensificó inspecciones en 2026.</p>
+      </div>
+      <div class="px-6 text-center md:text-left mt-8 md:mt-0">
+        <div class="label mb-2">Ley Karin · Chile</div>
+        <p class="text-base text-ink leading-relaxed"><span class="font-semibold">44.212 denuncias</span> formales en los primeros 11 meses de vigencia.</p>
+      </div>
+      <div class="px-6 text-center md:text-left mt-8 md:mt-0">
+        <div class="label mb-2">Ley 26.657 · Argentina</div>
+        <p class="text-base text-ink leading-relaxed"><span class="font-semibold">16 años</span> de derecho a telepsicología. Los empleados ya saben qué pueden exigir.</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-14 reveal">
+      <a href="mailto:hola@sereno.app?subject=Conversación%20de%2030%20min" class="btn-solid-teal">Reserva una conversación de 30 min</a>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="divider-line"><span class="dot"></span></div>
+
+  <!-- DEMO -->
+  <section id="demo" class="px-6 py-20 lg:py-28">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <div class="label mb-4">Pruébalo</div>
+        <h2 class="h2-big serif text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight">
+          No te pedimos demo de 60 minutos. Pruébalo en 3.
+        </h2>
+        <p class="mt-6 text-base text-soft leading-relaxed">
+          Abre el demo en vivo, juega con la vista del empleado y el dashboard de RRHH al mismo tiempo. Mira cómo la utilización del benefit alimenta el reporte de compliance — sin signup, sin install, sin fricción.
+        </p>
+        <div class="mt-8">
+          <a href="../" class="btn-solid-terracotta text-lg px-7 py-4">Abrir demo en vivo →</a>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="bg-paper border border-border rounded-2xl p-3 shadow-sm">
+          <!-- Abstract split-view preview -->
+          <svg viewBox="0 0 400 240" class="w-full">
+            <rect x="0" y="0" width="400" height="240" rx="12" fill="#FAF7F2"/>
+            <line x1="200" y1="20" x2="200" y2="220" stroke="#E5DDD0" stroke-width="1"/>
+
+            <!-- Left panel: chat bubbles -->
+            <rect x="24" y="32" width="148" height="40" rx="8" fill="#F4EDE2"/>
+            <line x1="36" y1="44" x2="120" y2="44" stroke="#8A7B68" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="36" y1="54" x2="100" y2="54" stroke="#8A7B68" stroke-width="1.5" stroke-linecap="round"/>
+
+            <rect x="56" y="84" width="116" height="32" rx="8" fill="#2D6A6A"/>
+            <line x1="68" y1="100" x2="148" y2="100" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+
+            <rect x="24" y="128" width="148" height="56" rx="8" fill="#F4EDE2"/>
+            <line x1="36" y1="142" x2="140" y2="142" stroke="#8A7B68" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="36" y1="154" x2="120" y2="154" stroke="#8A7B68" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="36" y1="166" x2="130" y2="166" stroke="#8A7B68" stroke-width="1.5" stroke-linecap="round"/>
+
+            <rect x="24" y="194" width="148" height="20" rx="10" fill="#FFFFFF" stroke="#2D6A6A"/>
+            <line x1="40" y1="204" x2="120" y2="204" stroke="#2D6A6A" stroke-width="1" stroke-linecap="round"/>
+
+            <!-- Right panel: dashboard -->
+            <rect x="216" y="32" width="48" height="44" rx="6" fill="#FFFFFF" stroke="#E5DDD0"/>
+            <text x="240" y="60" font-family="Source Serif 4" font-size="18" fill="#2D3A3A" text-anchor="middle" font-weight="600">47</text>
+
+            <rect x="272" y="32" width="48" height="44" rx="6" fill="#FFFFFF" stroke="#E5DDD0"/>
+            <text x="296" y="60" font-family="Source Serif 4" font-size="18" fill="#2D3A3A" text-anchor="middle" font-weight="600">134</text>
+
+            <rect x="328" y="32" width="48" height="44" rx="6" fill="#FFFFFF" stroke="#E5DDD0"/>
+            <text x="352" y="60" font-family="Source Serif 4" font-size="18" fill="#C97E5C" text-anchor="middle" font-weight="600">7.2</text>
+
+            <!-- Tiny chart -->
+            <rect x="216" y="88" width="160" height="60" rx="6" fill="#FFFFFF" stroke="#E5DDD0"/>
+            <polyline points="226,138 246,134 266,128 286,124 306,118 326,114 346,108 366,102" fill="none" stroke="#C97E5C" stroke-width="1.5"/>
+            <polyline points="226,142 246,138 266,132 286,128 306,122 326,118 346,112 366,106" fill="none" stroke="#2D6A6A" stroke-width="1.5" stroke-dasharray="2,2"/>
+
+            <!-- Compliance row -->
+            <rect x="216" y="160" width="50" height="22" rx="4" fill="#E8F0E8"/>
+            <text x="241" y="176" font-family="Inter" font-size="9" fill="#1F4F4F" text-anchor="middle" font-weight="600">NOM-035</text>
+            <rect x="272" y="160" width="50" height="22" rx="4" fill="#E8F0E8"/>
+            <text x="297" y="176" font-family="Inter" font-size="9" fill="#1F4F4F" text-anchor="middle" font-weight="600">Karin</text>
+            <rect x="328" y="160" width="50" height="22" rx="4" fill="#E8F0E8"/>
+            <text x="353" y="176" font-family="Inter" font-size="9" fill="#1F4F4F" text-anchor="middle" font-weight="600">26.657</text>
+
+            <rect x="216" y="194" width="160" height="20" rx="4" fill="#FBE9DD"/>
+            <line x1="226" y1="204" x2="266" y2="204" stroke="#C97E5C" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="226" y1="208" x2="296" y2="208" stroke="#C97E5C" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="text-xs text-mute mt-4 italic text-center">Sin signup · sin install · cero fricción.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-paper border-t border-border px-6 py-14">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="w-7 h-7 rounded-full bg-teal flex items-center justify-center">
+            <span class="text-white serif text-sm font-semibold">S</span>
+          </span>
+          <span class="serif text-lg font-semibold text-ink">Sereno</span>
+        </div>
+        <p class="serif italic text-soft text-base max-w-md leading-relaxed">
+          Salud mental corporativa, embebida en la póliza que ya tienes.
+        </p>
+        <p class="text-xs text-mute mt-4">© Sereno — Todos los derechos reservados.</p>
+      </div>
+      <div class="md:text-right">
+        <ul class="space-y-2 text-sm text-soft">
+          <li><a href="#como-funciona" class="hover:text-ink">Cómo funciona</a></li>
+          <li><a href="#aseguradoras" class="hover:text-ink">Para aseguradoras</a></li>
+          <li><a href="../" class="hover:text-ink">Demo en vivo</a></li>
+        </ul>
+        <p class="text-[11px] text-mute mt-6">
+          Idea original: <a href="https://aguacate-newsletter.beehiiv.com/" class="hover:text-soft underline decoration-dotted">Aguacate newsletter</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById('mobileMenu').classList.add('hidden');
+        }
+      });
+    });
+
+    // Reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
