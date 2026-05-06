@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aparta — Cada vez que llega tu remesa, parte se queda guardada</title>
+  <meta name="description" content="Aparta separa automáticamente parte de cada remesa en una cuenta de ahorro en dólares. Para la educación de tus hijos, la casa, la salud de tu mamá. Disponible en Honduras, Guatemala, El Salvador y República Dominicana." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            terracotta: '#C66B47',
+            'terracotta-deep': '#A8542F',
+            cream: '#F5EBDC',
+            'cream-soft': '#FBF6EC',
+            'cream-warm': '#EFE2CD',
+            'teal-deep': '#1F4E5F',
+            'teal-mid': '#2D6678',
+            gold: '#D9A441',
+            'gold-bright': '#E8B85B',
+            ink: '#0F1F26',
+            mute: '#7A8B92',
+          },
+          fontFamily: {
+            display: ['Fraunces', 'Georgia', 'serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #F5EBDC; color: #0F1F26; }
+    .font-display { font-family: 'Fraunces', Georgia, serif; }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .nav-link { transition: color 0.2s; }
+    .nav-link:hover { color: #C66B47; }
+    .lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .lift:hover { transform: translateY(-4px); box-shadow: 0 18px 36px -12px rgba(31, 78, 95, 0.18); }
+    .underline-deco {
+      background-image: linear-gradient(transparent calc(100% - 4px), #D9A441 4px);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+  </style>
+</head>
+<body class="bg-cream">
+
+  <!-- ───────────── NAV ───────────── -->
+  <nav class="sticky top-0 z-40 backdrop-blur-md bg-cream/80 border-b border-cream-warm/50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-terracotta flex items-center justify-center">
+          <span class="font-display font-bold text-cream-soft text-lg">A</span>
+        </div>
+        <span class="font-display font-bold text-teal-deep text-xl">Aparta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-[14px] text-teal-deep">
+        <a href="#como-te-ayuda" class="nav-link">Cómo te ayuda</a>
+        <a href="#para-tu-familia" class="nav-link">Para tu familia</a>
+        <a href="#preguntas" class="nav-link">Preguntas</a>
+      </div>
+      <a href="#descargar" class="bg-terracotta hover:bg-terracotta-deep text-cream-soft font-semibold text-[13px] px-5 py-2.5 rounded-full transition">
+        Descarga la app
+      </a>
+    </div>
+  </nav>
+
+  <!-- ───────────── HERO ───────────── -->
+  <section id="top" class="relative overflow-hidden">
+    <div class="blob" style="top: 80px; right: -60px; width: 380px; height: 380px; background: #C66B47;"></div>
+    <div class="blob" style="bottom: -80px; left: -100px; width: 300px; height: 300px; background: #D9A441;"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-40 grid md:grid-cols-12 gap-10 items-center">
+      <div class="md:col-span-8">
+        <div class="text-[12px] tracking-[0.18em] text-terracotta font-semibold uppercase mb-5">
+          Para familias que reciben remesas
+        </div>
+        <h1 class="font-display font-bold text-teal-deep leading-[1.02] text-5xl sm:text-6xl lg:text-[80px]">
+          Cada vez que llega tu remesa,<br/>
+          <span class="italic text-terracotta">parte se queda guardada.</span>
+        </h1>
+        <p class="font-body text-lg text-ink/75 mt-8 max-w-xl leading-relaxed">
+          Tú decides cuánto: 10%, 20%, 30%. Aparta separa esa parte automáticamente, en dólares, antes de que se gaste. Para la universidad de tus hijos, la salud de tu mamá, o la casa que llevas años pensando.
+        </p>
+        <div class="mt-10 flex flex-col sm:flex-row gap-4">
+          <a href="#descargar" class="bg-terracotta hover:bg-terracotta-deep text-cream-soft font-semibold px-8 py-4 rounded-full transition text-center">
+            Descarga la app gratis
+          </a>
+          <a href="https://aguacate-demos.pages.dev/aguacate-007-auto-ahorro-receptores-remesas/" target="_blank" rel="noopener" class="border-2 border-teal-deep text-teal-deep hover:bg-teal-deep hover:text-cream-soft font-semibold px-8 py-4 rounded-full transition text-center">
+            Ver cómo funciona
+          </a>
+        </div>
+        <div class="mt-10 text-[13px] text-mute italic font-display">
+          Disponible en 🇭🇳 Honduras · 🇬🇹 Guatemala · 🇸🇻 El Salvador · 🇩🇴 República Dominicana
+        </div>
+      </div>
+
+      <!-- Hero mockup -->
+      <div class="md:col-span-4 flex justify-center md:justify-end">
+        <div class="relative">
+          <div class="absolute -top-4 -left-4 w-40 h-40 rounded-2xl bg-gold/20 -rotate-6"></div>
+          <div class="relative bg-cream-soft rounded-3xl border-2 border-cream-warm p-5 w-[260px] shadow-2xl">
+            <div class="text-center mb-4">
+              <div class="font-display font-bold text-teal-deep text-lg">Hola, Marisol</div>
+              <div class="text-[10px] tracking-widest text-mute uppercase">Honduras</div>
+            </div>
+            <div class="bg-cream rounded-xl p-3 mb-2.5">
+              <div class="text-[9px] tracking-[0.12em] text-mute uppercase">Para gastos</div>
+              <div class="font-display font-bold text-terracotta text-xl">L 8.000</div>
+            </div>
+            <div class="bg-[#FFF6E2] rounded-xl border-2 border-gold p-3 mb-2.5">
+              <div class="text-[9px] tracking-[0.12em] text-teal-deep font-semibold uppercase">Tu ahorro</div>
+              <div class="font-display font-bold text-teal-deep text-2xl">USD 480</div>
+              <div class="font-display italic text-[10px] text-mute mt-0.5">Universidad del niño</div>
+              <div class="mt-2 h-1 bg-cream-warm rounded-full overflow-hidden">
+                <div class="h-full rounded-full" style="width: 4%; background: linear-gradient(90deg, #D9A441, #E8B85B);"></div>
+              </div>
+            </div>
+            <div class="bg-cream rounded-xl p-2.5">
+              <div class="flex items-center justify-between">
+                <div class="text-[10px] text-teal-deep font-semibold">Aparto el 20% siempre</div>
+                <div class="bg-emerald-100 text-emerald-700 text-[8px] px-1.5 py-0.5 rounded-full font-bold">ON</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── BAND DE CONTEXTO ───────────── -->
+  <section class="relative bg-teal-deep text-cream-soft overflow-hidden">
+    <div class="max-w-4xl mx-auto px-6 py-16 md:py-20 text-center relative">
+      <h2 class="font-display font-bold text-3xl md:text-5xl leading-[1.1] italic">
+        "La plata llega el viernes.<br/>
+        El lunes ya no queda nada."
+      </h2>
+      <p class="font-body text-cream/70 mt-8 max-w-xl mx-auto leading-relaxed text-lg">
+        Si te suena conocido, no es culpa tuya. La remesa entra junto con todas las cuentas del mes y desaparece antes de que puedas pensar en lo que viene. Aparta cambia eso sin pedirte que pienses más.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────── CÓMO TE AYUDA ───────────── -->
+  <section id="como-te-ayuda" class="bg-cream py-24 md:py-32">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-12 gap-12 items-start">
+      <div class="md:col-span-7">
+        <div class="text-[12px] tracking-[0.18em] text-terracotta font-semibold uppercase mb-5">
+          Cómo te ayuda Aparta
+        </div>
+        <h2 class="font-display font-bold text-teal-deep text-4xl md:text-6xl leading-tight mb-12">
+          Tres pasos.<br/>
+          <span class="italic text-terracotta">Una sola vez.</span>
+        </h2>
+
+        <div class="space-y-10">
+          <div class="flex gap-6">
+            <div class="font-display font-bold text-gold text-5xl md:text-7xl flex-shrink-0 leading-none">01</div>
+            <div>
+              <h3 class="font-display font-bold text-teal-deep text-2xl mb-2">Eliges cuánto apartar.</h3>
+              <p class="text-ink/70 leading-relaxed">10%, 20%, 30% — lo que tú decidas. Lo configuras una vez al descargar la app y no tienes que volver a pensarlo nunca más.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-6">
+            <div class="font-display font-bold text-gold text-5xl md:text-7xl flex-shrink-0 leading-none">02</div>
+            <div>
+              <h3 class="font-display font-bold text-teal-deep text-2xl mb-2">Tu familia te manda como siempre.</h3>
+              <p class="text-ink/70 leading-relaxed">No tienen que cambiar nada. Pueden seguir mandándote por Western Union, Remitly, MoneyGram o cualquier app que ya usen.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-6">
+            <div class="font-display font-bold text-gold text-5xl md:text-7xl flex-shrink-0 leading-none">03</div>
+            <div>
+              <h3 class="font-display font-bold text-teal-deep text-2xl mb-2">Aparta separa lo tuyo.</h3>
+              <p class="text-ink/70 leading-relaxed">La parte que elegiste se guarda automáticamente en dólares. El resto te queda disponible en tu tarjeta para gastar cuando lo necesites.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side mockup -->
+      <div class="md:col-span-5 md:sticky md:top-24">
+        <div class="bg-cream-soft rounded-3xl border-2 border-teal-deep/20 p-6 lift">
+          <div class="text-[10px] tracking-[0.18em] text-mute uppercase mb-4 text-center">Así se ve tu app</div>
+          <div class="space-y-3">
+            <div class="bg-cream rounded-xl border border-cream-warm p-4">
+              <div class="text-[10px] tracking-widest text-mute uppercase mb-1">Para gastos</div>
+              <div class="font-display font-bold text-terracotta text-2xl">L 8.000 <span class="text-mute text-sm font-normal">≈ USD 320</span></div>
+              <div class="text-[11px] text-mute mt-1">Lo usas con tu tarjeta de débito</div>
+            </div>
+            <div class="bg-[#FFF6E2] rounded-xl border-2 border-gold p-4">
+              <div class="text-[10px] tracking-widest text-teal-deep uppercase mb-1 font-semibold">Tu ahorro</div>
+              <div class="font-display font-bold text-teal-deep text-3xl">USD 480</div>
+              <div class="font-display italic text-[12px] text-mute">Universidad del niño</div>
+              <div class="mt-3 h-1.5 bg-cream-warm rounded-full overflow-hidden">
+                <div class="h-full rounded-full" style="width: 4%; background: linear-gradient(90deg, #D9A441, #E8B85B);"></div>
+              </div>
+              <div class="text-[11px] text-teal-deep/70 mt-2">Llevas USD 480 de los USD 12.000 que necesitas</div>
+            </div>
+            <div class="bg-cream rounded-xl border border-cream-warm p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-teal-deep font-semibold uppercase tracking-widest">Tu regla</div>
+                  <div class="text-[12px] text-teal-deep mt-1">Aparto el 20% de cada remesa</div>
+                </div>
+                <div class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold">ON</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── PARA TU FAMILIA ───────────── -->
+  <section id="para-tu-familia" class="bg-cream-soft py-24 md:py-32 relative overflow-hidden">
+    <div class="blob" style="top: 100px; right: -100px; width: 320px; height: 320px; background: #C66B47;"></div>
+
+    <div class="max-w-6xl mx-auto px-6 relative">
+      <div class="text-[12px] tracking-[0.18em] text-terracotta font-semibold uppercase mb-5">
+        Para lo que de verdad importa
+      </div>
+      <h2 class="font-display font-bold text-teal-deep text-4xl md:text-6xl leading-tight max-w-3xl mb-16">
+        Lo que ahorras hoy<br/>
+        <span class="italic">es lo que construyes mañana.</span>
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-cream rounded-3xl border-2 border-cream-warm p-8 lift">
+          <div class="font-display italic text-gold text-5xl mb-4">01</div>
+          <h3 class="font-display font-bold text-teal-deep text-xl mb-3">La educación de tus hijos.</h3>
+          <p class="text-ink/70 leading-relaxed text-[15px]">Que cuando llegue el momento, no sea una conversación de diciembre. Sea un sobre con la matrícula adentro.</p>
+        </div>
+
+        <div class="bg-cream rounded-3xl border-2 border-cream-warm p-8 lift">
+          <div class="font-display italic text-gold text-5xl mb-4">02</div>
+          <h3 class="font-display font-bold text-teal-deep text-xl mb-3">La salud de los tuyos.</h3>
+          <p class="text-ink/70 leading-relaxed text-[15px]">Operaciones, medicinas, exámenes que no esperan. Tener algo guardado es tener tiempo para decidir bien.</p>
+        </div>
+
+        <div class="bg-cream rounded-3xl border-2 border-cream-warm p-8 lift">
+          <div class="font-display italic text-gold text-5xl mb-4">03</div>
+          <h3 class="font-display font-bold text-teal-deep text-xl mb-3">Tu casa o tu negocio.</h3>
+          <p class="text-ink/70 leading-relaxed text-[15px]">Esa idea que llevas años posponiendo. El terreno, el local, la remodelación. Ahorrar sin sentirlo es la única forma que funciona.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── PARA QUIEN ENVÍA ───────────── -->
+  <section class="bg-cream py-24 md:py-32 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-12 gap-12 items-center relative">
+      <div class="md:col-span-7">
+        <div class="text-[12px] tracking-[0.18em] text-terracotta font-semibold uppercase mb-5">
+          Si tú eres quien manda
+        </div>
+        <h2 class="font-display font-bold text-teal-deep text-4xl md:text-6xl leading-tight mb-8">
+          Mandas igual que siempre.<br/>
+          <span class="italic">Pero ahora ves dónde llega.</span>
+        </h2>
+        <div class="space-y-5 text-ink/75 leading-relaxed text-lg max-w-xl">
+          <p>Sigues usando la app de remesas que prefieras. Aparta no cambia eso.</p>
+          <p>Lo que sí puedes ver, si tu familia te invita, es la meta que están construyendo: cuánto llevan ahorrado, qué les falta, cómo va el progreso.</p>
+          <p class="font-display italic text-teal-deep">Mandar dinero deja de ser una transacción mensual. Empieza a ser un proyecto compartido.</p>
+        </div>
+      </div>
+
+      <div class="md:col-span-5">
+        <div class="bg-cream-soft rounded-3xl border-2 border-cream-warm p-7 shadow-xl">
+          <div class="text-[10px] tracking-[0.18em] text-mute uppercase mb-3">Lo que ve quien envía</div>
+          <div class="bg-[#FFF6E2] rounded-2xl border-2 border-gold p-5">
+            <div class="text-[10px] tracking-widest text-teal-deep uppercase mb-1 font-semibold">Meta de la familia</div>
+            <h3 class="font-display font-bold text-teal-deep text-xl mb-3">Universidad del niño</h3>
+            <div class="h-2.5 bg-cream-warm rounded-full overflow-hidden mb-3">
+              <div class="h-full rounded-full" style="width: 4%; background: linear-gradient(90deg, #D9A441, #E8B85B);"></div>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span class="font-display font-bold text-teal-deep text-lg">USD 480</span>
+              <span class="text-mute text-sm">de USD 12.000</span>
+            </div>
+            <div class="text-[11px] text-mute italic mt-2 font-display">
+              Marisol está apartando el 20% cada mes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── PREGUNTAS FRECUENTES ───────────── -->
+  <section id="preguntas" class="bg-cream-soft py-24 md:py-32">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-[12px] tracking-[0.18em] text-terracotta font-semibold uppercase mb-5 text-center">
+        Lo que la gente nos pregunta
+      </div>
+      <h2 class="font-display font-bold text-teal-deep text-4xl md:text-5xl leading-tight text-center mb-16">
+        Antes de descargar.
+      </h2>
+
+      <div class="space-y-6">
+        <div class="bg-cream rounded-2xl border border-cream-warm p-6">
+          <h3 class="font-display font-bold text-teal-deep text-lg mb-2">¿Aparta cobra por usar la app?</h3>
+          <p class="text-ink/70 leading-relaxed">No. Descargarla y usarla es gratis. Tampoco te quitamos nada de tu remesa: el 100% de lo que te mandan llega a tu cuenta.</p>
+        </div>
+        <div class="bg-cream rounded-2xl border border-cream-warm p-6">
+          <h3 class="font-display font-bold text-teal-deep text-lg mb-2">¿Por qué el ahorro es en dólares?</h3>
+          <p class="text-ink/70 leading-relaxed">Porque la moneda local pierde valor año a año, y el dólar no. Lo que apartas hoy compra lo mismo en cinco años, sin que tengas que estar pendiente del tipo de cambio.</p>
+        </div>
+        <div class="bg-cream rounded-2xl border border-cream-warm p-6">
+          <h3 class="font-display font-bold text-teal-deep text-lg mb-2">¿Puedo retirar mi ahorro cuando quiera?</h3>
+          <p class="text-ink/70 leading-relaxed">Sí. El retiro tarda 24 horas en llegarte, una pausa pequeña a propósito para que sea una decisión pensada. Pero es tu plata, siempre.</p>
+        </div>
+        <div class="bg-cream rounded-2xl border border-cream-warm p-6">
+          <h3 class="font-display font-bold text-teal-deep text-lg mb-2">¿Qué pasa si dejo de recibir remesas?</h3>
+          <p class="text-ink/70 leading-relaxed">Nada. Tu ahorro se queda donde está, en dólares, hasta que decidas usarlo. La app sigue siendo tuya.</p>
+        </div>
+        <div class="bg-cream rounded-2xl border border-cream-warm p-6">
+          <h3 class="font-display font-bold text-teal-deep text-lg mb-2">¿Necesito cuenta bancaria para usar Aparta?</h3>
+          <p class="text-ink/70 leading-relaxed">No. Te damos una cuenta dentro de la app y una tarjeta de débito que puedes usar en cualquier comercio o cajero del país.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── CTA FINAL ───────────── -->
+  <section id="descargar" class="bg-cream py-24 md:py-32 relative overflow-hidden">
+    <div class="blob" style="bottom: -60px; right: -80px; width: 280px; height: 280px; background: #D9A441;"></div>
+
+    <div class="max-w-3xl mx-auto px-6 text-center relative">
+      <h2 class="font-display font-bold text-teal-deep text-4xl md:text-6xl leading-tight mb-8">
+        Empieza a ahorrar<br/>
+        <span class="italic text-terracotta">sin sentirlo.</span>
+      </h2>
+      <p class="text-ink/70 text-lg max-w-xl mx-auto leading-relaxed mb-12">
+        Descarga Aparta gratis. Configura tu regla en dos minutos. La próxima remesa que te llegue ya empieza a construir lo que tú elijas.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#" class="bg-terracotta hover:bg-terracotta-deep text-cream-soft font-semibold px-10 py-5 rounded-full transition text-lg">
+          Descarga para iPhone
+        </a>
+        <a href="#" class="bg-teal-deep hover:bg-teal-mid text-cream-soft font-semibold px-10 py-5 rounded-full transition text-lg">
+          Descarga para Android
+        </a>
+      </div>
+      <div class="mt-8 text-[12px] text-mute italic font-display">
+        Sin tarjeta de crédito. Sin compromisos. Sin letras chicas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── FOOTER ───────────── -->
+  <footer class="bg-teal-deep text-cream-soft py-12">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-8 mb-10">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-9 h-9 rounded-lg bg-terracotta flex items-center justify-center">
+              <span class="font-display font-bold text-cream-soft text-lg">A</span>
+            </div>
+            <span class="font-display font-bold text-xl">Aparta</span>
+          </div>
+          <p class="text-cream/60 text-sm max-w-md">Una app para que las familias que reciben remesas en Centroamérica y el Caribe puedan ahorrar sin pensarlo.</p>
+        </div>
+        <div>
+          <div class="text-[11px] tracking-widest text-cream/50 uppercase mb-3 font-semibold">La app</div>
+          <ul class="space-y-2 text-sm text-cream/80">
+            <li><a href="#como-te-ayuda" class="hover:text-gold">Cómo te ayuda</a></li>
+            <li><a href="#para-tu-familia" class="hover:text-gold">Para tu familia</a></li>
+            <li><a href="#preguntas" class="hover:text-gold">Preguntas</a></li>
+            <li><a href="#descargar" class="hover:text-gold">Descargar</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="text-[11px] tracking-widest text-cream/50 uppercase mb-3 font-semibold">Soporte</div>
+          <ul class="space-y-2 text-sm text-cream/80">
+            <li><span class="text-cream/30">Ayuda</span></li>
+            <li><span class="text-cream/30">Contacto</span></li>
+            <li><span class="text-cream/30">Privacidad</span></li>
+            <li><span class="text-cream/30">Términos</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[12px]">
+        <div class="text-cream/40 italic font-display">
+          Aparta es un demo conceptual — no un producto financiero real.
+        </div>
+        <div class="text-cream/40 italic">
+          Idea original: Aguacate newsletter — <a href="https://aguacate-newsletter.beehiiv.com" target="_blank" rel="noopener" class="underline hover:text-gold">aguacate-newsletter.beehiiv.com</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

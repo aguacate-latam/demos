@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aparta — Auto-Ahorro para Receptores de Remesas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            terracotta: '#C66B47',
+            'terracotta-deep': '#A8542F',
+            cream: '#F5EBDC',
+            'cream-soft': '#FBF6EC',
+            'cream-warm': '#EFE2CD',
+            'teal-deep': '#1F4E5F',
+            'teal-mid': '#2D6678',
+            gold: '#D9A441',
+            'gold-bright': '#E8B85B',
+            ink: '#0F1F26',
+            mute: '#7A8B92',
+          },
+          fontFamily: {
+            display: ['Fraunces', 'Georgia', 'serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #F5EBDC; color: #0F1F26; }
+    .font-display { font-family: 'Fraunces', Georgia, serif; }
+    @keyframes shimmer {
+      0% { box-shadow: 0 0 0 0 rgba(217, 164, 65, 0.6); }
+      50% { box-shadow: 0 0 0 14px rgba(217, 164, 65, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(217, 164, 65, 0); }
+    }
+    .shimmer { animation: shimmer 1.4s ease-out; }
+    @keyframes slide-down {
+      from { transform: translateY(-12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .toast-in { animation: slide-down 0.4s ease-out; }
+    .phone-shadow { box-shadow: 0 12px 32px -8px rgba(31, 78, 95, 0.25), 0 4px 8px rgba(31, 78, 95, 0.06); }
+    /* Hide scrollbars on phone screens */
+    .phone-screen::-webkit-scrollbar { display: none; }
+    .phone-screen { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef } = React;
+
+    // ───────────────── ICONS (SVG inline, no emojis) ─────────────────
+    const Icon = {
+      Lock: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      ),
+      Card: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <path d="M2 10h20" />
+        </svg>
+      ),
+      ArrowDown: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14" />
+          <path d="m19 12-7 7-7-7" />
+        </svg>
+      ),
+      Check: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m5 12 5 5L20 7" />
+        </svg>
+      ),
+      Send: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 2 11 13" />
+          <path d="M22 2 15 22l-4-9-9-4 20-7Z" />
+        </svg>
+      ),
+      Close: ({ className = 'w-5 h-5' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+        </svg>
+      ),
+      Hand: ({ className = 'w-4 h-4' }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 11V6a2 2 0 0 0-4 0v5" />
+          <path d="M14 10V4a2 2 0 0 0-4 0v6" />
+          <path d="M10 10.5V6a2 2 0 0 0-4 0v8" />
+          <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+        </svg>
+      ),
+    };
+
+    // ───────────────── ANIMATED COUNTER ─────────────────
+    function useCounter(target, duration = 1100) {
+      const [value, setValue] = useState(target);
+      const fromRef = useRef(target);
+      useEffect(() => {
+        const from = fromRef.current;
+        if (from === target) return;
+        const start = performance.now();
+        let raf;
+        const tick = (now) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          setValue(from + (target - from) * eased);
+          if (t < 1) raf = requestAnimationFrame(tick);
+          else fromRef.current = target;
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+      }, [target, duration]);
+      return value;
+    }
+
+    function fmtUSD(v) {
+      return 'USD ' + Math.round(v).toLocaleString('en-US');
+    }
+    function fmtLempira(v) {
+      return 'L ' + Math.round(v).toLocaleString('es-HN');
+    }
+
+    // ───────────────── MOCK PHONE FRAME ─────────────────
+    function PhoneFrame({ children, label }) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="text-[10px] tracking-[0.18em] text-teal-deep font-semibold mb-3 uppercase">
+            {label}
+          </div>
+          <div className="phone-shadow rounded-[2.5rem] bg-ink p-2 w-[340px] max-w-full">
+            <div className="rounded-[2rem] bg-cream-soft overflow-hidden relative" style={{ height: '660px' }}>
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-ink rounded-b-2xl z-10" />
+              <div className="phone-screen overflow-y-auto h-full px-5 pt-8 pb-6">
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ───────────────── RECEIVER SIDE — MARISOL ─────────────────
+    function ReceiverPanel({ spend, save, goal, onSimulate, onAhorroClick, recentRemesa, isReceiving, justAdded }) {
+      const animatedSpend = useCounter(spend, 1100);
+      const animatedSave = useCounter(save, 1300);
+      const progressPct = Math.min((save / goal) * 100, 100);
+
+      return (
+        <PhoneFrame label="Vista de la receptora · Marisol · Honduras">
+          {/* Header */}
+          <div className="text-center mb-6 mt-2">
+            <h2 className="font-display text-2xl font-bold text-teal-deep">Hola, Marisol</h2>
+            <div className="text-[11px] tracking-[0.12em] text-mute uppercase mt-1">Honduras</div>
+          </div>
+
+          {/* Toast */}
+          {isReceiving && (
+            <div className="toast-in mb-4 bg-teal-deep text-cream-soft rounded-xl p-3 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex-1">
+                <div className="text-[12px] font-semibold">Remesa recibida</div>
+                <div className="text-[11px] text-cream/70">USD 400 · dividida 80/20</div>
+              </div>
+            </div>
+          )}
+
+          {/* Card 1: Saldo gastable */}
+          <div className="bg-cream rounded-2xl border border-cream-warm p-4 mb-3">
+            <div className="text-[10px] tracking-[0.12em] text-mute uppercase mb-1">Saldo gastable</div>
+            <div className="font-display text-3xl font-bold text-terracotta">
+              {fmtLempira(animatedSpend * 25)}
+            </div>
+            <div className="text-[11px] text-mute mt-1 flex items-center gap-1.5">
+              ≈ {fmtUSD(animatedSpend)} ·
+              <Icon.Card className="w-3 h-3 inline" />
+              <span>tarjeta de débito</span>
+            </div>
+          </div>
+
+          {/* Card 2: Mi ahorro USD (highlighted) */}
+          <button
+            onClick={onAhorroClick}
+            className={`w-full text-left bg-[#FFF6E2] rounded-2xl border-2 border-gold p-4 mb-3 transition hover:border-gold-bright ${justAdded ? 'shimmer' : ''}`}
+          >
+            <div className="text-[10px] tracking-[0.12em] text-teal-deep uppercase font-semibold mb-1">Mi ahorro USD</div>
+            <div className="font-display text-4xl font-bold text-teal-deep">
+              {fmtUSD(animatedSave)}
+            </div>
+            <div className="font-display italic text-[12px] text-mute mt-1">
+              para la universidad del niño
+            </div>
+            <div className="mt-3 h-1.5 bg-cream-warm rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${progressPct}%`,
+                  background: 'linear-gradient(90deg, #D9A441 0%, #E8B85B 100%)',
+                }}
+              />
+            </div>
+            <div className="text-[10px] text-mute mt-1.5">
+              {fmtUSD(save)} / {fmtUSD(goal)} · {progressPct.toFixed(0)}%
+            </div>
+          </button>
+
+          {/* Card 3: Regla activa */}
+          <div className="bg-cream rounded-2xl border border-cream-warm p-4 mb-5">
+            <div className="flex items-start gap-2">
+              <Icon.Lock className="w-4 h-4 mt-0.5 text-teal-deep flex-shrink-0" />
+              <div className="flex-1">
+                <div className="text-[11px] text-teal-deep font-semibold uppercase tracking-wide">Regla activa</div>
+                <div className="text-[12px] text-teal-deep mt-1">Aparto 20% de cada remesa</div>
+                <div className="text-[10px] text-mute italic mt-0.5">automáticamente · activa</div>
+              </div>
+              <div className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-semibold">
+                ON
+              </div>
+            </div>
+          </div>
+
+          {/* Simulate button */}
+          <button
+            onClick={onSimulate}
+            disabled={isReceiving}
+            className="w-full bg-terracotta hover:bg-terracotta-deep disabled:opacity-50 text-cream-soft font-semibold text-[13px] tracking-wide rounded-full py-3.5 transition flex items-center justify-center gap-2 mb-3"
+          >
+            <Icon.ArrowDown className="w-4 h-4" />
+            Simular llegada de remesa
+          </button>
+
+          {/* Recent activity */}
+          <div className="text-[10px] text-mute uppercase tracking-widest mb-2 mt-4">
+            Actividad reciente
+          </div>
+          {recentRemesa ? (
+            <div className="bg-cream-warm/60 rounded-xl p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] text-teal-deep font-semibold">+ {fmtUSD(recentRemesa.amount)}</div>
+                  <div className="text-[10px] text-mute">de Carlos · hace un momento</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] text-mute">apartado</div>
+                  <div className="text-[11px] text-gold font-semibold">{fmtUSD(recentRemesa.amount * 0.2)}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-[11px] text-mute italic">Sin remesas recientes — toca el botón para simular.</div>
+          )}
+        </PhoneFrame>
+      );
+    }
+
+    // ───────────────── SENDER SIDE — CARLOS ─────────────────
+    function SenderPanel({ save, goal, onSend, isSending, history }) {
+      const progressPct = Math.min((save / goal) * 100, 100);
+      const max = Math.max(...history, 1);
+
+      return (
+        <PhoneFrame label="Vista del remitente · Carlos · Houston">
+          {/* Header */}
+          <div className="text-center mb-6 mt-2">
+            <h2 className="font-display text-2xl font-bold text-teal-deep">Mi familia</h2>
+            <div className="text-[11px] tracking-[0.12em] text-mute uppercase mt-1">Carlos · Houston</div>
+          </div>
+
+          {/* Avatar card */}
+          <div className="bg-cream rounded-2xl border border-cream-warm p-3 mb-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-terracotta flex items-center justify-center font-display font-bold text-cream-soft text-base">
+              M
+            </div>
+            <div>
+              <div className="text-[13px] text-teal-deep font-semibold">Marisol</div>
+              <div className="text-[10px] text-mute">Honduras · hermana</div>
+            </div>
+          </div>
+
+          {/* Última remesa */}
+          <div className="bg-cream rounded-2xl border border-cream-warm p-4 mb-3">
+            <div className="text-[10px] tracking-[0.12em] text-mute uppercase mb-1">Última remesa enviada</div>
+            <div className="font-display text-2xl font-bold text-terracotta">USD 400</div>
+            <div className="text-[10px] text-mute mt-1">{isSending ? 'enviando ahora...' : 'hace 3 días · vía Felix Pago'}</div>
+            {isSending && (
+              <div className="mt-2 h-1 bg-cream-warm rounded-full overflow-hidden">
+                <div className="h-full bg-terracotta animate-pulse" style={{ width: '60%' }} />
+              </div>
+            )}
+          </div>
+
+          {/* Meta familiar */}
+          <div className="bg-[#FFF6E2] rounded-2xl border-2 border-gold p-4 mb-3">
+            <div className="text-[10px] tracking-[0.12em] text-teal-deep uppercase font-semibold mb-1">Meta familiar activa</div>
+            <div className="font-display text-base font-bold text-teal-deep">Universidad del niño</div>
+            <div className="mt-3 h-2 bg-cream-warm rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${progressPct}%`,
+                  background: 'linear-gradient(90deg, #D9A441 0%, #E8B85B 100%)',
+                }}
+              />
+            </div>
+            <div className="text-[11px] text-teal-deep mt-2">
+              {fmtUSD(save)} / {fmtUSD(goal)}
+            </div>
+            <div className="text-[10px] text-mute italic mt-0.5">
+              Marisol activó regla 20% — ahorra cada mes
+            </div>
+          </div>
+
+          {/* Mini bar chart */}
+          <div className="bg-cream rounded-2xl border border-cream-warm p-3 mb-4">
+            <div className="text-[10px] tracking-[0.12em] text-mute uppercase mb-2">Ahorro de tu familia · 6 meses</div>
+            <div className="flex items-end gap-1.5 h-20">
+              {history.map((v, i) => {
+                const h = (v / max) * 100;
+                const isLast = i === history.length - 1;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t transition-all duration-700"
+                    style={{
+                      height: `${h}%`,
+                      background: isLast ? 'linear-gradient(180deg, #E8B85B 0%, #D9A441 100%)' : `rgba(31,78,95,${0.3 + (i / history.length) * 0.5})`,
+                    }}
+                    title={fmtUSD(v)}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex justify-between text-[9px] text-mute mt-1">
+              <span>Dic</span><span>May</span>
+            </div>
+          </div>
+
+          {/* Send button */}
+          <button
+            onClick={onSend}
+            disabled={isSending}
+            className="w-full bg-teal-deep hover:bg-teal-mid disabled:opacity-50 text-cream-soft font-semibold text-[13px] tracking-wide rounded-full py-3.5 transition flex items-center justify-center gap-2"
+          >
+            <Icon.Send className="w-4 h-4" />
+            Mandar otra remesa
+          </button>
+
+          <div className="text-[10px] text-mute italic text-center mt-3">
+            La fricción del receptor se vuelve orgullo del remitente.
+          </div>
+        </PhoneFrame>
+      );
+    }
+
+    // ───────────────── MODAL ─────────────────
+    function AhorroModal({ open, onClose }) {
+      if (!open) return null;
+      return (
+        <div className="fixed inset-0 bg-ink/60 z-50 flex items-center justify-center p-4 toast-in" onClick={onClose}>
+          <div className="bg-cream-soft rounded-3xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={onClose} className="absolute top-4 right-4 text-mute hover:text-ink">
+              <Icon.Close />
+            </button>
+            <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center mb-4">
+              <Icon.Hand className="w-5 h-5 text-gold" />
+            </div>
+            <h3 className="font-display text-xl font-bold text-teal-deep mb-3">Tu ahorro vive en USD</h3>
+            <p className="text-[13px] text-ink/80 leading-relaxed mb-3">
+              El monto apartado se mantiene en una cuenta USD respaldada por broker licenciado. Genera rendimiento, no se devalúa con tu moneda local.
+            </p>
+            <p className="text-[13px] text-ink/80 leading-relaxed mb-5">
+              Para retirar hay 24h de fricción intencional — no es prisión, es default. Tú decides cuándo lo necesitas. La app no te empuja a sacarlo.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full bg-terracotta hover:bg-terracotta-deep text-cream-soft font-semibold text-[13px] rounded-full py-3 transition"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ───────────────── APP ─────────────────
+    function App() {
+      const [spend, setSpend] = useState(320);
+      const [save, setSave] = useState(480);
+      const [isSending, setIsSending] = useState(false);
+      const [isReceiving, setIsReceiving] = useState(false);
+      const [justAdded, setJustAdded] = useState(false);
+      const [recentRemesa, setRecentRemesa] = useState(null);
+      const [modalOpen, setModalOpen] = useState(false);
+      const [history, setHistory] = useState([60, 110, 180, 240, 380, 480]);
+      const goal = 12000;
+
+      const triggerRemesa = () => {
+        if (isSending || isReceiving) return;
+        const amount = 400;
+
+        // Sender: progress bar shows
+        setIsSending(true);
+
+        // After 2s, receiver gets it
+        setTimeout(() => {
+          setIsSending(false);
+          setIsReceiving(true);
+
+          const newSave = save + amount * 0.2;
+          const newSpend = spend + amount * 0.8;
+          setSave(newSave);
+          setSpend(newSpend);
+          setRecentRemesa({ amount, ts: Date.now() });
+          setJustAdded(true);
+
+          // Update history (replace last bar)
+          setHistory((h) => [...h.slice(1), Math.round(newSave)]);
+
+          setTimeout(() => setJustAdded(false), 1500);
+          setTimeout(() => setIsReceiving(false), 3500);
+        }, 2000);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="border-b border-cream-warm bg-cream-soft/80 backdrop-blur sticky top-0 z-30">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-terracotta flex items-center justify-center">
+                  <span className="font-display font-bold text-cream-soft text-base">A</span>
+                </div>
+                <span className="font-display font-bold text-teal-deep text-lg">Aparta</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-6 text-[12px] text-teal-deep">
+                <span className="font-semibold">HN · GT · SV · DO</span>
+                <span className="text-mute italic">demo simulation</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Hero copy */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-14 text-center">
+            <h1 className="font-display text-4xl sm:text-6xl font-bold text-teal-deep leading-[1.05] max-w-3xl mx-auto">
+              Tu remesa llega.
+              <span className="block italic text-terracotta">El 20% se queda.</span>
+            </h1>
+            <p className="font-body text-[14px] sm:text-base text-ink/70 mt-5 max-w-xl mx-auto">
+              Aparta convierte la decisión de ahorrar en un default invisible. Una vez configuras la regla, no la cambias más — la app divide automáticamente cada remesa que recibe tu familia.
+            </p>
+            <p className="text-[11px] text-mute mt-3 italic font-display">
+              Toca <span className="font-bold text-terracotta not-italic">"Simular llegada de remesa"</span> en cualquiera de las dos vistas para ver el flujo.
+            </p>
+          </section>
+
+          {/* Split view */}
+          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 pb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 justify-items-center">
+              <ReceiverPanel
+                spend={spend}
+                save={save}
+                goal={goal}
+                onSimulate={triggerRemesa}
+                onAhorroClick={() => setModalOpen(true)}
+                recentRemesa={recentRemesa}
+                isReceiving={isReceiving}
+                justAdded={justAdded}
+              />
+              <SenderPanel
+                save={save}
+                goal={goal}
+                onSend={triggerRemesa}
+                isSending={isSending}
+                history={history}
+              />
+            </div>
+          </main>
+
+          {/* Footer */}
+          <footer className="border-t border-cream-warm bg-cream-soft mt-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-[11px] text-mute font-display italic">
+                Aparta — auto-ahorro receptor-first para Centroamérica y el Caribe.
+              </div>
+              <div className="text-[10px] text-mute/70 italic">
+                Idea original: Aguacate newsletter — <a href="https://aguacate-newsletter.beehiiv.com" target="_blank" rel="noopener" className="underline hover:text-teal-deep">aguacate-newsletter.beehiiv.com</a>
+              </div>
+            </div>
+          </footer>
+
+          <AhorroModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
