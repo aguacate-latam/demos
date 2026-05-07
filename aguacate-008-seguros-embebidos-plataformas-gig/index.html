@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amparo — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: '#0B1220',
+        slate2: '#1F2937',
+        cyan2: '#22D3EE',
+        offwhite: '#F4F6FA',
+        signal: '#FACC15',
+      },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'monospace'],
+        serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background: #0B1220; }
+  .pulse-dot {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  .hard-border-cyan { border: 1px solid #22D3EE; }
+  .hard-border-slate { border: 1px solid #374151; }
+  .toast-slide {
+    animation: slideIn 0.4s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .sparkline-path {
+    stroke: #FACC15;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .modal-fade {
+    animation: fadeIn 0.25s ease-out;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .msg-in { animation: msgIn 0.4s ease-out; }
+  @keyframes msgIn {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+</head>
+<body class="font-mono text-offwhite">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+function useCountdown(initialSeconds) {
+  const [s, setS] = useState(initialSeconds);
+  useEffect(() => {
+    const id = setInterval(() => setS(prev => (prev > 0 ? prev - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const hh = String(Math.floor(s / 3600)).padStart(2, '0');
+  const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+
+function CountUp({ to, duration = 600 }) {
+  const [val, setVal] = useState(to);
+  const ref = useRef(to);
+  useEffect(() => {
+    if (ref.current === to) return;
+    const start = ref.current;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(Math.round(start + (to - start) * eased));
+      if (t < 1) requestAnimationFrame(tick);
+      else ref.current = to;
+    };
+    requestAnimationFrame(tick);
+  }, [to, duration]);
+  return <>{val.toLocaleString()}</>;
+}
+
+const sparklineData = [2.1, 2.4, 2.0, 2.5, 2.2, 2.6, 2.3];
+function Sparkline({ data, w = 80, h = 24 }) {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((d - min) / (max - min || 1)) * h;
+    return `${x},${y}`;
+  }).join(' ');
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="inline-block ml-2">
+      <polyline className="sparkline-path" points={points} />
+    </svg>
+  );
+}
+
+function ClaimsModal({ open, onClose }) {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (!open) { setStep(0); return; }
+    const t1 = setTimeout(() => setStep(1), 800);
+    const t2 = setTimeout(() => setStep(2), 2200);
+    const t3 = setTimeout(() => setStep(3), 4000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [open]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 modal-fade p-4" onClick={onClose}>
+      <div className="bg-offwhite text-ink max-w-md w-full hard-border-slate" onClick={e => e.stopPropagation()}>
+        <div className="bg-ink text-offwhite px-4 py-3 flex items-center justify-between">
+          <div className="font-mono text-xs uppercase tracking-wider">claim_chat // amparo · whatsapp</div>
+          <button onClick={onClose} className="text-cyan2 font-mono text-sm">[ ✕ ]</button>
+        </div>
+        <div className="p-4 space-y-3 min-h-[280px]">
+          <div className="msg-in flex items-start gap-2">
+            <div className="w-7 h-7 bg-cyan2 flex items-center justify-center text-ink font-mono text-xs shrink-0">IA</div>
+            <div className="bg-slate2/10 px-3 py-2 font-serif text-sm">Hola Diego, ¿qué pasó? Mándame una foto y descripción corta.</div>
+          </div>
+          {step >= 1 && (
+            <div className="msg-in flex items-start gap-2 justify-end">
+              <div className="bg-cyan2/20 px-3 py-2 font-serif text-sm text-right">Me caí saliendo de Curridabat. Daño en la pierna y la moto raspada.</div>
+            </div>
+          )}
+          {step >= 2 && (
+            <div className="msg-in flex items-start gap-2 justify-end">
+              <div className="bg-cyan2/20 px-2 py-2 font-mono text-xs text-right">[📷 foto_siniestro_01.jpg subida]</div>
+            </div>
+          )}
+          {step >= 3 && (
+            <div className="msg-in flex items-start gap-2">
+              <div className="w-7 h-7 bg-cyan2 flex items-center justify-center text-ink font-mono text-xs shrink-0">IA</div>
+              <div className="bg-slate2/10 px-3 py-2 font-serif text-sm">
+                Triage hecho. Siniestro <span className="font-mono text-xs">#A28934</span> aprobado: <strong>USD 180</strong> a tu cuenta vía Sinpe Móvil en horas. Te llega un SMS cuando esté en tu cuenta.
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [coveragesActive, setCoveragesActive] = useState({
+    accidente_personal: true,
+    vida_simple: true,
+    hospitalizacion_corta: false,
+  });
+  const [contractorsCount, setContractorsCount] = useState(1847);
+  const [shiftActive, setShiftActive] = useState(true);
+  const [toast, setToast] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
+  const countdown = useCountdown(15791);
+
+  const toggleCoverage = (key) => {
+    setCoveragesActive(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const simulateShift = () => {
+    setToast(true);
+    setContractorsCount(c => c + 1);
+    setShiftActive(true);
+    setTimeout(() => setToast(false), 1800);
+  };
+
+  const activeCoverageList = Object.entries(coveragesActive)
+    .filter(([_, v]) => v)
+    .map(([k]) => k.replace('_', ' '));
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Header bar */}
+      <div className="border-b border-slate2 px-4 md:px-6 py-3 flex items-center justify-between">
+        <div className="font-mono text-sm tracking-widest">AMPARO <span className="text-cyan2">// demo</span></div>
+        <div className="font-mono text-xs text-offwhite/60 hidden md:block">embedded insurance for gig platforms · 🇪🇨 EC · 🇺🇾 UY · 🇩🇴 DO · 🇨🇷 CR</div>
+      </div>
+
+      {/* Split view */}
+      <div className="flex-1 flex flex-col md:flex-row">
+        {/* Left panel — Integrator dashboard */}
+        <div className="w-full md:w-1/2 bg-ink p-4 md:p-6 md:border-r border-cyan2/30">
+          <div className="font-mono text-xs text-offwhite/60 mb-2 uppercase tracking-wider md:hidden">↓ INTEGRADOR (Rappi)</div>
+          <div className="font-mono text-xs text-offwhite/50 mb-4 hidden md:block">&gt; rappi-cr &gt; production</div>
+
+          {/* 4 cards grid */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+            <div className="bg-slate2 hard-border-cyan p-3 col-span-2 md:col-span-1">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-offwhite/60 mb-2">contractors_cubiertos_hoy</div>
+              <div className="flex items-center gap-2">
+                <div className="font-mono text-3xl md:text-4xl text-offwhite"><CountUp to={contractorsCount} /></div>
+                <div className="w-2 h-2 rounded-full bg-cyan2 pulse-dot"></div>
+              </div>
+              <div className="font-serif italic text-xs text-offwhite/60 mt-1">activos en este turno</div>
+            </div>
+
+            <div className="bg-slate2 hard-border-slate p-3 col-span-2 md:col-span-1">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-offwhite/60 mb-2">claim_ratio_7d</div>
+              <div className="flex items-center">
+                <div className="font-mono text-3xl text-signal">2.3<span className="text-xl">%</span></div>
+                <Sparkline data={sparklineData} />
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-offwhite/50 mt-1">// ok — dentro de banda</div>
+            </div>
+
+            <div className="bg-slate2 hard-border-slate p-3">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-offwhite/60 mb-2">payout_time_avg</div>
+              <div className="font-mono text-2xl text-cyan2">4h 12m</div>
+              <div className="font-serif italic text-xs text-offwhite/60 mt-1">vía Sinpe Móvil</div>
+            </div>
+
+            <div className="bg-slate2 hard-border-slate p-3">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-offwhite/60 mb-2">api_surface</div>
+              <div className="space-y-1">
+                <div className="font-mono text-[11px]"><span className="text-cyan2">POST</span> /shifts/start <span className="text-green-400">·</span></div>
+                <div className="font-mono text-[11px]"><span className="text-cyan2">POST</span> /claims/file <span className="text-green-400">·</span></div>
+                <div className="font-mono text-[11px]"><span className="text-cyan2">GET</span> /coverage/status <span className="text-green-400">·</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Coverage config */}
+          <div className="mb-6">
+            <div className="font-mono text-xs text-cyan2 mb-3">&gt; coverage-config</div>
+            <div className="space-y-2">
+              {Object.entries(coveragesActive).map(([key, value]) => (
+                <button
+                  key={key}
+                  onClick={() => toggleCoverage(key)}
+                  className={`w-full hard-border-slate px-3 py-2 flex items-center justify-between font-mono text-xs transition-all ${value ? 'bg-cyan2/10 border-cyan2/60' : 'bg-slate2'}`}
+                >
+                  <span className="lowercase">{key}</span>
+                  <span className={`px-2 py-0.5 ${value ? 'bg-cyan2 text-ink' : 'bg-slate-700 text-offwhite/60'}`}>
+                    {value ? 'ON' : 'OFF'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={simulateShift}
+            className="w-full bg-cyan2 text-ink font-mono uppercase tracking-widest py-3 hover:bg-offwhite transition-colors"
+          >
+            [ simular aceptar turno ]
+          </button>
+        </div>
+
+        {/* Right panel — Contractor view */}
+        <div className="w-full md:w-1/2 bg-slate-100 p-4 md:p-6 flex items-start md:items-center justify-center min-h-[600px]">
+          <div className="font-mono text-xs text-ink/60 mb-2 uppercase tracking-wider md:hidden w-full">↓ CONTRACTOR (Diego)</div>
+          {/* Mobile mockup frame */}
+          <div className="w-full max-w-sm bg-offwhite border-4 border-ink rounded-3xl overflow-hidden shadow-2xl relative">
+            {/* Toast */}
+            {toast && (
+              <div className="absolute top-3 left-3 right-3 bg-ink text-offwhite px-3 py-2 font-mono text-xs toast-slide z-10 hard-border-cyan">
+                🛡️ Estás cubierto hasta las 11pm hoy
+              </div>
+            )}
+            {/* Header */}
+            <div className="bg-ink text-offwhite px-5 pt-6 pb-4">
+              <div className="font-serif text-2xl">Hola, Diego</div>
+              <div className="font-mono text-[10px] text-offwhite/60 uppercase tracking-wider mt-1">Costa Rica · motorizado</div>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {/* Cobertura activa */}
+              <div className="bg-ink text-offwhite p-4 hard-border-cyan">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-cyan2 mb-2">cobertura #a2891f</div>
+                {shiftActive ? (
+                  <>
+                    <div className="font-mono text-3xl mb-2">{countdown}</div>
+                    <div className="font-serif text-sm text-offwhite/80 mb-3">Estás cubierto hasta las 11pm hoy.</div>
+                    <div className="flex flex-wrap gap-1">
+                      {activeCoverageList.length === 0 ? (
+                        <div className="font-mono text-[10px] text-signal">// ninguna cobertura activa</div>
+                      ) : activeCoverageList.map(c => (
+                        <span key={c} className="font-mono text-[10px] uppercase bg-cyan2/20 text-cyan2 px-2 py-0.5 border border-cyan2/40">{c}</span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="font-mono text-sm text-offwhite/60">// sin turno activo</div>
+                )}
+              </div>
+
+              {/* Reportar siniestro */}
+              <div className="bg-offwhite hard-border-slate p-4">
+                <div className="font-serif text-base text-ink mb-3">¿Tuviste un siniestro hoy?</div>
+                <button
+                  onClick={() => setClaimOpen(true)}
+                  className="w-full bg-signal text-ink font-mono uppercase tracking-widest py-2.5 text-sm hover:bg-yellow-300 transition-colors"
+                >
+                  [ abrir claim por whatsapp ]
+                </button>
+              </div>
+
+              {/* Mis siniestros */}
+              <div className="bg-offwhite hard-border-slate p-4">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 mb-2">mis_siniestros</div>
+                <div className="space-y-2">
+                  {[
+                    {id: '#A28912', date: '2026-04-12', amount: 'USD 180'},
+                    {id: '#A28823', date: '2026-03-28', amount: 'USD 95'},
+                    {id: '#A28701', date: '2026-02-15', amount: 'USD 240'},
+                  ].map(s => (
+                    <div key={s.id} className="flex items-center justify-between font-mono text-[11px] text-ink/80">
+                      <span>{s.id} · {s.date}</span>
+                      <span className="flex items-center gap-1">{s.amount} <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer credit line */}
+      <div className="bg-ink border-t border-slate2 py-3 px-4 text-center">
+        <div className="font-mono text-[10px] text-slate-400">
+          Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com
+        </div>
+      </div>
+
+      <ClaimsModal open={claimOpen} onClose={() => setClaimOpen(false)} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

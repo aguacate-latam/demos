@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amparo — Cobertura activada por turno para tus contractors</title>
+<meta name="description" content="API de embedded insurance para plataformas gig LatAm. Tres endpoints, una semana de integración, cobertura en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: '#0B1220',
+        slate2: '#1F2937',
+        cyan2: '#22D3EE',
+        offwhite: '#F4F6FA',
+        signal: '#FACC15',
+      },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'monospace'],
+        serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: #F4F6FA; color: #0B1220; }
+  .hard-border-cyan { border: 1px solid #22D3EE; }
+  .hard-border-slate { border: 1px solid #374151; }
+  .card-hover { transition: all 0.2s ease; }
+  .card-hover:hover { transform: translateY(-2px); border-color: #22D3EE; }
+  .nav-sticky { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .code-line { white-space: pre; }
+  .anim-fade-up { animation: fadeUp 0.6s ease-out forwards; opacity: 0; }
+  @keyframes fadeUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+</head>
+<body class="font-serif">
+
+<!-- Nav -->
+<nav class="nav-sticky sticky top-0 z-50 bg-ink/95 border-b border-slate-700">
+  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="font-mono text-sm tracking-widest text-offwhite">AMPARO</div>
+    <div class="hidden md:flex items-center gap-6 text-offwhite/80">
+      <a href="#problema" class="font-mono text-xs hover:text-cyan2">#problema</a>
+      <a href="#como-funciona" class="font-mono text-xs hover:text-cyan2">#cómo-funciona</a>
+      <a href="#cobertura" class="font-mono text-xs hover:text-cyan2">#cobertura</a>
+      <a href="#integracion" class="font-mono text-xs hover:text-cyan2">#integración</a>
+      <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="font-mono text-xs text-cyan2 border border-cyan2/60 px-3 py-1 hover:bg-cyan2 hover:text-ink transition">Probar el producto →</a>
+    </div>
+    <button id="menu-btn" class="md:hidden text-offwhite font-mono text-sm" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">[ menú ]</button>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-ink border-t border-slate-700 px-6 py-4 space-y-2">
+    <a href="#problema" class="block font-mono text-xs text-offwhite/80">#problema</a>
+    <a href="#como-funciona" class="block font-mono text-xs text-offwhite/80">#cómo-funciona</a>
+    <a href="#cobertura" class="block font-mono text-xs text-offwhite/80">#cobertura</a>
+    <a href="#integracion" class="block font-mono text-xs text-offwhite/80">#integración</a>
+    <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="block font-mono text-xs text-cyan2">→ probar el producto</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="bg-ink text-offwhite py-20 md:py-32 px-6">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="font-mono text-xs uppercase tracking-[0.4em] text-cyan2 mb-8">// embedded insurance · LatAm gig</div>
+    <h1 class="font-serif font-bold text-4xl md:text-6xl leading-tight mb-6">Cobertura activada<br/>por turno para tus<br/><span class="italic font-normal">contractors.</span></h1>
+    <p class="font-serif italic text-lg md:text-xl text-offwhite/70 max-w-2xl mx-auto mb-12">Tres endpoints, una semana de integración, cobertura en producción para tus drivers, freelancers y profesionales del hogar.</p>
+    <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+      <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="bg-cyan2 text-ink font-mono uppercase tracking-widest text-sm px-6 py-3 hover:bg-offwhite transition w-full md:w-auto text-center">[ probar el producto ]</a>
+      <a href="#integracion" class="border border-cyan2 text-cyan2 font-mono uppercase tracking-widest text-sm px-6 py-3 hover:bg-cyan2 hover:text-ink transition w-full md:w-auto text-center">[ hablar con solutions ]</a>
+    </div>
+    <div class="font-mono text-[11px] text-offwhite/50 mt-8 tracking-wider">// disponible en 🇪🇨 EC · 🇺🇾 UY · 🇩🇴 DO · 🇨🇷 CR</div>
+  </div>
+</section>
+
+<!-- Problema -->
+<section id="problema" class="bg-offwhite text-ink py-20 md:py-28 px-6">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
+    <div>
+      <div class="font-mono text-xs uppercase tracking-[0.3em] text-ink/50 mb-6">// el problema</div>
+      <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight">El churn de drivers tiene un nombre: el accidente que no estaba cubierto.</h2>
+    </div>
+    <div class="space-y-6">
+      <p class="font-serif text-lg leading-relaxed">En LatAm, <strong>el 70% de los vehículos de trabajo no tiene seguro</strong>. El motorizado se cae, pierde dos semanas, deja la plataforma. La plataforma pierde el activo más caro: el contractor activo.</p>
+      <div class="hard-border-slate p-4 bg-white">
+        <div class="font-mono text-[11px] uppercase tracking-wider text-ink/60 space-y-1">
+          <div>// LatAm insurance penetration &lt; 5%</div>
+          <div>// LatAm gig workforce &gt; 8M</div>
+          <div>// avg driver churn / mes: 12-18%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cómo funciona -->
+<section id="como-funciona" class="bg-ink text-offwhite py-20 md:py-28 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="font-mono text-xs uppercase tracking-[0.3em] text-cyan2 mb-6">// cómo funciona</div>
+    <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight mb-12 max-w-3xl">Una API. Tres endpoints. Cuatro países.</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Code block — ocupa 2 cols -->
+      <div class="md:col-span-2 bg-slate2 hard-border-cyan p-5 card-hover">
+        <div class="font-mono text-[11px] uppercase tracking-wider text-cyan2 mb-3">// snippet</div>
+        <pre class="font-mono text-xs md:text-sm text-offwhite leading-relaxed overflow-x-auto"><code>POST /shifts/start
+{
+  "contractor_id": "ctr_8a92f",
+  "shift_duration_min": 480,
+  "coverage_tier": "accidente_personal+vida"
+}
+
+→ 200 OK
+{
+  "coverage_id": "cov_a2891f",
+  "active_until": "2026-05-06T23:00:00Z"
+}</code></pre>
+      </div>
+
+      <div class="bg-slate2 hard-border-slate p-5 card-hover flex flex-col justify-between">
+        <div>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="1.5" class="mb-3">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          <div class="font-mono text-xs uppercase tracking-wider text-cyan2 mb-2">// claims</div>
+          <h3 class="font-serif text-xl font-semibold mb-2">Claim por chat</h3>
+          <p class="font-serif text-sm text-offwhite/70">El contractor abre WhatsApp y manda foto + descripción. Un agente IA con visión hace triage en minutos.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate2 hard-border-slate p-5 card-hover">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FACC15" stroke-width="1.5" class="mb-3">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+          <path d="M12 6v2m0 8v2"/>
+        </svg>
+        <div class="font-mono text-xs uppercase tracking-wider text-signal mb-2">// payout</div>
+        <h3 class="font-serif text-xl font-semibold mb-2">Pago en horas</h3>
+        <p class="font-serif text-sm text-offwhite/70">Vía rail local — Sinpe Móvil 🇨🇷, BCU 🇺🇾, ACH RD 🇩🇴, transferencia USD 🇪🇨.</p>
+      </div>
+
+      <div class="bg-slate2 hard-border-slate p-5 card-hover">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="1.5" class="mb-3">
+          <rect x="3" y="6" width="18" height="12" rx="0"/>
+          <path d="M7 12h10M12 9v6"/>
+        </svg>
+        <div class="font-mono text-xs uppercase tracking-wider text-cyan2 mb-2">// dashboard</div>
+        <h3 class="font-serif text-xl font-semibold mb-2">Toggle por país</h3>
+        <p class="font-serif text-sm text-offwhite/70">Activa coberturas por categoría de contractor y por país desde un solo dashboard. En vivo.</p>
+      </div>
+
+      <div class="md:col-span-2 bg-slate2 hard-border-slate p-5 card-hover flex items-center justify-between">
+        <div>
+          <div class="font-mono text-xs uppercase tracking-wider text-offwhite/60 mb-2">// integración promedio</div>
+          <div class="font-mono text-3xl md:text-4xl text-cyan2">5–7 días</div>
+        </div>
+        <div class="text-right">
+          <div class="font-mono text-xs uppercase tracking-wider text-offwhite/60 mb-2">// claim ratio típico</div>
+          <div class="font-mono text-3xl md:text-4xl text-signal">2–4%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cobertura -->
+<section id="cobertura" class="bg-offwhite text-ink py-20 md:py-28 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="font-mono text-xs uppercase tracking-[0.3em] text-ink/50 mb-6">// lo que cubrimos</div>
+    <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight mb-12 max-w-3xl">Tres coberturas. Una API. Per-shift pricing.</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="hard-border-slate p-6 bg-white card-hover">
+        <div class="font-mono text-xs uppercase tracking-widest text-cyan2 mb-3">accidente_personal</div>
+        <h3 class="font-serif text-2xl font-semibold mb-3">Accidente personal</h3>
+        <p class="font-serif text-sm text-ink/70 mb-6">Cubre lesión durante turno activo. Reembolso médico + indemnización por días no trabajados.</p>
+        <div class="font-mono text-[11px] text-ink/50 border-t border-ink/20 pt-3">$ por póliza · take rate transparente</div>
+      </div>
+
+      <div class="hard-border-slate p-6 bg-white card-hover">
+        <div class="font-mono text-xs uppercase tracking-widest text-cyan2 mb-3">vida_simple</div>
+        <h3 class="font-serif text-2xl font-semibold mb-3">Vida simple</h3>
+        <p class="font-serif text-sm text-ink/70 mb-6">Suma asegurada para la familia del contractor en caso de fallecimiento por accidente. Sin examen médico.</p>
+        <div class="font-mono text-[11px] text-ink/50 border-t border-ink/20 pt-3">$ por póliza · take rate transparente</div>
+      </div>
+
+      <div class="hard-border-slate p-6 bg-white card-hover">
+        <div class="font-mono text-xs uppercase tracking-widest text-cyan2 mb-3">hospitalizacion_corta</div>
+        <h3 class="font-serif text-2xl font-semibold mb-3">Hospitalización corta</h3>
+        <p class="font-serif text-sm text-ink/70 mb-6">Hasta 5 días de internamiento + ingreso protegido. Activable como upgrade del plan base.</p>
+        <div class="font-mono text-[11px] text-ink/50 border-t border-ink/20 pt-3">$ por póliza · take rate transparente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Integración -->
+<section id="integracion" class="bg-ink text-offwhite py-20 md:py-28 px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="font-mono text-xs uppercase tracking-[0.3em] text-cyan2 mb-6">// integration</div>
+    <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight mb-12">Para tu equipo de ingeniería.</h2>
+
+    <div class="space-y-8">
+      <div class="grid grid-cols-[40px_1fr] gap-6 items-start">
+        <div class="font-mono text-2xl text-cyan2 font-bold">01</div>
+        <div>
+          <h3 class="font-serif text-xl font-semibold mb-3">Instala el SDK</h3>
+          <pre class="font-mono text-xs md:text-sm bg-slate2 hard-border-slate p-4 overflow-x-auto"><code>npm install amparo-sdk
+
+import { Amparo } from 'amparo-sdk';
+const client = new Amparo({ apiKey: process.env.AMPARO_KEY });</code></pre>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-[40px_1fr] gap-6 items-start">
+        <div class="font-mono text-2xl text-cyan2 font-bold">02</div>
+        <div>
+          <h3 class="font-serif text-xl font-semibold mb-3">Activa cobertura por turno</h3>
+          <pre class="font-mono text-xs md:text-sm bg-slate2 hard-border-slate p-4 overflow-x-auto"><code>const coverage = await client.shifts.start({
+  contractor_id: driver.id,
+  shift_duration_min: 480,
+  coverage_tier: 'accidente_personal+vida',
+});</code></pre>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-[40px_1fr] gap-6 items-start">
+        <div class="font-mono text-2xl text-cyan2 font-bold">03</div>
+        <div>
+          <h3 class="font-serif text-xl font-semibold mb-3">Recibe webhooks de claims</h3>
+          <pre class="font-mono text-xs md:text-sm bg-slate2 hard-border-slate p-4 overflow-x-auto"><code>app.post('/webhooks/amparo', (req, res) => {
+  const { event, claim } = req.body;
+  if (event === 'claim.approved') notifyContractor(claim);
+});</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="font-mono text-sm text-cyan2 hover:underline">→ ver el demo en vivo</a>
+    </div>
+  </div>
+</section>
+
+<!-- Disponible en -->
+<section class="bg-offwhite text-ink py-20 md:py-28 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="font-mono text-xs uppercase tracking-[0.3em] text-ink/50 mb-6">// disponible en</div>
+    <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight mb-12 max-w-3xl">Cuatro países. Cuatro reguladores. Una API.</h2>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="hard-border-slate p-5 bg-white card-hover">
+        <div class="text-4xl mb-3">🇪🇨</div>
+        <div class="font-serif text-xl font-semibold mb-1">Ecuador</div>
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink/50 mb-3">SCVS · USD oficial</div>
+        <div class="font-mono text-[11px] text-ink/70">Resolución JPRF-S-2025-0152 abrió el registro insurtech.</div>
+      </div>
+      <div class="hard-border-slate p-5 bg-white card-hover">
+        <div class="text-4xl mb-3">🇺🇾</div>
+        <div class="font-serif text-xl font-semibold mb-1">Uruguay</div>
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink/50 mb-3">BCU · BSE partner</div>
+        <div class="font-mono text-[11px] text-ink/70">Hub fintech LatAm — Mvd 7ª ciudad startup más activa.</div>
+      </div>
+      <div class="hard-border-slate p-5 bg-white card-hover">
+        <div class="text-4xl mb-3">🇩🇴</div>
+        <div class="font-serif text-xl font-semibold mb-1">Rep. Dominicana</div>
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink/50 mb-3">Sup. Seguros · ACH RD</div>
+        <div class="font-mono text-[11px] text-ink/70">Penetración móvil &gt;85% · informalidad ~60%.</div>
+      </div>
+      <div class="hard-border-slate p-5 bg-white card-hover">
+        <div class="text-4xl mb-3">🇨🇷</div>
+        <div class="font-serif text-xl font-semibold mb-1">Costa Rica</div>
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink/50 mb-3">SUGESE · Sinpe Móvil</div>
+        <div class="font-mono text-[11px] text-ink/70">Pagos en tiempo real desde 2015. Hub tech CA.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA final -->
+<section class="bg-ink text-offwhite py-24 md:py-32 px-6">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="font-serif font-bold text-3xl md:text-5xl leading-tight mb-8">Una semana de integración.<br/><span class="italic">Cobertura mañana.</span></h2>
+    <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="inline-block bg-cyan2 text-ink font-mono uppercase tracking-widest text-sm px-8 py-4 hover:bg-offwhite transition">[ probar el producto ]</a>
+    <div class="font-mono text-[11px] text-offwhite/50 mt-8 tracking-wider">// solutions@amparo.app</div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-ink text-offwhite border-t border-slate-700 py-10 px-6">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="font-mono text-sm tracking-widest">AMPARO</div>
+    <div class="flex items-center gap-6">
+      <a href="https://aguacate-demos.pages.dev/aguacate-008-seguros-embebidos-plataformas-gig/" class="font-mono text-xs text-cyan2 hover:underline">→ ver el demo</a>
+      <span class="font-mono text-[10px] text-offwhite/40">© 2026</span>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto mt-6 font-mono text-[10px] text-offwhite/40 text-center">
+    Amparo es un demo conceptual — no es un producto de seguros real.
+  </div>
+  <div class="max-w-6xl mx-auto mt-3 font-mono text-[10px] text-slate-500 text-center">
+    Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com
+  </div>
+</footer>
+
+</body>
+</html>
