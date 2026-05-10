@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cresta — Cuenta multi-moneda para PyMEs exportadoras LatAm</title>
+<meta name="description" content="Recibe USD y EUR onshore. Convierte cuando el rate te conviene. Paga a tus proveedores por Pix, SPEI o CCE — todo desde una sola cuenta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'ice': '#F4F6F8',
+        'navy': '#0F2748',
+        'navy-soft': '#1A3760',
+        'silver': '#B8C5D1',
+        'signal': '#FACC15',
+        'signal-deep': '#EAB308',
+      },
+      fontFamily: {
+        'display': ['Tinos', 'Recoleta', 'Georgia', 'serif'],
+        'sans': ['DM Sans', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'card': '0 1px 3px rgba(15, 39, 72, 0.06), 0 4px 12px rgba(15, 39, 72, 0.04)',
+        'hover': '0 4px 12px rgba(15, 39, 72, 0.10), 0 12px 32px rgba(15, 39, 72, 0.08)',
+      }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: #F4F6F8; color: #0F172A; }
+  h1, h2, h3 { font-family: 'Tinos', 'Recoleta', Georgia, serif; letter-spacing: -0.02em; }
+  .highlight-yellow { background: linear-gradient(180deg, transparent 60%, rgba(250, 204, 21, 0.35) 60%); padding: 0 2px; }
+  .mockup-tilt { transform: perspective(1200px) rotateY(-6deg) rotateX(3deg); transition: transform 0.4s ease; }
+  .mockup-tilt:hover { transform: perspective(1200px) rotateY(-2deg) rotateX(1deg); }
+  .cta-button { transition: all 0.2s ease; }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(15, 39, 72, 0.15); }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] summary svg { transform: rotate(180deg); }
+  details summary svg { transition: transform 0.2s ease; }
+  .ticker { animation: tick 30s linear infinite; }
+  @keyframes tick { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-ice/95 backdrop-blur-sm border-b border-slate-200/60">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="#" class="font-display text-2xl font-bold text-navy tracking-tight">Cresta</a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+      <a href="#como-funciona" class="hover:text-navy transition">Cómo funciona</a>
+      <a href="#contadora" class="hover:text-navy transition">Para tu contadora</a>
+      <a href="#testimonios" class="hover:text-navy transition">Clientes</a>
+      <a href="#faq" class="hover:text-navy transition">FAQ</a>
+    </nav>
+    <a href="https://aguacate-demos.pages.dev/aguacate-010-cuenta-multimoneda-pymes-exportadoras/" class="cta-button inline-flex items-center gap-2 bg-signal text-navy font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-signal-deep">
+      Empieza gratis
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="max-w-7xl mx-auto px-6 pt-16 md:pt-24 pb-16 md:pb-24">
+  <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+    <div class="md:col-span-7">
+      <p class="text-xs uppercase tracking-widest text-slate-500 mb-6 font-semibold">Para PyMEs exportadoras LatAm</p>
+      <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-navy leading-[1.05] mb-8">
+        Tu plata exportada <span class="highlight-yellow">no tiene que perder</span> 4-8% cada vez que llega.
+      </h1>
+      <p class="text-lg md:text-xl text-slate-600 leading-relaxed mb-8 max-w-2xl">
+        Recibe USD y EUR onshore, convierte cuando el rate te conviene, paga a tus proveedores por Pix, SPEI o CCE — todo desde una sola cuenta empresarial. Sin sucursales, sin SWIFT escondido, sin esperar 5 días.
+      </p>
+      <div class="flex flex-wrap items-center gap-4 mb-6">
+        <a href="https://aguacate-demos.pages.dev/aguacate-010-cuenta-multimoneda-pymes-exportadoras/" class="cta-button inline-flex items-center gap-2 bg-signal text-navy font-semibold text-base px-7 py-3.5 rounded-lg hover:bg-signal-deep">
+          Empieza gratis →
+        </a>
+        <a href="#como-funciona" class="cta-button inline-flex items-center gap-2 border border-navy text-navy font-semibold text-base px-7 py-3.5 rounded-lg hover:bg-navy hover:text-white">
+          Ver cómo funciona
+        </a>
+      </div>
+      <p class="text-xs text-slate-500">Onboarding KYB en 48h · Sin compromiso anual · Soporte en español</p>
+    </div>
+
+    <!-- Hero mockup -->
+    <div class="md:col-span-5 hidden md:block">
+      <div class="mockup-tilt bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+        <div class="bg-navy text-white px-5 py-4 flex items-center justify-between">
+          <span class="font-display text-lg font-bold">Cresta</span>
+          <span class="text-xs text-white/60">Dashboard</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-ice rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">USD</p>
+              <p class="font-display text-xl text-navy font-bold mt-1">$48,210</p>
+              <p class="text-[10px] text-emerald-600 mt-0.5">+ $3,210 esta semana</p>
+            </div>
+            <div class="bg-ice rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">EUR</p>
+              <p class="font-display text-xl text-navy font-bold mt-1">€12,640</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">parqueado</p>
+            </div>
+            <div class="bg-ice rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">PEN</p>
+              <p class="font-display text-xl text-navy font-bold mt-1">S/127,400</p>
+              <p class="text-[10px] text-emerald-600 mt-0.5">+ S/8,300 hoy</p>
+            </div>
+            <div class="bg-ice rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">MXN</p>
+              <p class="font-display text-xl text-navy font-bold mt-1">$32,180</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">sin movimiento</p>
+            </div>
+          </div>
+          <div class="border-2 border-signal rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] uppercase tracking-wider bg-signal text-navy font-bold px-2 py-0.5 rounded">Wire entrante</span>
+              <span class="text-[10px] text-slate-500">hace 2h</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-1">Berliner Kaffeerösterei · INV-042</p>
+            <p class="font-display text-2xl text-navy font-bold mb-3">USD 12,400.00</p>
+            <button class="w-full bg-signal text-navy text-sm font-semibold py-2 rounded-lg">Convertir ahora →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STAT BAR -->
+<section class="bg-navy text-white py-12 md:py-16">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div>
+      <p class="font-display text-4xl md:text-5xl text-signal font-bold mb-2">0.7%</p>
+      <p class="text-sm text-white/70">FX spread promedio</p>
+    </div>
+    <div>
+      <p class="font-display text-4xl md:text-5xl text-signal font-bold mb-2">48h</p>
+      <p class="text-sm text-white/70">KYB completo</p>
+    </div>
+    <div>
+      <p class="font-display text-4xl md:text-5xl text-signal font-bold mb-2">&lt;5min</p>
+      <p class="text-sm text-white/70">Wire onshore</p>
+    </div>
+    <div>
+      <p class="font-display text-4xl md:text-5xl text-signal font-bold mb-2">4 rails</p>
+      <p class="text-sm text-white/70">Pix · SPEI · CCE · WebPay</p>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como-funciona" class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+  <div class="mb-12 md:mb-16 max-w-3xl">
+    <p class="text-xs uppercase tracking-widest text-slate-500 mb-4 font-semibold">El producto</p>
+    <h2 class="font-display text-4xl md:text-5xl font-bold text-navy leading-tight">
+      Tres movimientos. Cero comisiones escondidas.
+    </h2>
+  </div>
+
+  <div class="grid md:grid-cols-12 gap-6">
+    <!-- Card 1 (5 cols) -->
+    <div class="md:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-card p-8 md:p-10 hover:border-navy transition-all">
+      <p class="font-display text-7xl text-signal font-bold mb-4">1</p>
+      <h3 class="font-display text-2xl text-navy font-bold mb-4">Recibe USD/EUR onshore</h3>
+      <p class="text-slate-600 leading-relaxed">
+        Tu comprador europeo o estadounidense te paga vía wire a una cuenta USD onshore. El dinero llega y se queda en USD hasta que tú decidas moverlo. Sin conversión forzada.
+      </p>
+    </div>
+
+    <!-- Card 2 (7 cols) -->
+    <div class="md:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-card p-8 md:p-10 hover:border-navy transition-all">
+      <p class="font-display text-7xl text-signal font-bold mb-4">2</p>
+      <h3 class="font-display text-2xl text-navy font-bold mb-4">Convierte al rate que te conviene</h3>
+      <p class="text-slate-600 leading-relaxed mb-6">
+        Ves el rate de mercado público + el spread Cresta + el neto a recibir antes de hacer click. El agente IA te sugiere cuándo conviene esperar y cuándo conviene convertir, basándose en la volatilidad del corredor (USD/PEN, USD/MXN, USD/BRL, USD/CLP).
+      </p>
+      <div class="bg-ice rounded-xl p-4 inline-block">
+        <p class="text-xs text-slate-500 mb-1">USD/PEN · Rate sugerido</p>
+        <p class="font-display text-3xl text-navy font-bold">3.764 <span class="text-signal text-sm">↑ convertir</span></p>
+      </div>
+    </div>
+
+    <!-- Card 3 (full width) -->
+    <div class="md:col-span-12 bg-white rounded-2xl border border-slate-200 shadow-card p-8 md:p-10 hover:border-navy transition-all">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <p class="font-display text-7xl text-signal font-bold mb-4">3</p>
+          <h3 class="font-display text-2xl text-navy font-bold mb-4">Paga a tus proveedores en moneda local sin SWIFT</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Desde el mismo dashboard pagas a tus productores, talleres o suppliers domésticos vía Pix en Brasil, SPEI en México, CCE en Perú o WebPay en Chile — todo en tiempo real, sin SWIFT intermediario que se quede USD 35 por operación.
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-3 md:gap-6 flex-wrap">
+          <div class="bg-ice rounded-xl px-5 py-3 border border-slate-200">
+            <span class="font-display font-bold text-navy text-sm md:text-base">🇧🇷 Pix</span>
+          </div>
+          <span class="text-signal text-2xl">→</span>
+          <div class="bg-ice rounded-xl px-5 py-3 border border-slate-200">
+            <span class="font-display font-bold text-navy text-sm md:text-base">🇲🇽 SPEI</span>
+          </div>
+          <span class="text-signal text-2xl">→</span>
+          <div class="bg-ice rounded-xl px-5 py-3 border border-slate-200">
+            <span class="font-display font-bold text-navy text-sm md:text-base">🇵🇪 CCE</span>
+          </div>
+          <span class="text-signal text-2xl">→</span>
+          <div class="bg-ice rounded-xl px-5 py-3 border border-slate-200">
+            <span class="font-display font-bold text-navy text-sm md:text-base">🇨🇱 WebPay</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA TU CONTADORA -->
+<section id="contadora" class="bg-white border-y border-slate-200">
+  <div class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+    <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-start">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-slate-500 mb-4 font-semibold">Reconciliación automática</p>
+        <h2 class="font-display text-4xl md:text-5xl font-bold text-navy leading-tight mb-6">
+          Tu contadora también va a quererte.
+        </h2>
+        <p class="text-lg text-slate-600 leading-relaxed mb-10">
+          Reconciliación automática + retenciones detectadas + comprobantes generados — todo lo que antes vivía en 9 columnas de Excel ahora vive en un dashboard que se actualiza solo.
+        </p>
+
+        <div class="space-y-8">
+          <div>
+            <h4 class="font-display text-lg font-bold text-navy mb-2">Reconciliación automática</h4>
+            <p class="text-slate-600">Cada wire entrante se matchea con la factura correspondiente. Lo que demoraba 3 horas sale en 4 minutos.</p>
+          </div>
+          <div>
+            <h4 class="font-display text-lg font-bold text-navy mb-2">Retenciones cross-border detectadas</h4>
+            <p class="text-slate-600">SUNAT, SAT, Receita Federal, SII — el sistema calcula la retención que aplica y genera el comprobante.</p>
+          </div>
+          <div>
+            <h4 class="font-display text-lg font-bold text-navy mb-2">Export a tu software contable</h4>
+            <p class="text-slate-600">Integración nativa con Contpaqi, Aspel, Bind ERP, Conta Azul. Cierre mensual en un click.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-ice rounded-2xl p-8 border border-slate-200">
+        <div class="text-center mb-8">
+          <p class="font-display text-7xl md:text-8xl text-navy font-bold leading-none">94%</p>
+          <p class="text-sm uppercase tracking-wider text-slate-500 font-semibold mt-3">facturas reconciliadas este mes</p>
+        </div>
+        <div class="space-y-3">
+          <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-between border border-slate-200">
+            <span class="text-sm text-slate-700">37 wires entrantes</span>
+            <span class="text-emerald-600 text-sm font-semibold">✓ 35 reconciliados</span>
+          </div>
+          <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-between border border-slate-200">
+            <span class="text-sm text-slate-700">12 pagos a proveedores</span>
+            <span class="text-emerald-600 text-sm font-semibold">✓ Completados</span>
+          </div>
+          <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-between border border-slate-200">
+            <span class="text-sm text-slate-700">Tiempo ahorrado</span>
+            <span class="text-navy text-sm font-bold">~11 horas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section id="testimonios" class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+  <div class="mb-12 md:mb-16 max-w-3xl">
+    <p class="text-xs uppercase tracking-widest text-slate-500 mb-4 font-semibold">Quiénes ya usan Cresta</p>
+    <h2 class="font-display text-4xl md:text-5xl font-bold text-navy leading-tight">
+      PyMEs reales. Wires reales. Sin spread escondido.
+    </h2>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-full bg-navy text-signal flex items-center justify-center font-display font-bold text-lg">CV</div>
+        <div>
+          <p class="font-display font-bold text-navy">Camila Vásquez</p>
+          <p class="text-xs text-slate-500">CFO · Café Especialidad Andes · 🇵🇪</p>
+        </div>
+      </div>
+      <p class="text-slate-700 italic leading-relaxed">"Exporto a Berlín y Tokio. Antes perdía 4% en cada wire sin entender por qué. Ahora veo el spread, decido cuándo convertir y mi contadora dejó de odiarme."</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-full bg-navy text-signal flex items-center justify-center font-display font-bold text-lg">FO</div>
+        <div>
+          <p class="font-display font-bold text-navy">Felipe Ortiz</p>
+          <p class="text-xs text-slate-500">Dueño · Viña Cordillera · 🇨🇱</p>
+        </div>
+      </div>
+      <p class="text-slate-700 italic leading-relaxed">"Recibo de 12 países en USD y EUR. Cresta me dejó parquear los saldos hasta que el peso chileno se mueve a mi favor. Ahorré USD 18 mil en 6 meses."</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-full bg-navy text-signal flex items-center justify-center font-display font-bold text-lg">MS</div>
+        <div>
+          <p class="font-display font-bold text-navy">María Sandoval</p>
+          <p class="text-xs text-slate-500">CEO · Manufactura Textil Tres Lunas · 🇲🇽</p>
+        </div>
+      </div>
+      <p class="text-slate-700 italic leading-relaxed">"Vendo a marcas en LA y Berlín. Antes Citibanamex me retenía 5 días los wires. Cresta los libera el mismo día y los reconcilia con la factura sola."</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="bg-white border-y border-slate-200">
+  <div class="max-w-4xl mx-auto px-6 py-20 md:py-28">
+    <h2 class="font-display text-4xl md:text-5xl font-bold text-navy leading-tight mb-12">Lo que más nos preguntan</h2>
+
+    <div class="space-y-4">
+      <details class="bg-ice rounded-xl px-6 py-5 border border-slate-200">
+        <summary class="flex items-center justify-between cursor-pointer">
+          <span class="font-display font-bold text-navy text-lg">¿Necesito licencia para recibir USD en mi país?</span>
+          <svg class="w-5 h-5 text-navy flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </summary>
+        <p class="text-slate-600 leading-relaxed mt-4">No. Cresta opera bajo licencias locales (Ley Fintech 2.0 en MX, ISFPE en CL, EEDE en PE, BCB en BR). Tú abres una cuenta empresarial; nosotros nos encargamos del compliance.</p>
+      </details>
+
+      <details class="bg-ice rounded-xl px-6 py-5 border border-slate-200">
+        <summary class="flex items-center justify-between cursor-pointer">
+          <span class="font-display font-bold text-navy text-lg">¿Cuánto cobran de FX spread?</span>
+          <svg class="w-5 h-5 text-navy flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </summary>
+        <p class="text-slate-600 leading-relaxed mt-4">Entre 0.5% y 1.2% según volumen mensual. Ves el rate público de mercado + el spread + el neto antes de cada conversión. Sin tarifas escondidas.</p>
+      </details>
+
+      <details class="bg-ice rounded-xl px-6 py-5 border border-slate-200">
+        <summary class="flex items-center justify-between cursor-pointer">
+          <span class="font-display font-bold text-navy text-lg">¿Cuánto demora abrir cuenta?</span>
+          <svg class="w-5 h-5 text-navy flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </summary>
+        <p class="text-slate-600 leading-relaxed mt-4">48 horas con KYB digital. Necesitas identificación fiscal (RFC en MX, CNPJ en BR, RUT en CL o RUC en PE), estatutos y último balance.</p>
+      </details>
+
+      <details class="bg-ice rounded-xl px-6 py-5 border border-slate-200">
+        <summary class="flex items-center justify-between cursor-pointer">
+          <span class="font-display font-bold text-navy text-lg">¿Pueden integrarse con mi software contable?</span>
+          <svg class="w-5 h-5 text-navy flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </summary>
+        <p class="text-slate-600 leading-relaxed mt-4">Sí. Conexión nativa con Contpaqi, Aspel, Bind ERP, Conta Azul, Defontana. Si usas otro, hay export CSV y API.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="max-w-5xl mx-auto px-6 py-20 md:py-28 text-center">
+  <h2 class="font-display text-5xl md:text-6xl font-bold text-navy leading-tight mb-6">
+    Empieza a recibir tus wires sin perder plata.
+  </h2>
+  <p class="text-lg md:text-xl text-slate-600 mb-10">Abre tu cuenta en 48h. Sin compromiso anual.</p>
+  <a href="https://aguacate-demos.pages.dev/aguacate-010-cuenta-multimoneda-pymes-exportadoras/" class="cta-button inline-flex items-center gap-2 bg-signal text-navy font-bold text-lg px-10 py-4 rounded-xl hover:bg-signal-deep">
+    Empieza gratis →
+  </a>
+  <p class="text-xs text-slate-500 mt-6">Pregúntale a tu contadora antes de seguir confiando en tu banco.</p>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-navy text-white">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="grid md:grid-cols-4 gap-8 mb-12">
+      <div class="md:col-span-2">
+        <p class="font-display text-2xl font-bold mb-3">Cresta</p>
+        <p class="text-sm text-white/60 max-w-xs leading-relaxed">Cuenta empresarial multi-moneda para PyMEs exportadoras LatAm. Recibe USD/EUR onshore, convierte cuando el rate te conviene.</p>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-widest text-white/40 font-semibold mb-4">Producto</p>
+        <ul class="space-y-2 text-sm text-white/70">
+          <li><a href="#como-funciona" class="hover:text-signal transition">Cómo funciona</a></li>
+          <li><a href="#" class="hover:text-signal transition">Precios</a></li>
+          <li><a href="https://aguacate-demos.pages.dev/aguacate-010-cuenta-multimoneda-pymes-exportadoras/" class="hover:text-signal transition">Demo</a></li>
+          <li><a href="#" class="hover:text-signal transition">API</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-widest text-white/40 font-semibold mb-4">Recursos</p>
+        <ul class="space-y-2 text-sm text-white/70">
+          <li><a href="#contadora" class="hover:text-signal transition">Para tu contadora</a></li>
+          <li><a href="#testimonios" class="hover:text-signal transition">Casos de uso</a></li>
+          <li><a href="#faq" class="hover:text-signal transition">FAQ</a></li>
+          <li><a href="https://www.notion.so/35c95c8691d781919ef4c8f673176534" class="hover:text-signal transition">Ver cómo se construyó</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <p class="text-xs text-white/40">© 2026 Cresta · Cresta es un demo conceptual — no un producto financiero real.</p>
+      <p class="text-xs text-white/40">Idea original: <a href="https://aguacate-newsletter.beehiiv.com/" class="hover:text-signal transition">Aguacate newsletter — aguacate-newsletter.beehiiv.com</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
