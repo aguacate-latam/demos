@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Origen — Trazabilidad agrícola para cooperativas Mercosur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          sage: { 50: '#F2F5F1', 100: '#DEE6DC', 300: '#B6C5B2', 500: '#8FA68E', 700: '#5C7259', 900: '#3D4F3B' },
+          bark: { 50: '#F8F4EE', 100: '#E9DECC', 300: '#A48A6E', 500: '#705844', 700: '#4D3A28', 900: '#3D2E1E' },
+          cream: { 50: '#FBF6EA', 100: '#F5EBD8', 200: '#EFE0BF', 300: '#E4D0A0' },
+          amber2: { 300: '#E8C475', 500: '#D4A24E', 600: '#B0832F', 800: '#7A5A1E' },
+          terracotta: { 400: '#D88A7B', 500: '#C46B5C', 600: '#9C5346' },
+        },
+        fontFamily: {
+          display: ['Cormorant Garamond', 'Georgia', 'serif'],
+          body: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; background: #F5EBD8; color: #3D2E1E; }
+  .font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+  .farm-polygon { transition: fill 0.3s ease, opacity 0.3s ease; cursor: pointer; }
+  .farm-polygon:hover { opacity: 0.85; }
+  .toast-enter { animation: toastIn 0.25s ease-out forwards; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .map-polygon-animated { stroke-dasharray: 220; stroke-dashoffset: 220; animation: drawPath 1.5s ease-out forwards; }
+  @keyframes drawPath { to { stroke-dashoffset: 0; } }
+  .pulse-dot { animation: pulseDot 1.6s infinite; }
+  @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(212,162,78,0.6); } 70% { box-shadow: 0 0 0 8px rgba(212,162,78,0); } 100% { box-shadow: 0 0 0 0 rgba(212,162,78,0); } }
+  .chat-bubble-in { animation: bubbleIn 0.3s ease-out forwards; opacity: 0; transform: translateY(6px); }
+  @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+  .kpi-bounce { animation: kpiBounce 0.6s ease; }
+  @keyframes kpiBounce { 0% { transform: scale(1); } 35% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(61,46,30,0.18); border-radius: 4px; }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="min-h-screen">
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── Iconos SVG inline ────────────────────────────────────────────────────────
+const IconMap = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>);
+const IconBox = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>);
+const IconShield = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+const IconCash = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg>);
+const IconCheck = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>);
+const IconPin = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>);
+const IconArrow = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>);
+const IconLeaf = (p) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 014 13V8a5 5 0 015-5h7a4 4 0 014 4v3a7 7 0 01-7 7"/><path d="M2 22s2-3 9-9"/></svg>);
+
+// ─── Datos iniciales ──────────────────────────────────────────────────────────
+const initialFarms = [
+  { id: 1, name: 'João Silva', ha: 6, status: 'green', poly: '60,80 130,70 145,130 95,150 55,120' },
+  { id: 2, name: 'Carla Souza', ha: 4, status: 'green', poly: '160,60 220,55 235,105 195,135 165,110' },
+  { id: 3, name: 'Pedro Almeida', ha: 8, status: 'green', poly: '250,75 310,65 330,120 290,155 248,135' },
+  { id: 4, name: 'Roberto Lima', ha: 5, status: 'green', poly: '345,90 400,85 415,140 380,170 348,150' },
+  { id: 5, name: 'Ana Pereira', ha: 3, status: 'green', poly: '70,180 130,170 150,225 100,250 68,225' },
+  { id: 6, name: 'Miguel Costa', ha: 7, status: 'green', poly: '170,180 230,175 250,235 210,260 175,230' },
+  { id: 7, name: 'Sofia Rocha', ha: 5, status: 'green', poly: '270,180 325,180 345,230 310,265 273,240' },
+  { id: 8, name: 'Lucas Pinto', ha: 6, status: 'green', poly: '360,200 415,195 430,245 395,275 363,255' },
+  { id: 9, name: 'Tomás Vieira', ha: 4, status: 'green', poly: '60,275 120,265 138,320 90,345 55,320' },
+  { id: 10, name: 'Beatriz Dias', ha: 5, status: 'green', poly: '155,275 215,270 235,325 195,355 158,330' },
+  { id: 11, name: 'Henrique Melo', ha: 6, status: 'green', poly: '255,290 315,285 335,335 295,365 260,340' },
+  { id: 12, name: 'Júlia Brito', ha: 7, status: 'green', poly: '350,295 410,290 425,345 385,375 355,350' },
+  { id: 13, name: 'Rafael Cunha', ha: 4, status: 'green', poly: '70,365 130,355 148,410 100,435 65,410' },
+  { id: 14, name: 'Camila Barros', ha: 5, status: 'green', poly: '170,365 225,360 245,415 205,445 175,420' },
+  { id: 15, name: 'Eduardo Reis', ha: 8, status: 'green', poly: '270,375 330,370 350,425 305,455 275,430' },
+  { id: 16, name: 'Marcos Tavares', ha: 5, status: 'green', poly: '360,385 415,380 430,435 395,460 365,435' },
+  { id: 17, name: 'Patrícia Lopes', ha: 6, status: 'green', poly: '85,455 142,450 160,500 115,520 80,500' },
+  { id: 18, name: 'Felipe Cardoso', ha: 5, status: 'green', poly: '180,460 235,455 252,505 215,525 185,505' },
+  { id: 19, name: 'Renata Mota', ha: 4, status: 'yellow', poly: '90,560 150,555 168,605 120,625 85,605' },
+  { id: 20, name: 'Bruno Macedo', ha: 6, status: 'yellow', poly: '195,575 255,570 273,620 235,640 200,620' },
+  { id: 21, name: 'Diego Ramos', ha: 5, status: 'yellow', poly: '290,580 345,575 365,625 325,650 295,625' },
+  { id: 22, name: 'Larissa Nunes', ha: 4, status: 'yellow', poly: '380,585 435,580 450,630 410,655 385,635' },
+  { id: 23, name: 'Vinícius Aragão', ha: 6, status: 'yellow', poly: '60,650 120,645 138,695 90,715 55,695' },
+  { id: 24, name: 'Cristina Pires', ha: 7, status: 'yellow', poly: '155,665 215,660 233,715 195,740 158,720' },
+  { id: 25, name: 'Otávio Mendes', ha: 5, status: 'yellow', poly: '255,675 315,670 335,725 295,755 260,730' },
+  { id: 26, name: 'Helena Cruz', ha: 4, status: 'yellow', poly: '350,685 405,680 420,735 380,760 355,740' },
+  { id: 27, name: 'Iara Marques', ha: 5, status: 'red', poly: '85,740 140,735 158,790 110,815 75,790' },
+  { id: 28, name: 'Caio Vargas', ha: 4, status: 'red', poly: '180,755 235,750 252,805 215,825 185,805' },
+];
+
+const STATUS_FILL = { green: '#8FA68E', yellow: '#E8C475', red: '#C46B5C' };
+const STATUS_LABEL = { green: 'Verificado · eligible UE', yellow: 'Pendiente doc. local', red: 'No eligible UE' };
+
+// ─── Counter animado ──────────────────────────────────────────────────────────
+function useAnimatedCounter(target, duration = 1500, deps = []) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let frame, start;
+    const initial = value;
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const step = (ts) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setValue(Math.round(initial + (target - initial) * ease(progress)));
+      if (progress < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, ...deps]);
+  return value;
+}
+
+// ─── Componentes ──────────────────────────────────────────────────────────────
+function HeaderBar() {
+  return (
+    <header className="border-b border-stone-300/40 bg-cream-50/80 backdrop-blur">
+      <div className="max-w-[1480px] mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-bark-900 text-amber2-500 grid place-items-center">
+            <IconLeaf className="w-5 h-5" />
+          </div>
+          <div className="leading-tight">
+            <div className="font-display text-2xl text-bark-900 tracking-tight">Origen</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-bark-500">Trazabilidad de campo a puerto</div>
+          </div>
+        </div>
+        <div className="hidden md:flex items-center gap-6 text-sm text-bark-700">
+          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sage-500 pulse-dot"></span> En vivo</span>
+          <span>Cooperativa Cocamar · 🇧🇷 Brasil</span>
+          <div className="w-9 h-9 rounded-full bg-sage-100 text-sage-900 grid place-items-center font-medium">RG</div>
+        </div>
+        <div className="md:hidden text-xs text-bark-700">Cocamar · 🇧🇷</div>
+      </div>
+    </header>
+  );
+}
+
+function SidebarNav({ active }) {
+  const items = [
+    { key: 'mapa', label: 'Mapa de fincas', icon: IconMap, count: 28 },
+    { key: 'lotes', label: 'Lotes en preparación', icon: IconBox, count: 3 },
+    { key: 'eudr', label: 'Compliance EUDR', icon: IconShield, count: null },
+    { key: 'factoring', label: 'Factoring UE', icon: IconCash, count: null },
+  ];
+  return (
+    <nav className="w-full md:w-56 shrink-0 border-r border-stone-300/40 bg-cream-50/40 px-3 py-5">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-bark-500 px-3 mb-3">Operación</div>
+      <ul className="space-y-1">
+        {items.map((it) => {
+          const Ic = it.icon;
+          const on = active === it.key;
+          return (
+            <li key={it.key}>
+              <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${on ? 'bg-bark-900 text-cream-100' : 'text-bark-700 hover:bg-cream-200'}`}>
+                <Ic className="w-4 h-4 shrink-0" />
+                <span className="flex-1 text-left">{it.label}</span>
+                {it.count != null && (
+                  <span className={`text-[11px] tabular-nums ${on ? 'text-amber2-300' : 'text-bark-500'}`}>{it.count}</span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="mt-8 px-3">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-bark-500 mb-2">Cosecha activa</div>
+        <div className="text-bark-900 text-sm leading-relaxed">Café arábica</div>
+        <div className="text-bark-500 text-xs">Embarque 15-jun a Hamburgo</div>
+      </div>
+    </nav>
+  );
+}
+
+function KpiCard({ label, value, sub, highlight, bouncing }) {
+  return (
+    <div className={`rounded-xl border bg-cream-50 px-4 py-3 ${highlight ? 'border-amber2-500/60' : 'border-stone-300/50'}`}>
+      <div className="text-[10px] uppercase tracking-[0.16em] text-bark-500">{label}</div>
+      <div className={`font-display text-3xl text-bark-900 tabular-nums mt-1 ${bouncing ? 'kpi-bounce' : ''}`}>{value}</div>
+      {sub && <div className="text-[11px] text-bark-500 mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+function MapPanel({ farms, onFarmHover, hoveredFarm, newlyVerifiedId }) {
+  return (
+    <div className="rounded-2xl border border-stone-300/50 bg-cream-50 overflow-hidden flex-1 min-h-[420px] relative">
+      <div className="px-4 py-3 border-b border-stone-300/40 flex items-center justify-between">
+        <div>
+          <div className="font-display text-lg text-bark-900">Mapa de fincas — Cocamar</div>
+          <div className="text-[11px] text-bark-500">28 fincas · capa Mapbiomas + Global Forest Watch · actualizado hoy</div>
+        </div>
+        <div className="hidden md:flex items-center gap-3 text-[11px] text-bark-700">
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm" style={{background:STATUS_FILL.green}}></span> Verde</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm" style={{background:STATUS_FILL.yellow}}></span> Amarillo</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm" style={{background:STATUS_FILL.red}}></span> Rojo</span>
+        </div>
+      </div>
+      <svg viewBox="0 0 500 880" className="w-full h-[420px] md:h-[520px]" style={{background:'linear-gradient(180deg, #F2F5F1 0%, #FBF6EA 100%)'}}>
+        {/* Líneas de coordenadas estilizadas */}
+        {[100,200,300,400,500,600,700,800].map((y) => (
+          <line key={'h'+y} x1="0" y1={y} x2="500" y2={y} stroke="#3D2E1E" strokeOpacity="0.05" strokeWidth="1" strokeDasharray="2 6" />
+        ))}
+        {[100,200,300,400].map((x) => (
+          <line key={'v'+x} x1={x} y1="0" x2={x} y2="880" stroke="#3D2E1E" strokeOpacity="0.05" strokeWidth="1" strokeDasharray="2 6" />
+        ))}
+        {/* Polígonos de fincas */}
+        {farms.map((f) => (
+          <polygon
+            key={f.id}
+            points={f.poly}
+            className={`farm-polygon ${f.id === newlyVerifiedId ? 'map-polygon-animated' : ''}`}
+            fill={STATUS_FILL[f.status]}
+            fillOpacity={hoveredFarm === f.id ? 0.95 : 0.65}
+            stroke="#3D2E1E"
+            strokeOpacity={0.4}
+            strokeWidth={hoveredFarm === f.id ? 2 : 1}
+            onMouseEnter={() => onFarmHover(f.id)}
+            onMouseLeave={() => onFarmHover(null)}
+          />
+        ))}
+        {/* Pin del nuevo polígono */}
+        {newlyVerifiedId && farms.find(f=>f.id===newlyVerifiedId) && (() => {
+          const f = farms.find(ff=>ff.id===newlyVerifiedId);
+          const pts = f.poly.split(' ').map(p => p.split(',').map(Number));
+          const cx = pts.reduce((a,p)=>a+p[0],0)/pts.length;
+          const cy = pts.reduce((a,p)=>a+p[1],0)/pts.length;
+          return (
+            <g transform={`translate(${cx-10},${cy-22})`}>
+              <circle cx="10" cy="10" r="14" fill="#D4A24E" fillOpacity="0.25" />
+              <circle cx="10" cy="10" r="6" fill="#D4A24E" />
+            </g>
+          );
+        })()}
+      </svg>
+      {hoveredFarm && (
+        <div className="absolute top-16 right-4 bg-bark-900 text-cream-100 rounded-lg px-3 py-2 text-xs shadow-md max-w-[220px]">
+          <div className="font-display text-base">{farms.find(f=>f.id===hoveredFarm)?.name}</div>
+          <div className="opacity-80">{farms.find(f=>f.id===hoveredFarm)?.ha} ha · {STATUS_LABEL[farms.find(f=>f.id===hoveredFarm)?.status]}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LotePanel({ farms, onGenerateDDS, ddsState }) {
+  const greens = farms.filter(f => f.status === 'green').slice(0, 4);
+  const totalHa = greens.reduce((a,f) => a + f.ha, 0);
+  const tons = Math.round(totalHa * 5.9); // ~5.9t/ha café arábica supuesto demo
+  return (
+    <div className="rounded-2xl border border-stone-300/50 bg-cream-50">
+      <div className="px-4 py-3 border-b border-stone-300/40 flex items-center justify-between">
+        <div>
+          <div className="font-display text-lg text-bark-900">Lote en preparación · Embarque #1408</div>
+          <div className="text-[11px] text-bark-500">Buyer: Hamburg Coffee Co. · 🇩🇪 Alemania · Salida 15-jun</div>
+        </div>
+        <span className="text-[11px] px-2 py-1 rounded-full bg-sage-100 text-sage-900">EUDR-ready</span>
+      </div>
+      <div className="p-4 grid md:grid-cols-2 gap-4">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.16em] text-bark-500 mb-2">Fincas en este lote</div>
+          <ul className="space-y-1 text-sm">
+            {greens.map(f => (
+              <li key={f.id} className="flex items-center justify-between border-b border-stone-200/60 py-1.5">
+                <span className="text-bark-900">{f.name}</span>
+                <span className="text-bark-500 tabular-nums">{f.ha} ha</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center justify-between text-sm mt-3 pt-2 border-t border-stone-300">
+            <span className="text-bark-500">Total</span>
+            <span className="font-display text-2xl text-bark-900 tabular-nums">{tons} t</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="rounded-lg bg-bark-900 p-4 text-cream-100">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-amber2-300 mb-1">Declaración de Diligencia Debida</div>
+            <div className="font-display text-xl">EUDR · Reg. 2023/1115</div>
+            <div className="text-xs mt-1 opacity-80">Polígonos consolidados, satelital cruzado, listo para portal TRACES.</div>
+            <button
+              onClick={onGenerateDDS}
+              disabled={ddsState !== 'idle'}
+              className={`mt-3 w-full text-sm font-medium rounded-md px-4 py-2.5 transition flex items-center justify-center gap-2
+                ${ddsState === 'idle' ? 'bg-amber2-500 text-bark-900 hover:bg-amber2-300' : ddsState === 'loading' ? 'bg-amber2-500/60 text-bark-900 cursor-wait' : 'bg-sage-500 text-cream-50'}`}
+            >
+              {ddsState === 'idle' && (<><span>Generar DDS</span><IconArrow className="w-4 h-4"/></>)}
+              {ddsState === 'loading' && (<><span className="w-3 h-3 rounded-full border-2 border-bark-900 border-t-transparent animate-spin"></span><span>Generando…</span></>)}
+              {ddsState === 'ready' && (<><IconCheck className="w-4 h-4"/><span>Listo · Descargar PDF</span></>)}
+            </button>
+          </div>
+          <div className="rounded-lg border border-amber2-500/40 bg-cream-50 p-4">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-bark-500 mb-1">Trade finance partner</div>
+            <div className="text-sm text-bark-900 leading-relaxed">Adelanto sobre receivables UE a 30 días, tasa preferencial sobre lotes con DDS firmado.</div>
+            <button className="mt-2 text-xs text-bark-700 underline underline-offset-4 decoration-amber2-500/60 hover:text-bark-900">Solicitar adelanto →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FarmerPhone({ step, onMap, onMapped, mappedAnimating }) {
+  return (
+    <div className="mx-auto w-full max-w-[380px] bg-bark-900 rounded-[44px] p-3 shadow-2xl">
+      <div className="bg-cream-50 rounded-[32px] overflow-hidden flex flex-col h-[680px]">
+        {/* Notch / status bar */}
+        <div className="bg-bark-900 text-cream-100 text-[10px] flex justify-between px-6 py-1.5">
+          <span>9:41</span>
+          <span className="opacity-70">●●● 5G</span>
+        </div>
+        {/* Chat header */}
+        <div className="bg-sage-500 text-cream-50 px-4 py-3 flex items-center gap-3">
+          <button className="text-cream-50/80">←</button>
+          <div className="w-9 h-9 rounded-full bg-bark-900 grid place-items-center text-amber2-300">
+            <IconLeaf className="w-4 h-4"/>
+          </div>
+          <div className="flex-1">
+            <div className="font-medium">Cocamar — Comercial</div>
+            <div className="text-[10px] opacity-80">en línea</div>
+          </div>
+        </div>
+        {/* Chat body */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-cream-100">
+          {/* Bubble 1 — incoming */}
+          <div className="flex">
+            <div className="bg-cream-50 text-bark-900 rounded-2xl rounded-tl-sm px-3 py-2 text-sm max-w-[80%] shadow-sm">
+              Hola Mariana 👋 Mapea tu finca para el embarque a Alemania del 15-jun. Te paga premium si pasa la verificación.
+            </div>
+          </div>
+          {step >= 1 && (
+            <div className="flex chat-bubble-in">
+              <div className="bg-cream-50 text-bark-900 rounded-2xl rounded-tl-sm px-3 py-2 text-sm max-w-[80%] shadow-sm space-y-2">
+                <div className="text-[11px] text-bark-500">Origen · Mapeo de finca</div>
+                <button
+                  onClick={onMap}
+                  disabled={step >= 2}
+                  className={`w-full text-sm rounded-lg px-3 py-2 transition flex items-center justify-center gap-2
+                    ${step < 2 ? 'bg-amber2-500 text-bark-900 hover:bg-amber2-300' : 'bg-sage-500 text-cream-50'}`}
+                >
+                  {step < 2 ? (<><IconPin className="w-4 h-4"/><span>Mapear ahora</span></>) : (<><IconCheck className="w-4 h-4"/><span>Polígono enviado</span></>)}
+                </button>
+              </div>
+            </div>
+          )}
+          {/* Bubble — polygon preview after mapping */}
+          {step >= 2 && (
+            <div className="flex justify-end chat-bubble-in">
+              <div className="bg-sage-500 text-cream-50 rounded-2xl rounded-tr-sm px-2.5 py-2 text-xs max-w-[80%] shadow-sm">
+                <svg viewBox="0 0 200 120" className="w-full h-24 rounded-md bg-cream-50/20">
+                  <polygon
+                    points="40,30 130,25 165,75 100,100 30,75"
+                    fill="#F5EBD8"
+                    fillOpacity="0.9"
+                    stroke="#3D2E1E"
+                    strokeWidth="2"
+                    className={mappedAnimating ? 'map-polygon-animated' : ''}
+                  />
+                  <circle cx="100" cy="60" r="3" fill="#D4A24E" />
+                </svg>
+                <div className="mt-1.5 text-[11px] opacity-90">Polígono · 4 ha · Sítio Bom Jardim</div>
+              </div>
+            </div>
+          )}
+          {/* Bubble — verification result */}
+          {step >= 3 && (
+            <div className="flex chat-bubble-in">
+              <div className="bg-cream-50 text-bark-900 rounded-2xl rounded-tl-sm px-3 py-3 text-sm max-w-[85%] shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-sage-500"></span>
+                  <span className="font-medium">Verificación: verde</span>
+                </div>
+                <div className="text-[12px] mt-1.5 leading-relaxed">
+                  Tu finca <span className="font-medium">Sítio Bom Jardim</span> está dentro de zona libre de deforestación post-2020. Eligible para el embarque a Alemania.
+                </div>
+                <div className="text-[10px] mt-2 text-bark-500">Cruce: Mapbiomas v9 + Global Forest Watch · 14:32 BRT</div>
+              </div>
+            </div>
+          )}
+          {step >= 4 && (
+            <div className="flex chat-bubble-in">
+              <div className="bg-cream-50 text-bark-900 rounded-2xl rounded-tl-sm px-3 py-3 text-sm max-w-[85%] shadow-sm">
+                <div className="text-[11px] uppercase tracking-[0.16em] text-bark-500">Premium aplicado</div>
+                <div className="font-display text-2xl text-bark-900 tabular-nums mt-0.5">+ $340 USD</div>
+                <div className="text-[12px] mt-1 text-bark-700">+12% sobre tonelada · pagado al liquidar el embarque · cuenta en USD</div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="border-t border-stone-200 bg-cream-50 px-3 py-2 flex items-center gap-2">
+          <input className="flex-1 bg-cream-100 text-sm rounded-full px-3 py-1.5 text-bark-900 placeholder:text-bark-500 focus:outline-none" placeholder="Escribe o sube una foto…" disabled />
+          <button className="w-9 h-9 rounded-full bg-sage-500 text-cream-50 grid place-items-center" disabled>
+            <IconArrow className="w-4 h-4"/>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [farms, setFarms] = useState(initialFarms);
+  const [hoveredFarm, setHoveredFarm] = useState(null);
+  const [phoneStep, setPhoneStep] = useState(1); // 1: invitation visible, 2: mapped, 3: verified, 4: premium
+  const [newlyVerifiedId, setNewlyVerifiedId] = useState(null);
+  const [polyAnim, setPolyAnim] = useState(false);
+  const [bounceKpi, setBounceKpi] = useState(false);
+  const [ddsState, setDdsState] = useState('idle'); // idle | loading | ready
+  const [toast, setToast] = useState(null);
+  const [bannerOnPhone, setBannerOnPhone] = useState(null);
+
+  const greenCount = farms.filter(f => f.status === 'green').length;
+  const totalTons = Math.round(farms.filter(f => f.status === 'green').reduce((a,f)=>a+f.ha,0) * 5.9);
+  const targetReceivables = greenCount * 2700; // ~$2,700 USD por finca verde, demo
+  const animatedReceivables = useAnimatedCounter(targetReceivables, 1500, [greenCount]);
+
+  function showToast(text, kind = 'success') {
+    setToast({ text, kind });
+    setTimeout(() => setToast(null), 3200);
+  }
+  function showBanner(text) {
+    setBannerOnPhone(text);
+    setTimeout(() => setBannerOnPhone(null), 3500);
+  }
+
+  function handleMap() {
+    if (phoneStep >= 2) return;
+    setPhoneStep(2);
+    setPolyAnim(true);
+    setTimeout(() => setPhoneStep(3), 1700);
+    setTimeout(() => {
+      setPhoneStep(4);
+      // Promover finca pendiente #19 a green
+      setFarms(prev => prev.map(f => f.id === 19 ? { ...f, status: 'green', name: 'Mariana — Sítio Bom Jardim' } : f));
+      setNewlyVerifiedId(19);
+      setBounceKpi(true);
+      showToast('Nueva finca verificada — Mariana, Cocamar 4ha', 'success');
+      setTimeout(() => setBounceKpi(false), 700);
+    }, 2600);
+  }
+
+  function handleGenerateDDS() {
+    if (ddsState !== 'idle') return;
+    setDdsState('loading');
+    showBanner('Tu lote sale el 15-jun. Premium confirmado.');
+    setTimeout(() => setDdsState('ready'), 1800);
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <HeaderBar />
+      <main className="flex-1 max-w-[1480px] w-full mx-auto px-0 md:px-6 py-0 md:py-6 grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-0 md:gap-6">
+        {/* ─── PANEL IZQUIERDO ─── */}
+        <section className="bg-cream-100 rounded-none md:rounded-2xl border-stone-300/40 md:border md:overflow-hidden flex flex-col">
+          <div className="flex flex-col md:flex-row min-h-[420px]">
+            <SidebarNav active="mapa" />
+            <div className="flex-1 p-4 md:p-5 space-y-4">
+              {/* KPIs */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 relative">
+                <KpiCard label="Fincas verdes" value={`${greenCount}/28`} sub={`+${greenCount-18} verificadas hoy`} bouncing={bounceKpi} />
+                <KpiCard label="Toneladas EUDR-ready" value={`${totalTons} t`} sub="Café arábica · 4,500 kg/ha avg" />
+                <KpiCard label="Receivables UE desbloqueados" value={`$${animatedReceivables.toLocaleString('en-US')}`} sub="Sobre embarque #1408" highlight bouncing={bounceKpi} />
+                {toast && (
+                  <div className="absolute -top-2 left-2 md:left-auto md:-top-3 md:right-2 z-10 bg-bark-900 text-cream-100 rounded-lg px-3 py-2 text-xs shadow-lg toast-enter">
+                    {toast.text}
+                  </div>
+                )}
+              </div>
+              {/* Mapa */}
+              <MapPanel
+                farms={farms}
+                onFarmHover={setHoveredFarm}
+                hoveredFarm={hoveredFarm}
+                newlyVerifiedId={newlyVerifiedId}
+              />
+              {/* Lote */}
+              <LotePanel farms={farms} onGenerateDDS={handleGenerateDDS} ddsState={ddsState} />
+            </div>
+          </div>
+        </section>
+
+        {/* ─── PANEL DERECHO ─── */}
+        <section className="bg-cream-100/40 rounded-none md:rounded-2xl border-stone-300/40 md:border p-4 md:p-6 flex flex-col items-center justify-start relative">
+          <div className="w-full max-w-[420px]">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-bark-500 mb-1">Vista del asociado</div>
+            <div className="font-display text-2xl text-bark-900 leading-tight mb-1">Mariana — Cocamar</div>
+            <div className="text-xs text-bark-500 mb-5">Sítio Bom Jardim · 4 ha · 🇧🇷 Minas Gerais, Brasil</div>
+            {bannerOnPhone && (
+              <div className="mb-3 rounded-lg bg-amber2-500 text-bark-900 text-xs font-medium px-3 py-2 toast-enter">
+                {bannerOnPhone}
+              </div>
+            )}
+          </div>
+          <FarmerPhone step={phoneStep} onMap={handleMap} mappedAnimating={polyAnim} />
+          <div className="mt-5 text-center text-[11px] text-bark-500 max-w-[380px] leading-relaxed">
+            Tocá <span className="font-medium text-bark-900">"Mapear ahora"</span> en el chat para ver la sincronización en tiempo real con el dashboard de la cooperativa.
+          </div>
+        </section>
+      </main>
+      <footer className="border-t border-stone-300/40 bg-cream-50/60 mt-6">
+        <div className="max-w-[1480px] mx-auto px-6 py-4 text-center text-[11px] text-stone-500">
+          Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

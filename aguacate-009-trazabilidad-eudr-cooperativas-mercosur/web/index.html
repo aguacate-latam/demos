@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Origen — Trazabilidad de campo a puerto para cooperativas Mercosur</title>
+<meta name="description" content="Mapea las fincas de tu cooperativa, genera la Declaración de Diligencia Debida EUDR y desbloquea el premium europeo que ya estás dejando sobre la mesa." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          sage: { 100: '#DEE6DC', 300: '#B6C5B2', 500: '#8FA68E', 700: '#5C7259', 900: '#3D4F3B' },
+          bark: { 100: '#E9DECC', 300: '#A48A6E', 500: '#705844', 700: '#4D3A28', 900: '#3D2E1E' },
+          cream: { 50: '#FBF6EA', 100: '#F5EBD8', 200: '#EFE0BF' },
+          amber2: { 300: '#E8C475', 500: '#D4A24E', 700: '#B0832F' },
+        },
+        fontFamily: {
+          display: ['Cormorant Garamond', 'Georgia', 'serif'],
+          body: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; background: #F5EBD8; color: #3D2E1E; -webkit-font-smoothing: antialiased; }
+  .font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+  .drop-cap::first-letter { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 4.5rem; line-height: 0.85; float: left; padding-right: 0.6rem; padding-top: 0.4rem; color: #5C7259; }
+  .pull-quote { border-left: 3px solid #D4A24E; }
+  .step-num { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; }
+  .cta-primary { transition: background 0.2s, color 0.2s, transform 0.2s; }
+  .cta-primary:hover { background: #3D2E1E; color: #D4A24E; transform: translateY(-1px); }
+  .cta-secondary { transition: background 0.2s, color 0.2s; }
+  .cta-secondary:hover { background: #3D2E1E; color: #F5EBD8; }
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 1px; background: #5C7259; transition: width 0.25s; }
+  .nav-link:hover::after { width: 100%; }
+  html { scroll-behavior: smooth; }
+  .grain { background-image: radial-gradient(rgba(61,46,30,0.04) 1px, transparent 1px); background-size: 14px 14px; }
+</style>
+</head>
+<body class="grain">
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="border-b border-stone-300/40 bg-cream-50/85 backdrop-blur sticky top-0 z-30">
+  <nav class="max-w-6xl mx-auto px-5 md:px-8 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-full bg-bark-900 grid place-items-center text-amber2-500">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 014 13V8a5 5 0 015-5h7a4 4 0 014 4v3a7 7 0 01-7 7"/><path d="M2 22s2-3 9-9"/></svg>
+      </span>
+      <span class="font-display text-2xl tracking-tight text-bark-900">Origen</span>
+    </a>
+    <div class="hidden md:flex items-center gap-7 text-[13px] text-bark-700">
+      <a href="#como" class="nav-link">Cómo funciona</a>
+      <a href="#cooperativa" class="nav-link">Para cooperativas</a>
+      <a href="#buyers" class="nav-link">Para buyers UE</a>
+    </div>
+    <a href="https://aguacate-demos.pages.dev/aguacate-009-trazabilidad-eudr-cooperativas-mercosur/" class="cta-primary inline-flex items-center gap-2 bg-amber2-500 text-bark-900 text-sm font-medium px-4 py-2 rounded-full">
+      <span>Prueba el producto</span>
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </nav>
+</header>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<section class="max-w-6xl mx-auto px-5 md:px-8 pt-12 md:pt-20 pb-14 md:pb-24">
+  <div class="grid lg:grid-cols-12 gap-10 items-center">
+    <div class="lg:col-span-7">
+      <div class="text-[11px] uppercase tracking-[0.22em] text-bark-500 mb-5">Trazabilidad de campo a puerto · cooperativas Mercosur</div>
+      <h1 class="font-display text-bark-900 leading-[0.95] text-5xl md:text-7xl tracking-tight">
+        <span class="italic">Tu cosecha</span> <span class="italic">ya cumple.</span><br/>
+        Solo falta probarlo.
+      </h1>
+      <p class="mt-7 text-lg md:text-xl text-bark-700 leading-relaxed max-w-xl">
+        Origen mapea las fincas de tu cooperativa, genera la Declaración de Diligencia Debida EUDR y desbloquea el premium europeo que ya estás dejando sobre la mesa.
+      </p>
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a href="https://aguacate-demos.pages.dev/aguacate-009-trazabilidad-eudr-cooperativas-mercosur/" class="cta-primary inline-flex items-center gap-2 bg-amber2-500 text-bark-900 font-medium px-6 py-3 rounded-full">
+          <span>Prueba el producto</span>
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="#como" class="cta-secondary inline-flex items-center gap-2 border border-bark-900 text-bark-900 font-medium px-6 py-3 rounded-full">
+          Hablá con un especialista
+        </a>
+      </div>
+      <div class="mt-12 flex items-center gap-6 text-[12px] text-bark-500 flex-wrap">
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-sage-500"></span>EU-Mercosur ITA · vigente 1-may-2026</span>
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber2-500"></span>EUDR · 30-dic-2026</span>
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-bark-700"></span>SME deadline · 30-jun-2027</span>
+      </div>
+    </div>
+    <!-- Ilustración: mapa estilizado -->
+    <div class="lg:col-span-5">
+      <div class="relative w-full aspect-[5/6] rounded-3xl overflow-hidden bg-cream-50 border border-stone-300/50">
+        <svg viewBox="0 0 400 480" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="lines" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3D2E1E" stroke-opacity="0.05" stroke-width="0.7"/>
+            </pattern>
+          </defs>
+          <rect width="400" height="480" fill="url(#lines)"/>
+          <!-- Coordenadas estilizadas -->
+          <text x="20" y="40" font-family="Space Grotesk" font-size="9" fill="#3D2E1E" fill-opacity="0.4">22°33′ S</text>
+          <text x="20" y="455" font-family="Space Grotesk" font-size="9" fill="#3D2E1E" fill-opacity="0.4">22°45′ S</text>
+          <text x="320" y="40" font-family="Space Grotesk" font-size="9" fill="#3D2E1E" fill-opacity="0.4" text-anchor="end">45°12′ W</text>
+          <!-- Polígonos de fincas -->
+          <polygon points="60,90 130,80 155,135 100,170 55,140" fill="#8FA68E" fill-opacity="0.85" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="180,75 255,70 280,130 220,160 185,125" fill="#8FA68E" fill-opacity="0.75" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="300,95 360,85 375,140 335,175 305,140" fill="#8FA68E" fill-opacity="0.85" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="65,205 135,195 160,255 105,290 60,260" fill="#8FA68E" fill-opacity="0.7" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="190,210 260,200 285,260 225,295 195,265" fill="#E8C475" fill-opacity="0.85" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="310,215 365,210 380,265 340,300 315,275" fill="#8FA68E" fill-opacity="0.8" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="70,330 140,320 165,380 110,410 65,380" fill="#8FA68E" fill-opacity="0.85" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="195,335 260,330 280,395 220,425 200,390" fill="#8FA68E" fill-opacity="0.75" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <polygon points="305,340 360,335 380,395 340,430 310,400" fill="#C46B5C" fill-opacity="0.85" stroke="#3D2E1E" stroke-opacity="0.5" stroke-width="1.2"/>
+          <!-- Pin destacado -->
+          <g transform="translate(217,232)">
+            <circle r="14" fill="#D4A24E" fill-opacity="0.25"/>
+            <circle r="6" fill="#D4A24E"/>
+          </g>
+          <!-- Etiqueta lateral -->
+          <g transform="translate(20,440)">
+            <text font-family="Cormorant Garamond" font-style="italic" font-size="13" fill="#3D2E1E">9 fincas — 47 ha</text>
+            <text y="14" font-family="Space Grotesk" font-size="9" fill="#3D2E1E" fill-opacity="0.55">7 verdes · 1 amarilla · 1 roja</text>
+          </g>
+        </svg>
+      </div>
+      <div class="mt-3 text-[11px] text-bark-500 text-center italic">Mapa ilustrativo · datos no reales</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pull quote ─────────────────────────────────────────────────────────── -->
+<section class="border-y border-stone-300/40 bg-cream-50">
+  <div class="max-w-4xl mx-auto px-5 md:px-8 py-14 md:py-20 text-center">
+    <p class="font-display italic text-bark-900 text-2xl md:text-4xl leading-tight">
+      "La Unión Europea compra carne, café y soja Mercosur por miles de millones de USD. Pagan premium a quien tiene la prueba — y dejan al resto en el embarque genérico."
+    </p>
+    <div class="mt-6 text-[11px] uppercase tracking-[0.22em] text-bark-500">Comisión Europea · EU-Mercosur ITA, mayo 2026</div>
+  </div>
+</section>
+
+<!-- ── Cómo funciona ──────────────────────────────────────────────────────── -->
+<section id="como" class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+  <div class="grid lg:grid-cols-12 gap-8 mb-12">
+    <div class="lg:col-span-4">
+      <div class="text-[11px] uppercase tracking-[0.22em] text-bark-500 mb-3">Cómo funciona</div>
+      <h2 class="font-display text-bark-900 text-4xl md:text-5xl leading-[1.05] tracking-tight">
+        Tres pasos, <span class="italic">cero formularios</span> en papel.
+      </h2>
+    </div>
+    <div class="lg:col-span-8 lg:pl-8 lg:border-l lg:border-stone-300/50">
+      <p class="text-bark-700 text-lg leading-relaxed drop-cap">
+        El sistema toma datos satelitales públicos, los cruza con los polígonos que tus productores envían por mensaje y arma la Declaración de Diligencia Debida que la UE va a exigir desde diciembre. El resultado: tu cooperativa pasa de seis Excel y un mapa impreso a un libro de fincas verificado y un PDF firmado por embarque.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-10 md:gap-7">
+    <div class="border-t-2 border-sage-500 pt-6">
+      <div class="step-num text-sage-500 text-5xl mb-3">01</div>
+      <h3 class="font-display text-bark-900 text-2xl mb-2">Mapeás las fincas</h3>
+      <p class="text-bark-700 text-[15px] leading-relaxed">Tus productores asociados envían el polígono de su finca por mensaje, caminando el perímetro con el celular. El sistema lo cruza con datos satelitales de Global Forest Watch y Mapbiomas en segundos.</p>
+    </div>
+    <div class="border-t-2 border-amber2-500 pt-6">
+      <div class="step-num text-amber2-700 text-5xl mb-3">02</div>
+      <h3 class="font-display text-bark-900 text-2xl mb-2">Generás la DDS con un click</h3>
+      <p class="text-bark-700 text-[15px] leading-relaxed">Cada lote de exportación arma su Declaración de Diligencia Debida EUDR consolidando los polígonos verificados, lista para subir al portal TRACES de la Comisión Europea.</p>
+    </div>
+    <div class="border-t-2 border-bark-700 pt-6">
+      <div class="step-num text-bark-700 text-5xl mb-3">03</div>
+      <h3 class="font-display text-bark-900 text-2xl mb-2">Cobrás el premium</h3>
+      <p class="text-bark-700 text-[15px] leading-relaxed">Los buyers UE aceptan el envío sin fricción. El receivable certificado se descuenta a tasa preferencial vía nuestro partner de trade finance, en USD.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Two columns: cooperativa / buyer ───────────────────────────────────── -->
+<section class="bg-cream-50 border-y border-stone-300/40">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24 grid md:grid-cols-2 gap-12 md:gap-16">
+    <div id="cooperativa" class="md:pr-8 md:border-r md:border-stone-300/50">
+      <div class="text-[11px] uppercase tracking-[0.22em] text-bark-500 mb-3">Para cooperativas</div>
+      <h3 class="font-display text-bark-900 text-3xl md:text-4xl mb-6 leading-tight">Si gerencias una cooperativa</h3>
+      <ul class="space-y-5 text-bark-700">
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-sage-500 shrink-0"></span>
+          <span>Mapea 200 a 1.000 fincas en una semana, no en seis meses. Onboarding por WhatsApp; cero capacitación al productor.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-sage-500 shrink-0"></span>
+          <span>Convertí compliance EUDR en pricing premium, no en costo hundido. Cada finca verde sube +8 a +18% sobre tonelada.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-sage-500 shrink-0"></span>
+          <span>Adelantá receivables UE con tasa preferencial vía nuestro partner financiero. Liquidez en 30 días, en USD.</span>
+        </li>
+      </ul>
+      <a href="https://aguacate-demos.pages.dev/aguacate-009-trazabilidad-eudr-cooperativas-mercosur/" class="mt-8 inline-flex items-center gap-2 text-sm border border-bark-900 text-bark-900 px-5 py-2 rounded-full cta-secondary">
+        Ver el dashboard del gerente
+      </a>
+    </div>
+    <div id="buyers">
+      <div class="text-[11px] uppercase tracking-[0.22em] text-bark-500 mb-3">Para buyers UE</div>
+      <h3 class="font-display text-bark-900 text-3xl md:text-4xl mb-6 leading-tight">Si comprás desde Europa</h3>
+      <ul class="space-y-5 text-bark-700">
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-amber2-500 shrink-0"></span>
+          <span>Auditás los polígonos sin abandonar tu plataforma. Link de auditoría con sello de tiempo y trazabilidad satelital.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-amber2-500 shrink-0"></span>
+          <span>Recibís la Declaración de Diligencia Debida firmada, lista para subir al portal TRACES de la Comisión Europea.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-2 w-1.5 h-1.5 rounded-full bg-amber2-500 shrink-0"></span>
+          <span>Bajás tu propio compliance burden y el costo de auditoría externa — la prueba viaja con el embarque.</span>
+        </li>
+      </ul>
+      <a href="https://aguacate-demos.pages.dev/aguacate-009-trazabilidad-eudr-cooperativas-mercosur/" class="mt-8 inline-flex items-center gap-2 text-sm border border-bark-900 text-bark-900 px-5 py-2 rounded-full cta-secondary">
+        Ver el flujo de auditoría
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonio mockup ──────────────────────────────────────────────────── -->
+<section class="max-w-5xl mx-auto px-5 md:px-8 py-16 md:py-24">
+  <div class="pull-quote pl-6 md:pl-10">
+    <p class="font-display italic text-bark-900 text-2xl md:text-3xl leading-snug">
+      "En seis meses pasamos de cuatro Excel y un mapa impreso a embarcar 142 toneladas EUDR-ready en el primer envío a Hamburgo. El premium pagó la suscripción anual del primer trimestre."
+    </p>
+    <div class="mt-5 text-[12px] text-bark-500">
+      <span class="font-medium text-bark-700">Mariana,</span> gerente comercial — Cooperativa cafetera mediana, 🇧🇷 Brasil
+      <span class="ml-2 text-bark-300">· testimonio ilustrativo</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA final ──────────────────────────────────────────────────────────── -->
+<section class="bg-bark-900 text-cream-100">
+  <div class="max-w-5xl mx-auto px-5 md:px-8 py-20 md:py-28 text-center">
+    <div class="text-[11px] uppercase tracking-[0.25em] text-amber2-300 mb-6">Ventana abierta</div>
+    <h2 class="font-display text-cream-100 text-4xl md:text-6xl leading-[1.05] tracking-tight">
+      <span class="italic">La ventana abrió</span> el 1 de mayo.<br/>
+      Cierra el 30 de diciembre.
+    </h2>
+    <p class="mt-7 text-cream-100/85 text-lg max-w-2xl mx-auto">
+      Probá el producto en menos de un minuto y mirá cómo se ve tu cooperativa cuando la trazabilidad ya está resuelta.
+    </p>
+    <div class="mt-10">
+      <a href="https://aguacate-demos.pages.dev/aguacate-009-trazabilidad-eudr-cooperativas-mercosur/" class="cta-primary inline-flex items-center gap-2 bg-amber2-500 text-bark-900 font-medium text-lg px-7 py-3.5 rounded-full">
+        <span>Prueba el producto</span>
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer class="bg-cream-50">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-7 text-center">
+    <p class="text-[11px] text-bark-500/85">
+      Origen es un demo conceptual — no un producto comercial. Idea original: Aguacate newsletter — <a href="https://aguacate-newsletter.beehiiv.com" class="underline underline-offset-4 decoration-amber2-500/60 hover:text-bark-900">aguacate-newsletter.beehiiv.com</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
