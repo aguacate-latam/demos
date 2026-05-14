@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cresta — Cuenta multi-moneda para PyMEs exportadoras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'ice': '#F4F6F8',
+        'navy': '#0F2748',
+        'navy-soft': '#1A3760',
+        'silver': '#B8C5D1',
+        'signal': '#FACC15',
+        'signal-deep': '#EAB308',
+      },
+      fontFamily: {
+        'display': ['Tinos', 'Recoleta', 'Georgia', 'serif'],
+        'sans': ['DM Sans', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'card': '0 1px 3px rgba(15, 39, 72, 0.06)',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: #F4F6F8; color: #0F172A; }
+  .font-display { font-family: 'Tinos', 'Recoleta', Georgia, serif; letter-spacing: -0.02em; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ====== ICONS (inline SVG) ======
+const Icon = ({ name, className = "w-5 h-5" }) => {
+  const paths = {
+    dashboard: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l9-9 9 9M5 10v10h14V10"/></>,
+    wire: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12h13m-4-4l4 4-4 4M19 6v12"/></>,
+    convert: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16l-4-4 4-4m10 0l4 4-4 4M3 12h18"/></>,
+    pay: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8h18M3 16h12m4 0h2M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></>,
+    reconcile: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/></>,
+    compliance: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></>,
+    plus: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></>,
+    close: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></>,
+    spark: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 3l1.5 4 4 1.5-4 1.5L11 14l-1.5-4-4-1.5 4-1.5L11 3zM18 14l.8 2.2 2.2.8-2.2.8L18 20l-.8-2.2-2.2-.8 2.2-.8L18 14z"/></>,
+    download: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></>,
+    check: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/></>,
+    chevron: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></>,
+    menu: <><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></>,
+  };
+  return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">{paths[name]}</svg>;
+};
+
+// ====== INITIAL DATA ======
+const INITIAL_BALANCES = {
+  USD: { amount: 48210, label: "USD", flag: "🇺🇸", delta: "+ USD 3,210 esta semana", deltaPositive: true },
+  EUR: { amount: 12640, label: "EUR", flag: "🇪🇺", delta: "parqueado", deltaPositive: null },
+  PEN: { amount: 127400, label: "PEN", flag: "🇵🇪", delta: "+ S/8,300 hoy", deltaPositive: true },
+  MXN: { amount: 32180, label: "MXN", flag: "🇲🇽", delta: "sin movimiento", deltaPositive: null },
+};
+
+const INITIAL_TX = [
+  { id: 1, type: "Wire IN", amount: "USD 12,400", counterparty: "Berliner Kaffeerösterei", rail: "INV-042", date: "hace 2h", status: "Pendiente conversión" },
+  { id: 2, type: "Pago OUT", amount: "S/8,300", counterparty: "Productor José Quispe", rail: "CCE", date: "ayer", status: "Completado" },
+  { id: 3, type: "Wire IN", amount: "USD 8,720", counterparty: "Tokyo Coffee Co.", rail: "INV-040", date: "3 días", status: "Convertido a PEN al 3.74" },
+  { id: 4, type: "Conversión", amount: "USD 5,000 → PEN 18,850", counterparty: "Spread 0.7%", rail: "FX", date: "5 días", status: "Completado" },
+  { id: 5, type: "Pago OUT", amount: "EUR 450", counterparty: "SaaS Stripe", rail: "SWIFT", date: "6 días", status: "Completado" },
+];
+
+// ====== ANIMATED COUNTER HOOK ======
+function useAnimatedNumber(target, duration = 600) {
+  const [value, setValue] = useState(target);
+  const previousRef = useRef(target);
+  useEffect(() => {
+    const start = previousRef.current;
+    const end = target;
+    if (start === end) return;
+    const startTime = performance.now();
+    let raf;
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      setValue(start + (end - start) * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else previousRef.current = end;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return value;
+}
+
+// ====== UI COMPONENTS ======
+
+const Sidebar = ({ active, onSelect, mobileOpen, setMobileOpen }) => {
+  const items = [
+    { id: "dashboard", label: "Dashboard", icon: "dashboard" },
+    { id: "wires", label: "Wires entrantes", icon: "wire" },
+    { id: "convert", label: "Convertir", icon: "convert" },
+    { id: "payouts", label: "Pagos salientes", icon: "pay" },
+    { id: "reconcile", label: "Reconciliación", icon: "reconcile" },
+    { id: "compliance", label: "Compliance", icon: "compliance" },
+  ];
+  return (
+    <aside className={`fixed top-0 left-0 h-screen w-60 bg-navy text-white flex flex-col z-40 transition-transform ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <div className="px-6 py-6 flex items-center justify-between">
+        <span className="font-display text-2xl font-bold">Cresta</span>
+        <button className="md:hidden text-white/60" onClick={() => setMobileOpen(false)}><Icon name="close" /></button>
+      </div>
+      <nav className="flex-1 px-3 mt-2">
+        {items.map(item => (
+          <button key={item.id}
+            onClick={() => { onSelect(item.id); setMobileOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-1 transition relative ${active === item.id ? 'bg-navy-soft text-white' : 'text-white/60 hover:text-white hover:bg-navy-soft/40'}`}>
+            {active === item.id && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-signal rounded-r"></span>}
+            <Icon name={item.icon} className="w-5 h-5" />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+      <div className="px-4 py-4 border-t border-white/10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-signal text-navy flex items-center justify-center font-display font-bold">CV</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold truncate">Camila Vásquez</p>
+            <p className="text-xs text-white/50 truncate">CFO · Café Andes 🇵🇪</p>
+          </div>
+        </div>
+        <p className="text-[10px] text-white/40 leading-relaxed">Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com</p>
+      </div>
+    </aside>
+  );
+};
+
+const TopBar = ({ onNewConversion, setMobileOpen }) => {
+  const today = new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+  return (
+    <div className="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex items-center justify-between md:ml-60 sticky top-0 z-30">
+      <div className="flex items-center gap-3">
+        <button className="md:hidden text-navy" onClick={() => setMobileOpen(true)}><Icon name="menu" /></button>
+        <div>
+          <p className="font-display text-xl text-navy font-bold">Buenos días, Camila</p>
+          <p className="text-xs text-slate-500 hidden md:block">{today}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="hidden md:block text-xs text-slate-500 mr-2">USD/PEN: <span className="font-semibold text-navy">3.79</span> · <span className="text-red-600">⬇ -0.4% hoy</span></div>
+        <button onClick={onNewConversion} className="inline-flex items-center gap-2 bg-signal text-navy font-semibold text-sm px-4 py-2 rounded-lg hover:bg-signal-deep transition">
+          <Icon name="plus" className="w-4 h-4" />
+          <span className="hidden sm:inline">Nueva conversión</span>
+          <span className="sm:hidden">Nueva</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const BalanceCard = ({ balances }) => {
+  const fmt = (n, currency) => {
+    if (currency === "PEN") return "S/" + Math.round(n).toLocaleString('es-PE');
+    if (currency === "EUR") return "€" + Math.round(n).toLocaleString('es-PE');
+    return "$" + Math.round(n).toLocaleString('es-PE');
+  };
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 h-full">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-display text-lg text-navy font-bold">Saldos por moneda</h3>
+        <span className="text-[10px] uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded font-semibold whitespace-nowrap">● Vía Meru Business</span>
+      </div>
+      <div className="space-y-4">
+        {Object.entries(balances).map(([key, b]) => (
+          <AnimatedRow key={key} currency={key} balance={b} fmt={fmt} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const AnimatedRow = ({ currency, balance, fmt }) => {
+  const animated = useAnimatedNumber(balance.amount);
+  return (
+    <div className="flex items-end justify-between border-b border-slate-100 last:border-0 pb-3 last:pb-0">
+      <div>
+        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">{balance.flag} {currency}</p>
+        <p className="font-display text-2xl text-navy font-bold mt-1">{fmt(animated, currency)}</p>
+      </div>
+      <p className={`text-xs mb-1 ${balance.deltaPositive === true ? 'text-emerald-600' : 'text-slate-400'}`}>{balance.delta}</p>
+    </div>
+  );
+};
+
+const WireCard = ({ wire, onConvert }) => (
+  <div className={`bg-white rounded-2xl border-2 shadow-card p-6 h-full transition ${wire.status === 'converted' ? 'border-emerald-300' : 'border-signal'}`}>
+    <div className="flex items-center justify-between mb-3">
+      <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded ${wire.status === 'converted' ? 'bg-emerald-100 text-emerald-700' : 'bg-signal text-navy'}`}>
+        {wire.status === 'converted' ? '✓ Conversión completada' : 'Pendiente conversión'}
+      </span>
+      <span className="text-xs text-slate-400">hace 2h</span>
+    </div>
+    <p className="text-sm text-slate-500 mb-1">Berliner Kaffeerösterei</p>
+    <div className="flex items-center gap-2 mb-1">
+      <span className="font-display text-3xl text-navy font-bold">USD 12,400.00</span>
+    </div>
+    <div className="flex items-center gap-2 mb-5 text-xs text-emerald-600">
+      <Icon name="check" className="w-4 h-4" />
+      <span>INV-2026-042 · Café Lote 7</span>
+    </div>
+
+    {wire.status !== 'converted' && (
+      <>
+        <div className="space-y-2 mb-5 text-xs">
+          <div className="flex justify-between text-slate-600"><span>Mercado interbancario USD/PEN:</span><span className="font-mono">3.79</span></div>
+          <div className="flex justify-between text-slate-600"><span>Spread Cresta 0.7%:</span><span className="font-mono">3.764</span></div>
+          <div className="flex justify-between text-navy font-semibold border-t border-slate-200 pt-2"><span>Neto a recibir:</span><span className="font-mono">S/46,673.60</span></div>
+        </div>
+        <button onClick={onConvert} className="w-full bg-signal text-navy font-semibold text-sm py-3 rounded-lg hover:bg-signal-deep transition">
+          Convertir ahora →
+        </button>
+        <p className="text-[10px] text-slate-400 text-center mt-2">o esperar 24-72h</p>
+      </>
+    )}
+    {wire.status === 'converted' && (
+      <div className="bg-emerald-50 rounded-lg p-4 text-center">
+        <p className="text-xs text-emerald-700 mb-1">Recibido en cuenta PEN</p>
+        <p className="font-display text-xl text-emerald-700 font-bold">S/46,673.60</p>
+      </div>
+    )}
+  </div>
+);
+
+const AgenteCard = () => (
+  <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6 h-full">
+    <div className="flex items-center gap-2 mb-5">
+      <div className="w-8 h-8 rounded-lg bg-navy text-signal flex items-center justify-center"><Icon name="spark" className="w-5 h-5" /></div>
+      <h3 className="font-display text-base text-navy font-bold">Agente IA · Análisis USD/PEN</h3>
+    </div>
+    <div className="space-y-4 text-sm">
+      <div className="flex gap-3">
+        <span className="text-lg">📊</span>
+        <p className="text-slate-700 leading-snug">USD/PEN movió 6% en 90 días — volatilidad por encima del promedio.</p>
+      </div>
+      <div className="flex gap-3">
+        <span className="text-lg">💡</span>
+        <p className="text-slate-700 leading-snug">Si esperas 48-72h podrías capturar ~0.8% más según patrón histórico.</p>
+      </div>
+      <div className="flex gap-3">
+        <span className="text-lg">⏱️</span>
+        <p className="text-slate-700 leading-snug">Plazo vence en 5 días; después se convierte automáticamente al rate del día.</p>
+      </div>
+    </div>
+    <a href="#" className="text-xs text-navy font-semibold mt-5 inline-block hover:text-signal-deep">Ver análisis completo →</a>
+  </div>
+);
+
+const TransactionTable = ({ transactions, onRowClick }) => {
+  const [filter, setFilter] = useState("Todo");
+  const filtered = filter === "Todo" ? transactions : transactions.filter(t => t.type.includes(filter.replace(" IN", " IN").replace(" OUT", " OUT")));
+
+  const StatusChip = ({ status }) => {
+    if (status.includes("Pendiente")) return <span className="bg-signal/30 text-navy-soft text-[10px] font-semibold px-2 py-1 rounded">{status}</span>;
+    if (status.includes("Convertido") || status === "Completado") return <span className="bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1 rounded">{status}</span>;
+    return <span className="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-1 rounded">{status}</span>;
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <h3 className="font-display text-lg text-navy font-bold">Transacciones recientes</h3>
+        <div className="flex gap-1 text-xs">
+          {["Todo", "Wire IN", "Pago OUT", "Conversión"].map(f => (
+            <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 rounded-md font-semibold transition ${filter === f ? 'bg-navy text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{f}</button>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+              <th className="text-left py-2 font-semibold">Type</th>
+              <th className="text-left py-2 font-semibold">Monto</th>
+              <th className="text-left py-2 font-semibold">Counterparty</th>
+              <th className="text-left py-2 font-semibold hidden md:table-cell">Rail</th>
+              <th className="text-left py-2 font-semibold hidden md:table-cell">Fecha</th>
+              <th className="text-left py-2 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(tx => (
+              <tr key={tx.id} onClick={() => onRowClick(tx)} className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                <td className="py-3 text-slate-600 text-xs font-medium">{tx.type}</td>
+                <td className="py-3 font-display text-navy font-semibold">{tx.amount}</td>
+                <td className="py-3 text-slate-700">{tx.counterparty}</td>
+                <td className="py-3 text-slate-500 hidden md:table-cell">{tx.rail}</td>
+                <td className="py-3 text-slate-500 hidden md:table-cell">{tx.date}</td>
+                <td className="py-3"><StatusChip status={tx.status} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const ReconcileCard = () => {
+  const pct = useAnimatedNumber(94, 1200);
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 h-full flex flex-col">
+      <h3 className="font-display text-lg text-navy font-bold mb-3">Reconciliación · Este mes</h3>
+      <div className="flex-1 flex flex-col items-center justify-center text-center my-6">
+        <p className="font-display text-6xl text-navy font-bold leading-none">{Math.round(pct)}%</p>
+        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-3">facturas reconciliadas</p>
+      </div>
+      <div className="space-y-2 text-xs">
+        <div className="flex justify-between text-slate-600"><span>37 wires entrantes</span><span className="text-emerald-600 font-semibold">2 sin match</span></div>
+        <div className="flex justify-between text-slate-600"><span>12 pagos a proveedores</span><span className="text-emerald-600 font-semibold">✓</span></div>
+        <div className="flex justify-between text-slate-600"><span>Tiempo ahorrado</span><span className="text-navy font-bold">~11 horas</span></div>
+      </div>
+      <div className="h-2 bg-slate-100 rounded-full mt-5 overflow-hidden">
+        <div className="h-full bg-signal" style={{ width: `${pct}%` }}></div>
+      </div>
+    </div>
+  );
+};
+
+const ComplianceCard = () => {
+  const items = [
+    { flag: "🇵🇪", agency: "SUNAT", msg: "Retención 1.5% aplicada en 3 conversiones · Comprobantes generados → Enviar a contadora", status: "✓", color: "emerald" },
+    { flag: "🇲🇽", agency: "SAT", msg: "Sin operaciones MX este período", status: "·", color: "slate" },
+    { flag: "🇧🇷", agency: "Receita Federal", msg: "Sin operaciones BR este período", status: "·", color: "slate" },
+    { flag: "🇨🇱", agency: "SII", msg: "Sin operaciones CL este período", status: "·", color: "slate" },
+  ];
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-display text-lg text-navy font-bold">Compliance · Vista del agente IA</h3>
+        <span className="bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1 rounded">Auto-actualizado</span>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {items.map((item, i) => (
+          <div key={i} className="border border-slate-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">{item.flag}</span>
+              <span className="font-semibold text-sm text-navy">{item.agency}</span>
+              <span className={`ml-auto text-${item.color}-600 font-bold`}>{item.status}</span>
+            </div>
+            <p className="text-xs text-slate-600 leading-snug">{item.msg}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ====== MODALS ======
+
+const ConvertModal = ({ open, onClose, onConfirm }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-navy/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <h2 className="font-display text-2xl text-navy font-bold mb-2">Confirmar conversión</h2>
+        <p className="text-slate-600 mb-6">Conviertes <strong>USD 12,400</strong> a PEN al rate <strong>3.764</strong>.</p>
+        <div className="bg-ice rounded-xl p-5 mb-6">
+          <div className="flex justify-between mb-2 text-sm text-slate-600"><span>Recibido:</span><span className="font-mono">USD 12,400.00</span></div>
+          <div className="flex justify-between mb-2 text-sm text-slate-600"><span>Spread 0.7%:</span><span className="font-mono">−$86.80</span></div>
+          <div className="border-t border-slate-300 pt-2 flex justify-between text-base text-navy font-bold"><span>A tu cuenta PEN:</span><span className="font-mono">S/46,673.60</span></div>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-lg hover:bg-slate-50 transition">Cancelar</button>
+          <button onClick={onConfirm} className="flex-1 bg-signal text-navy font-semibold py-3 rounded-lg hover:bg-signal-deep transition">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const NewConversionModal = ({ open, onClose, onConfirm }) => {
+  const [from, setFrom] = useState("USD");
+  const [amount, setAmount] = useState("5000");
+  const [to, setTo] = useState("PEN");
+  if (!open) return null;
+  const rate = from === "USD" && to === "PEN" ? 3.764 : 1;
+  const result = (parseFloat(amount || 0) * rate).toFixed(2);
+  return (
+    <div className="fixed inset-0 bg-navy/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display text-2xl text-navy font-bold">Nueva conversión</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-navy"><Icon name="close" /></button>
+        </div>
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Desde</label>
+            <select value={from} onChange={e => setFrom(e.target.value)} className="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2.5 text-sm">
+              <option>USD</option><option>EUR</option><option>PEN</option><option>MXN</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Monto</label>
+            <input value={amount} onChange={e => setAmount(e.target.value)} type="number" className="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-mono" />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold">A</label>
+            <select value={to} onChange={e => setTo(e.target.value)} className="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2.5 text-sm">
+              <option>PEN</option><option>MXN</option><option>BRL</option><option>CLP</option>
+            </select>
+          </div>
+          <div className="bg-ice rounded-lg p-4">
+            <p className="text-xs text-slate-500 mb-1">Rate proyectado</p>
+            <p className="font-display text-2xl text-navy font-bold">{from} {amount} → {to} {Math.round(result).toLocaleString('es-PE')}</p>
+          </div>
+        </div>
+        <button onClick={onConfirm} className="w-full bg-signal text-navy font-semibold py-3 rounded-lg hover:bg-signal-deep transition">Programar conversión</button>
+      </div>
+    </div>
+  );
+};
+
+const Toast = ({ message, show }) => (
+  <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 bg-navy text-white px-6 py-3 rounded-lg shadow-2xl z-50 text-sm font-semibold transition-all ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+    {message}
+  </div>
+);
+
+const SlideOver = ({ tx, onClose }) => {
+  if (!tx) return null;
+  return (
+    <>
+      <div className="fixed inset-0 bg-navy/30 backdrop-blur-sm z-40" onClick={onClose}></div>
+      <div className="fixed top-0 right-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto">
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+          <h2 className="font-display text-xl text-navy font-bold">Detalle transacción</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-navy"><Icon name="close" /></button>
+        </div>
+        <div className="px-6 py-6 space-y-6">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Tipo</p>
+            <p className="font-display text-2xl text-navy font-bold">{tx.type}</p>
+            <p className="text-3xl font-display text-navy font-bold mt-2">{tx.amount}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Counterparty</p>
+            <p className="text-base text-slate-700 font-medium">{tx.counterparty}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Rail</p>
+              <p className="text-sm text-slate-700">{tx.rail}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Fecha</p>
+              <p className="text-sm text-slate-700">{tx.date}</p>
+            </div>
+          </div>
+          <div className="bg-ice rounded-xl p-5">
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Breakdown FX</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-slate-600"><span>Rate interbancario</span><span className="font-mono">3.790</span></div>
+              <div className="flex justify-between text-slate-600"><span>Spread Cresta</span><span className="font-mono">0.7%</span></div>
+              <div className="flex justify-between text-slate-600"><span>Rate aplicado</span><span className="font-mono">3.764</span></div>
+              <div className="flex justify-between text-navy font-bold border-t border-slate-300 pt-2"><span>Total recibido</span><span className="font-mono">S/46,673.60</span></div>
+            </div>
+          </div>
+          <div className="bg-ice rounded-xl p-5">
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Retención aplicada</p>
+            <p className="text-sm text-slate-700">🇵🇪 SUNAT — Retención IGV 1.5% sobre el monto convertido. Comprobante generado y enviado a contadora.</p>
+          </div>
+          <button className="w-full bg-navy text-white font-semibold py-3 rounded-lg hover:bg-navy-soft transition flex items-center justify-center gap-2">
+            <Icon name="download" className="w-4 h-4" />
+            Descargar comprobante
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ====== APP ======
+
+function App() {
+  const [activeNav, setActiveNav] = useState("dashboard");
+  const [balances, setBalances] = useState(INITIAL_BALANCES);
+  const [transactions, setTransactions] = useState(INITIAL_TX);
+  const [wireStatus, setWireStatus] = useState("pending");
+  const [convertModalOpen, setConvertModalOpen] = useState(false);
+  const [newConversionOpen, setNewConversionOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const handleConfirmConvert = () => {
+    setConvertModalOpen(false);
+    setWireStatus("converted");
+    setBalances(prev => ({
+      ...prev,
+      USD: { ...prev.USD, amount: prev.USD.amount - 12400, delta: "− USD 12,400 hoy", deltaPositive: false },
+      PEN: { ...prev.PEN, amount: prev.PEN.amount + 46673.60, delta: "+ S/46,673 hoy", deltaPositive: true },
+    }));
+    setTransactions(prev => [
+      { id: Date.now(), type: "Conversión", amount: "USD 12,400 → PEN 46,673.60", counterparty: "Spread 0.7%", rail: "FX", date: "ahora", status: "Completado" },
+      ...prev
+    ]);
+    setToast("Conversión completada · S/46,673.60 en tu cuenta PEN");
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleNewConversion = () => {
+    setNewConversionOpen(false);
+    setToast("Conversión programada");
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  return (
+    <div className="min-h-screen bg-ice">
+      <Sidebar active={activeNav} onSelect={setActiveNav} mobileOpen={mobileNavOpen} setMobileOpen={setMobileNavOpen} />
+      <TopBar onNewConversion={() => setNewConversionOpen(true)} setMobileOpen={setMobileNavOpen} />
+
+      <main className="md:ml-60 px-4 md:px-8 py-6 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Row 1 */}
+          <div className="lg:col-span-4">
+            <BalanceCard balances={balances} />
+          </div>
+          <div className="lg:col-span-4">
+            <WireCard wire={{ status: wireStatus }} onConvert={() => setConvertModalOpen(true)} />
+          </div>
+          <div className="lg:col-span-4">
+            <AgenteCard />
+          </div>
+
+          {/* Row 2 */}
+          <div className="lg:col-span-8">
+            <TransactionTable transactions={transactions} onRowClick={setSelectedTx} />
+          </div>
+          <div className="lg:col-span-4">
+            <ReconcileCard />
+          </div>
+
+          {/* Row 3 */}
+          <div className="lg:col-span-12">
+            <ComplianceCard />
+          </div>
+        </div>
+      </main>
+
+      <ConvertModal open={convertModalOpen} onClose={() => setConvertModalOpen(false)} onConfirm={handleConfirmConvert} />
+      <NewConversionModal open={newConversionOpen} onClose={() => setNewConversionOpen(false)} onConfirm={handleNewConversion} />
+      <SlideOver tx={selectedTx} onClose={() => setSelectedTx(null)} />
+      <Toast message={toast} show={!!toast} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>
