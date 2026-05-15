@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capataz — Tu agente IA en WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700&display=swap" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          palm: '#3D8E5A',
+          coral: '#E87764',
+          saffron: '#E1A24A',
+          'saffron-dark': '#B57F30',
+          cocoa: '#4A3826',
+          'cocoa-light': '#7A5E45',
+          crema: '#FBF7F0',
+          'off-white': '#F4F1EA',
+          'wa-bg': '#E5DDD5',
+          'wa-bubble-out': '#DCF8C6',
+        },
+        fontFamily: {
+          display: ['Newsreader', 'Georgia', 'serif'],
+          body: ['Inter', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { background: #F4F1EA; font-family: 'Inter', system-ui, sans-serif; color: #4A3826; }
+  .font-display { font-family: 'Newsreader', Georgia, serif; }
+  .chat-area { background: #E5DDD5; background-image: linear-gradient(rgba(229,221,213,0.92), rgba(229,221,213,0.92)), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path d='M0 0h40v40H0z' fill='%23E5DDD5'/><circle cx='10' cy='10' r='1' fill='%23D9CFC0' opacity='0.4'/><circle cx='30' cy='30' r='1' fill='%23D9CFC0' opacity='0.4'/></svg>"); }
+  .bubble-out { background: #DCF8C6; }
+  .bubble-in { background: #FFFFFF; }
+  @keyframes pulse-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-3px); opacity: 1; } }
+  .typing-dot { animation: pulse-dot 1.2s infinite; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #7A5E45; margin: 0 2px; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fade-in-up 0.4s ease-out forwards; opacity: 0; }
+  @keyframes slide-bar { from { width: 0%; } }
+  .bar-fill { animation: slide-bar 1.8s ease-out forwards; }
+  .scroll-hide::-webkit-scrollbar { width: 4px; }
+  .scroll-hide::-webkit-scrollbar-thumb { background: rgba(74,56,38,0.2); border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// SVG icons inline (heroicons style)
+const IconCamera = ({ size = 18, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+);
+const IconAttach = ({ size = 18, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+  </svg>
+);
+const IconMic = ({ size = 18, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+    <line x1="12" y1="19" x2="12" y2="23" />
+    <line x1="8" y1="23" x2="16" y2="23" />
+  </svg>
+);
+const IconCheck = ({ size = 14, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const IconDoc = ({ size = 28, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="9" y1="13" x2="15" y2="13" />
+    <line x1="9" y1="17" x2="15" y2="17" />
+  </svg>
+);
+const IconChat = ({ size = 16, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const IconBox = ({ size = 16, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
+const IconWallet = ({ size = 16, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 12V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4" />
+    <path d="M22 12h-6a2 2 0 0 0 0 4h6v-4z" />
+  </svg>
+);
+const IconAlert = ({ size = 16, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+const IconPlus = ({ size = 14, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+const IconMenu = ({ size = 18, className = "" }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
+  </svg>
+);
+
+function Counter({ target, duration = 2000, prefix = "$" }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let start = null;
+    let raf;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setVal(Math.floor(target * progress));
+      if (progress < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return <span>{prefix}{val.toLocaleString('en-US')}</span>;
+}
+
+function Sparkline() {
+  return (
+    <svg width="100%" height="32" viewBox="0 0 200 32" className="mt-2">
+      <polyline
+        fill="none"
+        stroke="#B57F30"
+        strokeWidth="2"
+        strokeLinecap="round"
+        points="0,28 20,26 40,22 60,20 80,17 100,14 120,11 140,9 160,6 180,4 200,3"
+      />
+      <circle cx="200" cy="3" r="3" fill="#B57F30" />
+    </svg>
+  );
+}
+
+function ChatMessage({ from, children, time, delay, withDoc, withCheck, withBadge }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  if (!visible) return null;
+  const isOut = from === 'out';
+  return (
+    <div className={`flex ${isOut ? 'justify-end' : 'justify-start'} mb-2 fade-in`}>
+      <div className={`max-w-[78%] rounded-2xl px-3 py-2 shadow-sm ${isOut ? 'bubble-out rounded-tr-md' : 'bubble-in rounded-tl-md'}`}>
+        <div className="text-[14px] leading-snug text-cocoa">{children}</div>
+        {withDoc && (
+          <div className="mt-2 rounded-lg bg-off-white border border-cocoa/10 p-2.5 flex items-center gap-2">
+            <div className="w-9 h-9 rounded bg-saffron/20 flex items-center justify-center text-saffron-dark">
+              <IconDoc size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[12px] font-semibold text-cocoa truncate">Cotización Remodel Cocina 12m²</div>
+              <div className="text-[11px] text-cocoa-light">Total: <span className="font-semibold text-cocoa">$8.450 USD</span></div>
+            </div>
+          </div>
+        )}
+        {withBadge && (
+          <div className="mt-2 inline-flex items-center gap-1.5 bg-palm/15 text-palm rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide">
+            <IconCheck size={11} /> Pagado · $2.535 USD
+          </div>
+        )}
+        <div className="flex items-center justify-end gap-1 mt-1">
+          <span className="text-[10px] text-cocoa-light">{time}</span>
+          {isOut && withCheck && <span className="text-palm"><IconCheck size={12} /></span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Typing({ delay, removeAfter }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t1 = setTimeout(() => setVisible(true), delay);
+    const t2 = setTimeout(() => setVisible(false), delay + removeAfter);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [delay, removeAfter]);
+  if (!visible) return null;
+  return (
+    <div className="flex justify-start mb-2 fade-in">
+      <div className="bubble-in rounded-2xl rounded-tl-md px-4 py-3 shadow-sm flex items-center">
+        <span className="typing-dot"></span>
+        <span className="typing-dot"></span>
+        <span className="typing-dot"></span>
+      </div>
+    </div>
+  );
+}
+
+function PhotoMessage({ delay }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  if (!visible) return null;
+  return (
+    <div className="flex justify-end mb-2 fade-in">
+      <div className="max-w-[78%] bubble-out rounded-2xl rounded-tr-md p-1 shadow-sm">
+        <div className="rounded-xl overflow-hidden">
+          <svg viewBox="0 0 240 160" className="w-full h-auto block">
+            <rect width="240" height="160" fill="#8C7A66" />
+            <rect x="0" y="110" width="240" height="50" fill="#6B5A48" />
+            <rect x="20" y="40" width="80" height="70" fill="#A89282" />
+            <rect x="115" y="60" width="105" height="50" fill="#B8A38C" />
+            <rect x="115" y="40" width="105" height="18" fill="#3D2F22" />
+            <line x1="20" y1="55" x2="100" y2="55" stroke="#FACC15" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.7" />
+            <text x="120" y="92" fontSize="9" fill="#3D2F22" fontFamily="monospace" opacity="0.7">12 m²</text>
+            <rect x="148" y="115" width="32" height="32" fill="#4A3826" rx="2" />
+            <circle cx="164" cy="131" r="6" fill="#E1A24A" opacity="0.7" />
+          </svg>
+        </div>
+        <div className="px-2 pt-2 pb-1">
+          <div className="text-[13px] leading-snug text-cocoa">Necesito cotizar este remodel. Cocina 12m², tumbar muro, piso nuevo, encimera de cuarzo, gabinetes.</div>
+          <div className="flex items-center justify-end gap-1 mt-1">
+            <span className="text-[10px] text-cocoa-light">14:22</span>
+            <span className="text-palm"><IconCheck size={12} /></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const chatRef = useRef(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (chatRef.current) {
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      }
+    }, 500);
+    setTimeout(() => clearInterval(interval), 12000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-off-white flex flex-col">
+      {/* Header */}
+      <header className="bg-crema border-b border-cocoa/10 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-md bg-saffron flex items-center justify-center font-display font-semibold text-cocoa text-base">C</div>
+          <div className="flex flex-col leading-tight">
+            <span className="font-display text-[18px] font-semibold text-cocoa">Capataz</span>
+            <span className="text-[11px] text-cocoa-light hidden sm:block">Tu agente IA en WhatsApp</span>
+          </div>
+        </div>
+        <div className="hidden md:flex items-center gap-2 text-[12px] text-cocoa-light">
+          <span className="inline-block w-2 h-2 rounded-full bg-palm"></span>
+          <span>En línea · Carlos, maestro · 4 trabajos activos</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-coral/80 flex items-center justify-center text-white font-semibold text-sm">C</div>
+          <button className="text-cocoa-light hover:text-cocoa"><IconMenu size={20} /></button>
+        </div>
+      </header>
+
+      {/* Split view */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
+
+        {/* LEFT — WhatsApp chat */}
+        <div className="flex flex-col border-r border-cocoa/10 min-h-0 h-[65vh] lg:h-auto">
+          <div className="bg-[#075E54] text-white px-4 py-2.5 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-saffron flex items-center justify-center font-display font-semibold text-cocoa text-sm">C</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 text-[14px] font-semibold">
+                Capataz IA
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#34B7F1"><circle cx="12" cy="12" r="11" fill="#34B7F1"/><polyline points="7,12 11,16 17,8" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div className="text-[11px] text-white/80">en línea</div>
+            </div>
+          </div>
+
+          <div ref={chatRef} className="chat-area flex-1 overflow-y-auto px-3 py-3 scroll-hide">
+            {/* Yesterday's history — muted */}
+            <div className="text-center my-2">
+              <span className="bg-cocoa/10 text-cocoa-light text-[10px] uppercase tracking-wider px-2 py-0.5 rounded">Ayer · viernes</span>
+            </div>
+            <ChatMessage from="in" time="17:30" delay={0}>
+              Hoy es viernes. Calculé los jornales de tu cuadrilla: <b>Mario $180, Luis $160, Pepe $150 = $490 USD total</b>. ¿Confirmas el pago vía Yape?
+            </ChatMessage>
+            <ChatMessage from="out" time="17:31" withCheck delay={400}>
+              👍
+            </ChatMessage>
+            <ChatMessage from="in" time="17:31" delay={800}>
+              ✅ Pagos enviados. Mario, Luis y Pepe recibieron transferencia.
+            </ChatMessage>
+
+            <div className="text-center my-3">
+              <span className="bg-cocoa/10 text-cocoa-light text-[10px] uppercase tracking-wider px-2 py-0.5 rounded">Hoy · 14:22</span>
+            </div>
+
+            <PhotoMessage delay={1800} />
+            <Typing delay={3400} removeAfter={1800} />
+            <ChatMessage from="in" time="14:24" delay={5400} withDoc>
+              Listo, Carlos. Analicé la foto. Te armé la cotización. Confirma antes de mandarla al cliente.
+            </ChatMessage>
+            <ChatMessage from="out" time="14:25" withCheck delay={7000}>
+              Listo, mándala a María.
+            </ChatMessage>
+            <Typing delay={7800} removeAfter={1400} />
+            <ChatMessage from="in" time="14:26" delay={9400}>
+              Enviada. María ya recibió la cotización. Te aviso cuando responda.
+            </ChatMessage>
+            <Typing delay={10800} removeAfter={1600} />
+            <ChatMessage from="in" time="14:31" delay={12600} withBadge>
+              María aceptó. Te transfirió el anticipo: <b>$2.535 USD vía Yape</b>. Disponible en tu cuenta.
+            </ChatMessage>
+          </div>
+
+          <div className="bg-[#F0F0F0] px-3 py-2 flex items-center gap-2 border-t border-cocoa/5">
+            <button className="text-cocoa-light p-1.5"><IconAttach size={20} /></button>
+            <div className="flex-1 bg-white rounded-full px-4 py-2 text-[13px] text-cocoa-light shadow-inner">Escribe un mensaje…</div>
+            <button className="text-cocoa-light p-1.5"><IconCamera size={20} /></button>
+            <button className="text-cocoa-light p-1.5"><IconMic size={20} /></button>
+          </div>
+        </div>
+
+        {/* RIGHT — Panel del maestro */}
+        <div className="bg-crema overflow-y-auto px-5 sm:px-8 py-6 scroll-hide">
+          {/* Block 1: Trabajos activos */}
+          <section className="mb-8">
+            <h2 className="font-display text-[26px] sm:text-[28px] font-semibold text-saffron-dark mb-3">Trabajos activos</h2>
+            <div className="space-y-2.5">
+
+              <div className="bg-white rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border border-cocoa/5">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-cocoa text-[15px]">María Hernández</div>
+                    <div className="text-[12px] text-cocoa-light">Remodel Cocina</div>
+                  </div>
+                  <div className="text-saffron-dark"><IconChat size={16} /></div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] text-saffron-dark font-semibold uppercase tracking-wide">Anticipo cobrado</span>
+                  <span className="font-semibold text-cocoa text-[14px]">$8.450 USD</span>
+                </div>
+                <div className="h-1.5 bg-cocoa/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-saffron bar-fill" style={{ width: '8%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border border-cocoa/5">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-cocoa text-[15px]">Restaurante El Olivo</div>
+                    <div className="text-[12px] text-cocoa-light">Pintura general</div>
+                  </div>
+                  <div className="text-coral"><IconBox size={16} /></div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] text-coral font-semibold uppercase tracking-wide">En ejecución · 65%</span>
+                  <span className="font-semibold text-cocoa text-[14px]">$3.200 USD</span>
+                </div>
+                <div className="h-1.5 bg-cocoa/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-coral bar-fill" style={{ width: '65%', animationDelay: '0.1s' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border border-cocoa/5">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-cocoa text-[15px]">Familia Mendoza</div>
+                    <div className="text-[12px] text-cocoa-light">Construcción techo</div>
+                  </div>
+                  <div className="text-palm"><IconWallet size={16} /></div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] text-palm font-semibold uppercase tracking-wide">Por cobrar saldo</span>
+                  <span className="font-semibold text-cocoa text-[14px]">$12.800 USD</span>
+                </div>
+                <div className="h-1.5 bg-cocoa/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-palm bar-fill" style={{ width: '100%', animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border border-cocoa/5">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-cocoa text-[15px]">Don Roberto</div>
+                    <div className="text-[12px] text-cocoa-light">Reforma baño</div>
+                  </div>
+                  <div className="text-cocoa-light"><IconAlert size={16} /></div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] text-cocoa-light font-semibold uppercase tracking-wide">Cotización pendiente</span>
+                  <span className="text-cocoa-light text-[14px]">—</span>
+                </div>
+                <div className="h-1.5 bg-cocoa/10 rounded-full overflow-hidden"></div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Block 2: Cuadrilla */}
+          <section className="mb-8">
+            <h2 className="font-display text-[26px] sm:text-[28px] font-semibold text-saffron-dark mb-3">Cuadrilla</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-cocoa/5 divide-y divide-cocoa/5">
+              {[
+                { name: 'Mario Aguilar', role: 'Oficial', jornal: '$30 USD/día' },
+                { name: 'Luis Mamani', role: 'Ayudante', jornal: '$25 USD/día' },
+                { name: 'Pepe Cruz', role: 'Ayudante', jornal: '$25 USD/día' },
+              ].map((w) => (
+                <div key={w.name} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-cocoa text-[14px]">{w.name}</div>
+                    <div className="text-[11px] text-cocoa-light">{w.role} · {w.jornal}</div>
+                  </div>
+                  <div className="inline-flex items-center gap-1 bg-palm/15 text-palm rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">
+                    <IconCheck size={10} /> Pagado
+                  </div>
+                </div>
+              ))}
+              <button className="w-full px-3.5 py-2.5 flex items-center justify-center gap-1.5 text-[13px] text-saffron-dark hover:bg-saffron/10 font-semibold">
+                <IconPlus size={14} /> Agregar trabajador
+              </button>
+            </div>
+          </section>
+
+          {/* Block 3: Recuperado */}
+          <section>
+            <div className="bg-coral/10 border-2 border-saffron/40 rounded-2xl p-5 sm:p-6">
+              <div className="text-[11px] uppercase tracking-widest text-saffron-dark font-semibold mb-1">Recuperado este mes</div>
+              <div className="font-display text-[56px] sm:text-[72px] leading-none font-semibold text-saffron-dark">
+                <Counter target={3180} duration={2000} />
+              </div>
+              <div className="text-[13px] text-cocoa mt-2 leading-snug">
+                Cobros que sin Capataz se hubieran perdido — 12 trabajos cerrados.
+              </div>
+              <Sparkline />
+            </div>
+          </section>
+
+          <div className="text-center text-[11px] text-cocoa-light/70 mt-8 pb-2">
+            Idea original: <a href="https://aguacate-newsletter.beehiiv.com" className="underline hover:text-cocoa" target="_blank" rel="noopener noreferrer">Aguacate newsletter</a> — aguacate-newsletter.beehiiv.com
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
