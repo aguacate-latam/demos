@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trayecto — Reválida IA de Títulos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Switzer:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#FAF5EB',
+          ink: '#2A2520',
+          ocre: '#C8964A',
+          'ocre-soft': '#E8C99A',
+          sage: '#8FA68E',
+          'sage-soft': '#C5D3C2',
+          muted: '#B85C5C',
+          'muted-soft': '#E8C5C5',
+          bone: '#F5EBD9',
+          stone: '#8A7F70',
+        },
+        fontFamily: {
+          display: ['Newsreader', 'Georgia', 'serif'],
+          body: ['Switzer', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body {
+    font-family: 'Switzer', system-ui, sans-serif;
+    background: #FAF5EB;
+    color: #2A2520;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display { font-family: 'Newsreader', Georgia, serif; }
+  .font-body { font-family: 'Switzer', system-ui, sans-serif; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.5s ease-out both; }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200, 150, 74, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(200, 150, 74, 0); }
+  }
+  .pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
+
+  .scroll-hidden::-webkit-scrollbar { width: 4px; }
+  .scroll-hidden::-webkit-scrollbar-track { background: transparent; }
+  .scroll-hidden::-webkit-scrollbar-thumb { background: #C8964A40; border-radius: 4px; }
+
+  .drop-cap::first-letter {
+    font-family: 'Newsreader', serif;
+    font-size: 3.2rem;
+    font-weight: 600;
+    line-height: 0.9;
+    float: left;
+    margin: 0.25rem 0.5rem 0 0;
+    color: #C8964A;
+  }
+
+  .sparkline-path {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: drawLine 1.4s ease-out 0.3s forwards;
+  }
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .split-view { flex-direction: column !important; }
+    .left-panel, .right-panel { width: 100% !important; max-width: 100% !important; }
+    .right-panel { border-left: none !important; border-top: 1px solid #2A252020; }
+    .country-grid { grid-template-columns: 1fr !important; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ============== ICONS ==============
+const Icon = ({ name, className = "w-4 h-4" }) => {
+  const paths = {
+    check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.5 12.75l6 6 9-13.5" />,
+    clock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z" />,
+    circle: <circle cx="12" cy="12" r="9" strokeWidth="2" />,
+    chevron: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />,
+    alert: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />,
+    warning: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.008v.008H12v-.008z" />,
+    spark: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />,
+    close: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />,
+    doc: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />,
+    user: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0v.75H4.5v-.75z" />,
+    arrow: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />,
+    bot: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />,
+  };
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className={className}>
+      {paths[name]}
+    </svg>
+  );
+};
+
+// ============== DATA ==============
+const ROUTES = {
+  AR: {
+    code: 'AR', flag: '🇦🇷', name: 'Argentina',
+    months: '12 meses', cost: 1800, approval: 68, exam: 'Validación UBA',
+    active: true, week: 18, totalWeeks: 52,
+    steps: [
+      { status: 'done', label: 'Apostille La Haya', meta: 'Completado · 03-feb-2026', detail: 'Cancillería Caracas' },
+      { status: 'done', label: 'Traducción jurada', meta: 'Completado · 12-feb-2026', detail: 'Traductora pública matriculada CABA — Mariana Quintero' },
+      { status: 'done', label: 'Expediente UBA presentado', meta: 'Completado · 28-feb-2026', detail: 'Expediente N° UBA-2026-04891' },
+      { status: 'active', label: 'Evaluación curricular', meta: 'En curso · ETA 4 semanas', detail: '12 documentos en revisión · Facultad de Medicina UBA' },
+      { status: 'pending', label: 'Examen práctico', meta: 'Pendiente', detail: 'Validación clínica supervisada' },
+      { status: 'pending', label: 'Matrícula Colegio Médicos', meta: 'Pendiente', detail: 'Trámite final · Colegio Médico Provincia Buenos Aires' },
+    ],
+  },
+  CL: {
+    code: 'CL', flag: '🇨🇱', name: 'Chile',
+    months: '18 meses', cost: 3400, approval: 54, exam: 'EUNACOM',
+    active: false,
+    steps: [
+      { status: 'pending', label: 'Apostille La Haya', meta: 'Por iniciar', detail: 'Cancillería Caracas' },
+      { status: 'pending', label: 'Traducción oficial', meta: 'Por iniciar', detail: 'Traductor inscrito Min. Relaciones Exteriores' },
+      { status: 'pending', label: 'Reconocimiento Min. Educación', meta: 'Por iniciar', detail: 'MINEDUC Chile · trámite presencial' },
+      { status: 'pending', label: 'Inscripción EUNACOM', meta: 'Por iniciar', detail: 'Examen Nacional · 2 fechas anuales' },
+      { status: 'pending', label: 'Rendir EUNACOM', meta: 'Pendiente', detail: 'Score mínimo 51% para medicina general' },
+      { status: 'pending', label: 'Inscripción Superintendencia', meta: 'Pendiente', detail: 'Superintendencia de Salud' },
+    ],
+  },
+  ES: {
+    code: 'ES', flag: '🇪🇸', name: 'España',
+    months: '8-24 meses', cost: 2200, approval: 73, exam: 'MIR + homologación',
+    active: false,
+    steps: [
+      { status: 'pending', label: 'Apostille La Haya', meta: 'Por iniciar', detail: 'Cancillería país origen' },
+      { status: 'pending', label: 'Traducción jurada España', meta: 'Por iniciar', detail: 'Traductor jurado nombrado MAEC' },
+      { status: 'pending', label: 'Homologación Min. Universidades', meta: 'Por iniciar', detail: 'Solicitud telemática · sede electrónica' },
+      { status: 'pending', label: 'Resolución express (nueva 2026)', meta: 'Disponible', detail: 'Resolución mayo 2026 · vía rápida' },
+      { status: 'pending', label: 'Examen MIR', meta: 'Pendiente', detail: 'Convocatoria anual enero' },
+      { status: 'pending', label: 'Colegiación Colegio Médicos', meta: 'Pendiente', detail: 'Colegio provincial correspondiente' },
+    ],
+  },
+  US: {
+    code: 'US', flag: '🇺🇸', name: 'Estados Unidos',
+    months: '36+ meses', cost: 9500, approval: 41, exam: 'USMLE Steps 1-3',
+    active: false,
+    steps: [
+      { status: 'pending', label: 'ECFMG Application', meta: 'Por iniciar', detail: 'Educational Commission for Foreign Medical Graduates' },
+      { status: 'pending', label: 'USMLE Step 1', meta: 'Por iniciar', detail: 'Ciencias básicas · 8h examen' },
+      { status: 'pending', label: 'USMLE Step 2 CK', meta: 'Por iniciar', detail: 'Clinical Knowledge · 9h examen' },
+      { status: 'pending', label: 'ECFMG Certification', meta: 'Pendiente', detail: 'Certificación post Step 2' },
+      { status: 'pending', label: 'Match Residency', meta: 'Pendiente', detail: 'NRMP Match · marzo cada año' },
+      { status: 'pending', label: 'USMLE Step 3 + License', meta: 'Pendiente', detail: 'Licencia estatal · varía por estado' },
+    ],
+  },
+};
+
+const PRIORITY_CASES = [
+  { name: 'Camila Rodríguez', origin: '🇻🇪', dest: '🇦🇷', step: 'Evaluación curricular', eta: '4 sem', priority: 'alta', profession: 'Médica', uni: 'Universidad Central de Venezuela' },
+  { name: 'Diego Martínez', origin: '🇨🇴', dest: '🇨🇱', step: 'Prep EUNACOM', eta: '6 sem', priority: 'alta', profession: 'Médico', uni: 'Universidad de Antioquia' },
+  { name: 'María Eugenia López', origin: '🇻🇪', dest: '🇨🇦', step: 'Equivalencia Ontario', eta: '12 sem', priority: 'media', profession: 'Enfermera', uni: 'Universidad de Los Andes' },
+  { name: 'Andrés Páez', origin: '🇨🇴', dest: '🇪🇸', step: 'Apostille pendiente', eta: '2 sem', priority: 'alta', profession: 'Ing. Industrial', uni: 'Universidad Nacional de Colombia' },
+  { name: 'Sofía González', origin: '🇦🇷', dest: '🇲🇽', step: 'Traducción jurada', eta: '1 sem', priority: 'baja', profession: 'Arquitecta', uni: 'Universidad de Buenos Aires' },
+];
+
+const AGENT_FEED_INITIAL = [
+  { ts: 'Hace 2 min', emoji: '📄', text: 'Extraje datos del título de Andrés P. (Universidad Nacional de Colombia, Ingeniería Industrial, 2018) — match con bases UNESCO confirmado.' },
+  { ts: 'Hace 5 min', emoji: '🔖', text: 'Disparé apostille remoto para Sofía G. con partner notarial México DF.' },
+  { ts: 'Hace 12 min', emoji: '📅', text: 'Agendé examen EUNACOM 15-jul-2026 para Diego M.' },
+  { ts: 'Hace 28 min', emoji: '⚡', text: 'Alerta a María Eugenia L. — falta módulo de equivalencia para Ontario CPNRE.' },
+  { ts: 'Hace 47 min', emoji: '💰', text: 'Confirmé pago de traducción jurada de Camila R. — USD 65 a traductor Buenos Aires.' },
+];
+
+const AGENT_FEED_POOL = [
+  { emoji: '🔍', text: 'Crucé registro CONACYT con Andrés P. — confirmé equivalencia automática para España.' },
+  { emoji: '📨', text: 'Envié recordatorio WhatsApp a Camila R. — entrevista UBA en 3 días.' },
+  { emoji: '✅', text: 'Cerré expediente de Lucía P. (🇻🇪→🇪🇸) — matrícula colegiada activa.' },
+  { emoji: '🎯', text: 'Identifiqué nueva ruta express España para 14 casos venezolanos en cola.' },
+  { emoji: '📊', text: 'Actualicé probabilidad de Diego M. en EUNACOM — 71% según pre-test.' },
+];
+
+// ============== ANIMATED COUNTER ==============
+function useCounter(target, duration = 1400) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let start;
+    let raf;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setVal(target * eased);
+      if (progress < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
+
+// ============== SPARKLINE ==============
+const Sparkline = ({ data, color = '#C8964A' }) => {
+  const w = 80, h = 24;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  }).join(' ');
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
+      <polyline className="sparkline-path" points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
+
+// ============== STAT TILE ==============
+const StatTile = ({ label, target, prefix = '', suffix = '', decimals = 0, spark, delay = 0 }) => {
+  const val = useCounter(target);
+  const display = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString('es');
+  return (
+    <div className="fade-up bg-bone/60 border border-ink/5 rounded-sm p-3" style={{ animationDelay: `${delay}ms` }}>
+      <div className="text-[10px] uppercase tracking-wider text-stone font-medium mb-1">{label}</div>
+      <div className="flex items-end justify-between gap-2">
+        <div className="font-display text-2xl text-ink leading-none">{prefix}{display}{suffix}</div>
+        <Sparkline data={spark} />
+      </div>
+    </div>
+  );
+};
+
+// ============== STATUS ICON ==============
+const StatusIcon = ({ status }) => {
+  if (status === 'done') return (
+    <div className="w-7 h-7 rounded-full bg-sage flex items-center justify-center text-cream flex-shrink-0">
+      <Icon name="check" className="w-4 h-4" />
+    </div>
+  );
+  if (status === 'active') return (
+    <div className="w-7 h-7 rounded-full bg-ocre flex items-center justify-center text-cream flex-shrink-0 pulse-glow">
+      <Icon name="clock" className="w-4 h-4" />
+    </div>
+  );
+  return (
+    <div className="w-7 h-7 rounded-full border-2 border-ink/15 flex items-center justify-center text-ink/30 flex-shrink-0">
+      <div className="w-2 h-2 rounded-full bg-ink/15"></div>
+    </div>
+  );
+};
+
+// ============== COUNTRY CARD ==============
+const CountryCard = ({ route, isSelected, onClick }) => {
+  const isActive = route.active;
+  return (
+    <button
+      onClick={onClick}
+      className={`text-left p-4 rounded-sm border transition-all ${
+        isSelected
+          ? 'border-ocre border-2 bg-ocre/5'
+          : 'border-ink/10 bg-cream hover:border-ocre/40 hover:bg-bone/30'
+      }`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <div className="text-2xl mb-1">{route.flag}</div>
+          <div className="font-display text-base font-semibold text-ink leading-tight">{route.name}</div>
+        </div>
+        {isActive && (
+          <div className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-sage font-semibold bg-sage/10 px-2 py-1 rounded-sm">
+            <Icon name="check" className="w-3 h-3" />
+            <span>Activa</span>
+          </div>
+        )}
+      </div>
+      <div className="space-y-1 text-xs text-stone font-body">
+        <div className="flex justify-between"><span>Tiempo</span><span className="text-ink font-medium">{route.months}</span></div>
+        <div className="flex justify-between"><span>Costo</span><span className="text-ink font-medium">USD {route.cost.toLocaleString()}</span></div>
+        <div className="flex justify-between"><span>Aprobación</span><span className="text-ink font-medium">{route.approval}%</span></div>
+        <div className="flex justify-between"><span>Examen</span><span className="text-ink font-medium text-[11px]">{route.exam}</span></div>
+      </div>
+      {isActive && (
+        <div className="mt-3 pt-3 border-t border-ocre/20">
+          <div className="text-[10px] uppercase tracking-wider text-ocre font-semibold mb-1">En progreso</div>
+          <div className="text-xs text-ink">Semana {route.week} de {route.totalWeeks}</div>
+          <div className="mt-1.5 w-full h-1 bg-ocre/15 rounded-full overflow-hidden">
+            <div className="h-full bg-ocre rounded-full" style={{ width: `${(route.week / route.totalWeeks) * 100}%` }}></div>
+          </div>
+        </div>
+      )}
+      {!isActive && (
+        <div className="mt-3 pt-3 border-t border-ink/5">
+          <span className="text-[11px] text-ocre font-medium">Ver detalles →</span>
+        </div>
+      )}
+    </button>
+  );
+};
+
+// ============== TIMELINE STEP ==============
+const TimelineStep = ({ step, idx, isLast, isExpanded, onToggle }) => {
+  return (
+    <div className="flex gap-3">
+      <div className="flex flex-col items-center">
+        <StatusIcon status={step.status} />
+        {!isLast && <div className={`w-0.5 flex-1 my-1 ${step.status === 'done' ? 'bg-sage/40' : 'bg-ink/10'}`}></div>}
+      </div>
+      <div className="flex-1 pb-5">
+        <button
+          onClick={onToggle}
+          className="text-left w-full group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="font-display text-base font-medium text-ink">{step.label}</div>
+            {step.status === 'active' && (
+              <span className="text-[10px] uppercase tracking-wider text-ocre font-semibold bg-ocre/10 px-2 py-0.5 rounded-sm whitespace-nowrap">En curso</span>
+            )}
+          </div>
+          <div className="text-xs text-stone mt-0.5">{step.meta}</div>
+        </button>
+        {isExpanded && (
+          <div className="mt-3 p-3 bg-bone/50 rounded-sm border border-ink/5 text-xs text-ink/80 fade-up">
+            <div className="font-medium text-ink mb-1 text-[11px] uppercase tracking-wider text-stone">Detalle</div>
+            <div className="mb-2">{step.detail}</div>
+            {step.status === 'active' && (
+              <>
+                <div className="font-medium text-ink mt-2 mb-1 text-[11px] uppercase tracking-wider text-stone">Documentos en revisión</div>
+                <ul className="space-y-1">
+                  <li className="flex items-center gap-1.5"><Icon name="check" className="w-3 h-3 text-sage" /> Título de Médica Cirujana (apostillado)</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check" className="w-3 h-3 text-sage" /> Notas certificadas (6 años)</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check" className="w-3 h-3 text-sage" /> Plan de estudios traducido</li>
+                  <li className="flex items-center gap-1.5"><Icon name="clock" className="w-3 h-3 text-ocre" /> Programa de internado rotatorio</li>
+                </ul>
+                <div className="mt-2 pt-2 border-t border-ink/5">
+                  <div className="text-[11px] uppercase tracking-wider text-stone mb-0.5">Coordinador asignado</div>
+                  <div className="text-ink">Lucas Bertolini — actualización hace 6 días</div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ============== CASE MODAL ==============
+const CaseModal = ({ caso, onClose }) => {
+  if (!caso) return null;
+  return (
+    <div className="fixed inset-0 bg-ink/60 flex items-center justify-center z-50 p-4 fade-up" onClick={onClose}>
+      <div className="bg-cream rounded-sm max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto scroll-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-ocre text-cream flex items-center justify-center font-display text-xl font-semibold">
+              {caso.name.charAt(0)}
+            </div>
+            <div>
+              <div className="font-display text-xl text-ink leading-tight">{caso.name}</div>
+              <div className="text-sm text-stone">{caso.profession} · {caso.uni}</div>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink transition">
+            <Icon name="close" className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center gap-3 my-5 py-4 border-y border-ink/10">
+          <div className="text-center">
+            <div className="text-3xl mb-1">{caso.origin}</div>
+            <div className="text-[10px] uppercase tracking-wider text-stone">Origen</div>
+          </div>
+          <Icon name="arrow" className="w-5 h-5 text-ocre" />
+          <div className="text-center">
+            <div className="text-3xl mb-1">{caso.dest}</div>
+            <div className="text-[10px] uppercase tracking-wider text-stone">Destino</div>
+          </div>
+        </div>
+
+        <div className="space-y-3 text-sm">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-stone mb-0.5">Paso actual</div>
+            <div className="text-ink font-medium">{caso.step}</div>
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-stone mb-0.5">Próxima actualización programada</div>
+            <div className="text-ink">{caso.eta} · vía WhatsApp + email</div>
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-stone mb-0.5">Prioridad</div>
+            <div className={`inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-sm font-medium ${
+              caso.priority === 'alta' ? 'bg-muted/15 text-muted' :
+              caso.priority === 'media' ? 'bg-ocre/15 text-ocre' :
+              'bg-sage/15 text-sage'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                caso.priority === 'alta' ? 'bg-muted' :
+                caso.priority === 'media' ? 'bg-ocre' : 'bg-sage'
+              }`}></div>
+              {caso.priority.charAt(0).toUpperCase() + caso.priority.slice(1)}
+            </div>
+          </div>
+          <div className="pt-3 border-t border-ink/10">
+            <div className="text-[11px] uppercase tracking-wider text-stone mb-2">Pasos completados</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-xs"><Icon name="check" className="w-4 h-4 text-sage" /><span>Apostille La Haya</span></div>
+              <div className="flex items-center gap-2 text-xs"><Icon name="check" className="w-4 h-4 text-sage" /><span>Traducción jurada</span></div>
+              <div className="flex items-center gap-2 text-xs"><Icon name="check" className="w-4 h-4 text-sage" /><span>Expediente presentado</span></div>
+              <div className="flex items-center gap-2 text-xs"><Icon name="clock" className="w-4 h-4 text-ocre" /><span className="text-ocre font-medium">{caso.step} (en curso)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <button className="flex-1 bg-ocre text-cream py-2 rounded-sm text-sm font-medium hover:bg-ocre/90 transition">Abrir expediente</button>
+          <button className="px-4 py-2 border border-ink/15 rounded-sm text-sm text-ink hover:bg-bone/60 transition">Enviar WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============== AFFECTED MODAL ==============
+const AffectedModal = ({ onClose }) => {
+  const affected = [
+    'Camila Rodríguez', 'Andrés Páez', 'Lucía Pérez', 'Roberto Salazar', 'Daniela Méndez',
+    'Joaquín Rivera', 'Valeria Castro', 'Esteban Núñez', 'Patricia Vargas', 'Federico Soto',
+    'Gabriela Morales', 'Hernán Aguilar', 'Isabel Romero', 'Juan Pablo Díaz', 'Karina Fuentes',
+    'Leandro Iglesias', 'Mariana Quiroga', 'Nicolás Báez', 'Olivia Sandoval', 'Pablo Echeverría',
+    'Quintín Lara', 'Renata Suárez', 'Santiago Acuña',
+  ];
+  return (
+    <div className="fixed inset-0 bg-ink/60 flex items-center justify-center z-50 p-4 fade-up" onClick={onClose}>
+      <div className="bg-cream rounded-sm max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto scroll-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2 text-muted text-xs font-semibold uppercase tracking-wider mb-1">
+              <Icon name="alert" className="w-4 h-4" />
+              <span>Re-routing recomendado</span>
+            </div>
+            <div className="font-display text-xl text-ink leading-tight">23 casos afectados</div>
+            <div className="text-sm text-stone mt-1">España · resolución express vigente desde mayo 2026</div>
+          </div>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink transition">
+            <Icon name="close" className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="bg-bone/60 border border-ocre/20 rounded-sm p-3 mb-4 text-xs text-ink/80">
+          La nueva resolución reduce el tiempo promedio de homologación de 18 a 6 meses para títulos médicos de Venezuela, Colombia y Argentina con plan de estudios homologable. Aplica el re-routing en bulk para mover estos casos a la nueva vía.
+        </div>
+
+        <div className="border border-ink/10 rounded-sm divide-y divide-ink/5 max-h-72 overflow-y-auto scroll-hidden mb-4">
+          {affected.map((n, i) => (
+            <div key={i} className="flex items-center justify-between px-3 py-2 hover:bg-bone/50 transition text-xs">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="accent-ocre" />
+                <span className="text-ink">{n}</span>
+              </div>
+              <span className="text-stone text-[10px] uppercase tracking-wider">Elegible</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <button className="flex-1 bg-ocre text-cream py-2 rounded-sm text-sm font-medium hover:bg-ocre/90 transition">Aplicar re-routing en bulk</button>
+          <button onClick={onClose} className="px-4 py-2 border border-ink/15 rounded-sm text-sm text-ink hover:bg-bone/60 transition">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============== MAIN APP ==============
+function App() {
+  const [selectedCountry, setSelectedCountry] = useState('AR');
+  const [expandedStep, setExpandedStep] = useState(3);
+  const [openCase, setOpenCase] = useState(null);
+  const [showAffected, setShowAffected] = useState(false);
+  const [feed, setFeed] = useState(AGENT_FEED_INITIAL);
+
+  const currentRoute = ROUTES[selectedCountry];
+
+  // Live feed simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const next = AGENT_FEED_POOL[Math.floor(Math.random() * AGENT_FEED_POOL.length)];
+      setFeed((prev) => [{ ts: 'Justo ahora', emoji: next.emoji, text: next.text }, ...prev.slice(0, 5)]);
+    }, 9000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCountryClick = (code) => {
+    setSelectedCountry(code);
+    setExpandedStep(ROUTES[code].steps.findIndex((s) => s.status === 'active'));
+  };
+
+  const monthlyData = [12, 15, 18, 14, 22, 28, 24, 31, 29, 35, 38, 42];
+  const maxMonthly = Math.max(...monthlyData);
+
+  return (
+    <div className="min-h-screen bg-cream">
+      {/* Top bar */}
+      <header className="border-b border-ink/10 bg-cream/95 backdrop-blur sticky top-0 z-20">
+        <div className="px-6 py-3 flex items-center justify-between max-w-[1600px] mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-sm bg-ink text-cream flex items-center justify-center font-display text-lg font-semibold">T</div>
+            <div>
+              <div className="font-display text-lg text-ink leading-none">Trayecto</div>
+              <div className="text-[10px] uppercase tracking-wider text-stone">Reválida profesional</div>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-5 text-xs text-stone">
+            <span className="hover:text-ink cursor-pointer transition">Mi expediente</span>
+            <span className="hover:text-ink cursor-pointer transition">Recursos</span>
+            <span className="hover:text-ink cursor-pointer transition">Soporte</span>
+            <div className="w-px h-4 bg-ink/15"></div>
+            <span className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-sage"></div>
+              <span>Coordinador en línea</span>
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div className="split-view flex max-w-[1600px] mx-auto" style={{ minHeight: 'calc(100vh - 57px)' }}>
+        {/* ============ LEFT PANEL — USER ============ */}
+        <main className="left-panel px-6 py-8 border-r border-ink/10" style={{ width: '55%' }}>
+          {/* Profile header */}
+          <div className="fade-up mb-8" style={{ animationDelay: '0ms' }}>
+            <div className="text-[10px] uppercase tracking-wider text-stone mb-2">Tu perfil</div>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-ocre text-cream flex items-center justify-center font-display text-2xl font-semibold flex-shrink-0">C</div>
+              <div className="flex-1">
+                <div className="font-display text-2xl text-ink leading-tight">Camila Rodríguez</div>
+                <div className="text-sm text-stone mt-0.5 flex items-center gap-2 flex-wrap">
+                  <span>🇻🇪 Venezuela</span>
+                  <Icon name="arrow" className="w-3 h-3 text-ocre" />
+                  <span>🇦🇷 Argentina</span>
+                  <span className="text-ink/30">·</span>
+                  <span className="text-ink">Médica</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Country routes */}
+          <section className="fade-up mb-8" style={{ animationDelay: '120ms' }}>
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="font-display text-xl text-ink">Rutas posibles para tu reválida</h2>
+              <span className="text-[10px] uppercase tracking-wider text-stone">4 destinos</span>
+            </div>
+            <div className="country-grid grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {Object.values(ROUTES).map((route) => (
+                <CountryCard
+                  key={route.code}
+                  route={route}
+                  isSelected={selectedCountry === route.code}
+                  onClick={() => handleCountryClick(route.code)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Timeline */}
+          <section className="fade-up mb-8" style={{ animationDelay: '240ms' }}>
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="font-display text-xl text-ink">
+                Pasos en {currentRoute.name}
+              </h2>
+              <span className="text-[10px] uppercase tracking-wider text-stone">
+                {currentRoute.steps.filter((s) => s.status === 'done').length} de {currentRoute.steps.length} completados
+              </span>
+            </div>
+            <div className="bg-bone/30 rounded-sm p-5 border border-ink/5">
+              {currentRoute.steps.map((step, idx) => (
+                <TimelineStep
+                  key={idx}
+                  step={step}
+                  idx={idx}
+                  isLast={idx === currentRoute.steps.length - 1}
+                  isExpanded={expandedStep === idx}
+                  onToggle={() => setExpandedStep(expandedStep === idx ? -1 : idx)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* WhatsApp widget */}
+          <section className="fade-up" style={{ animationDelay: '360ms' }}>
+            <div className="text-[10px] uppercase tracking-wider text-stone mb-2">Próxima notificación</div>
+            <div className="bg-sage/8 border border-sage/30 rounded-sm p-4 flex gap-3">
+              <div className="w-9 h-9 rounded-full bg-sage text-cream flex items-center justify-center flex-shrink-0 text-base">💬</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 text-[11px] text-stone mb-1">
+                  <span className="font-medium text-ink">Lucas (coordinador)</span>
+                  <span>·</span>
+                  <span>WhatsApp · vista previa</span>
+                </div>
+                <div className="text-sm text-ink leading-relaxed font-body">
+                  Hola Camila, tu expediente entró a evaluación curricular el martes. Aviso apenas haya update — esperamos respuesta entre 4-6 semanas.
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* ============ RIGHT PANEL — COORDINATOR ============ */}
+        <aside className="right-panel px-5 py-8 bg-bone/20" style={{ width: '45%' }}>
+          {/* Header */}
+          <div className="fade-up flex items-center justify-between mb-5">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-stone mb-0.5">Vista coordinador</div>
+              <h2 className="font-display text-xl text-ink">Panel operativo</h2>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-sage font-semibold bg-sage/10 px-2 py-1 rounded-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse"></div>
+              <span>IA activa</span>
+            </div>
+          </div>
+
+          {/* Stat tiles */}
+          <div className="stat-grid grid grid-cols-2 xl:grid-cols-4 gap-2 mb-6">
+            <StatTile label="Casos activos" target={247} spark={[210, 218, 225, 230, 238, 242, 247]} delay={80} />
+            <StatTile label="Documentos hoy" target={38} spark={[22, 28, 25, 31, 35, 33, 38]} delay={160} />
+            <StatTile label="Alertas nuevas" target={2} spark={[0, 1, 1, 0, 2, 1, 2]} delay={240} />
+            <StatTile label="Ingresos mes" target={14200} prefix="$" spark={[8200, 9400, 10800, 11600, 12400, 13500, 14200]} delay={320} />
+          </div>
+
+          {/* Priority cases table */}
+          <section className="fade-up mb-6" style={{ animationDelay: '400ms' }}>
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-display text-base font-semibold text-ink">Cola prioritaria</h3>
+              <span className="text-[10px] uppercase tracking-wider text-stone">5 casos</span>
+            </div>
+            <div className="bg-cream border border-ink/10 rounded-sm overflow-hidden">
+              <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-bone/40 border-b border-ink/5 text-[10px] uppercase tracking-wider text-stone font-semibold">
+                <div className="col-span-4">Profesional</div>
+                <div className="col-span-2 text-center">Ruta</div>
+                <div className="col-span-4">Paso · ETA</div>
+                <div className="col-span-2 text-right">Prio.</div>
+              </div>
+              {PRIORITY_CASES.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => setOpenCase(c)}
+                  className="grid grid-cols-12 gap-2 px-3 py-2.5 border-b border-ink/5 last:border-b-0 hover:bg-ocre/5 transition text-xs text-left w-full items-center"
+                >
+                  <div className="col-span-4 truncate font-medium text-ink">{c.name}</div>
+                  <div className="col-span-2 text-center text-sm">{c.origin} <span className="text-stone text-[10px]">→</span> {c.dest}</div>
+                  <div className="col-span-4 text-stone truncate">{c.step} <span className="text-ink/40">·</span> {c.eta}</div>
+                  <div className="col-span-2 flex justify-end">
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-sm ${
+                      c.priority === 'alta' ? 'bg-muted/15 text-muted' :
+                      c.priority === 'media' ? 'bg-ocre/15 text-ocre' :
+                      'bg-sage/15 text-sage'
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${
+                        c.priority === 'alta' ? 'bg-muted' :
+                        c.priority === 'media' ? 'bg-ocre' : 'bg-sage'
+                      }`}></div>
+                      {c.priority}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Regulatory alerts */}
+          <section className="fade-up mb-6" style={{ animationDelay: '480ms' }}>
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-display text-base font-semibold text-ink">Alertas regulatorias</h3>
+              <span className="text-[10px] uppercase tracking-wider text-muted font-semibold">2 nuevas</span>
+            </div>
+            <div className="space-y-2">
+              <div className="bg-muted/8 border-l-4 border-muted rounded-sm p-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <Icon name="alert" className="w-4 h-4 text-muted flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="text-xs font-semibold text-ink mb-1">🇪🇸 España — resolución express vigente</div>
+                    <div className="text-xs text-ink/75 leading-relaxed">Vigente desde mayo 2026. 23 casos en cola podrían acelerarse. Re-routing recomendado.</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAffected(true)}
+                  className="ml-6 text-xs font-medium text-muted hover:text-muted/80 transition flex items-center gap-1"
+                >
+                  Revisar afectados <Icon name="chevron" className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="bg-ocre/8 border-l-4 border-ocre rounded-sm p-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <Icon name="warning" className="w-4 h-4 text-ocre flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="text-xs font-semibold text-ink mb-1">🇦🇷 UBA — cambio en traducción jurada</div>
+                    <div className="text-xs text-ink/75 leading-relaxed">Debe ser traductor matriculado en CABA. 8 casos requieren re-submisión.</div>
+                  </div>
+                </div>
+                <button className="ml-6 text-xs font-medium text-ocre hover:text-ocre/80 transition flex items-center gap-1">
+                  Aplicar fix <Icon name="chevron" className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Agent live feed */}
+          <section className="fade-up mb-6" style={{ animationDelay: '560ms' }}>
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-display text-base font-semibold text-ink flex items-center gap-2">
+                <Icon name="bot" className="w-4 h-4 text-ocre" />
+                Agente IA — actividad reciente
+              </h3>
+              <div className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-sage font-semibold">
+                <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse"></div>
+                Live
+              </div>
+            </div>
+            <div className="bg-cream border border-ink/10 rounded-sm divide-y divide-ink/5">
+              {feed.map((item, i) => (
+                <div key={`${i}-${item.text}`} className="flex gap-3 px-3 py-2.5 fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="text-base flex-shrink-0 leading-none mt-0.5">{item.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider text-stone mb-0.5">{item.ts}</div>
+                    <div className="text-xs text-ink leading-relaxed">{item.text}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Monthly chart */}
+          <section className="fade-up mb-6" style={{ animationDelay: '640ms' }}>
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-display text-base font-semibold text-ink">Casos cerrados · 12 meses</h3>
+              <span className="text-[10px] uppercase tracking-wider text-stone">2025 — 2026</span>
+            </div>
+            <div className="bg-cream border border-ink/10 rounded-sm p-4">
+              <div className="flex items-end justify-between gap-1.5 h-24">
+                {monthlyData.map((v, i) => {
+                  const isCurrent = i === monthlyData.length - 1;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className={`w-full rounded-sm transition-all ${isCurrent ? 'bg-ocre' : 'bg-ocre/25'}`}
+                        style={{ height: `${(v / maxMonthly) * 88}px`, animation: `fadeUp 0.6s ease-out ${i * 50}ms both` }}
+                      ></div>
+                      <div className={`text-[9px] uppercase tracking-wider ${isCurrent ? 'text-ocre font-semibold' : 'text-stone'}`}>
+                        {['jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr', 'may'][i]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-3 pt-3 border-t border-ink/5 flex justify-between text-[11px]">
+                <span className="text-stone">Total año: <span className="text-ink font-semibold">308 casos</span></span>
+                <span className="text-sage font-semibold">↑ 24% vs 2024</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer credit */}
+          <footer className="mt-8 pt-4 border-t border-ink/5">
+            <div className="text-[10px] text-slate-400 text-center">
+              Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com
+            </div>
+          </footer>
+        </aside>
+      </div>
+
+      {/* Modals */}
+      {openCase && <CaseModal caso={openCase} onClose={() => setOpenCase(null)} />}
+      {showAffected && <AffectedModal onClose={() => setShowAffected(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>

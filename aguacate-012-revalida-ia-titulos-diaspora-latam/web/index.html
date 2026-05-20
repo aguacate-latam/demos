@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trayecto — La ruta a tu reválida profesional</title>
+<meta name="description" content="Trayecto orquesta tu reválida profesional con un agente IA y un coordinador humano. Apostille, traducción jurada, examen de equivalencia. Pagas solo cuando ya estés ejerciendo." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Switzer:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream: '#FAF5EB',
+        ink: '#2A2520',
+        ocre: '#C8964A',
+        'ocre-dark': '#A87A36',
+        sage: '#8FA68E',
+        'sage-soft': '#C5D2C4',
+        muted: '#B85C5C',
+      },
+      fontFamily: {
+        display: ['Newsreader', 'Georgia', 'serif'],
+        body: ['Switzer', 'system-ui', 'sans-serif'],
+      },
+      maxWidth: {
+        'editorial': '1180px',
+      }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Switzer', system-ui, sans-serif;
+    background: #FAF5EB;
+    color: #2A2520;
+    font-feature-settings: "ss01", "kern";
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display { font-family: 'Newsreader', Georgia, serif; }
+
+  /* Drop cap */
+  .drop-cap::first-letter {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 4.5rem;
+    line-height: 0.9;
+    float: left;
+    padding: 0.35rem 0.6rem 0 0;
+    color: #C8964A;
+    font-weight: 500;
+  }
+
+  /* Custom SVG divider color */
+  .divider-sage { color: #8FA68E; opacity: 0.45; }
+
+  /* Hero numeral / display tuning */
+  .display-xl {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+  }
+  .display-md {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 450;
+    letter-spacing: -0.01em;
+    line-height: 1.12;
+  }
+  .numeral {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 300;
+    line-height: 1;
+    color: #C8964A;
+  }
+
+  /* CTA button */
+  .btn-primary {
+    background: #C8964A;
+    color: #FAF5EB;
+    transition: all 200ms ease;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary:hover {
+    background: #A87A36;
+    transform: translateY(-1px);
+  }
+
+  /* Text link hover */
+  .link-ocre {
+    color: #2A2520;
+    border-bottom: 1px solid #C8964A;
+    padding-bottom: 1px;
+    transition: all 200ms ease;
+  }
+  .link-ocre:hover {
+    color: #C8964A;
+  }
+
+  /* Mockup card */
+  .mockup-card {
+    background: #FFFDF8;
+    border: 1px solid rgba(143, 166, 142, 0.35);
+    box-shadow: 0 1px 0 rgba(42, 37, 32, 0.04), 0 24px 48px -24px rgba(42, 37, 32, 0.18);
+  }
+
+  /* FAQ details/summary */
+  details {
+    border-bottom: 1px solid rgba(143, 166, 142, 0.35);
+  }
+  details summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary .toggle-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: #C8964A;
+    transition: transform 250ms ease;
+  }
+  details[open] summary .toggle-icon { transform: rotate(45deg); }
+  details .answer {
+    padding: 0 0 1.75rem 0;
+    color: #4a423b;
+    max-width: 56ch;
+  }
+
+  /* Profile cards */
+  .profile-card {
+    border-top: 1px solid #C8964A;
+    padding-top: 1.5rem;
+  }
+
+  /* Section spacing */
+  section { scroll-margin-top: 80px; }
+
+  /* Small italic accent */
+  .accent-italic {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic;
+    color: #8FA68E;
+  }
+
+  /* Asymmetric grid override for mobile */
+  @media (max-width: 767px) {
+    .display-xl { font-size: clamp(2.5rem, 9vw, 3.5rem); }
+    .drop-cap::first-letter { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body class="font-body">
+
+<!-- NAV -->
+<header class="border-b border-sage-soft/40">
+  <div class="max-w-editorial mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
+    <a href="#" class="font-display text-2xl tracking-tight" style="font-weight:500;">Trayecto</a>
+    <nav class="hidden md:flex items-center gap-8 text-sm">
+      <a href="#como-funciona" class="hover:text-ocre transition">Cómo funciona</a>
+      <a href="#para-quien" class="hover:text-ocre transition">Para quién</a>
+      <a href="#faq" class="hover:text-ocre transition">Preguntas</a>
+      <a href="https://aguacate-demos.pages.dev/aguacate-012-revalida-ia-titulos-diaspora-latam/" class="btn-primary px-4 py-2 rounded-sm text-sm">Empieza tu ruta</a>
+    </nav>
+    <a href="https://aguacate-demos.pages.dev/aguacate-012-revalida-ia-titulos-diaspora-latam/" class="md:hidden btn-primary px-3 py-2 rounded-sm text-xs">Empieza</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="max-w-editorial mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-20 md:pb-28">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
+    <!-- Left: H1 + sub + CTA -->
+    <div class="md:col-span-7">
+      <p class="text-sm uppercase tracking-[0.18em] text-sage mb-6" style="font-weight:500;">Para profesionales en transición</p>
+      <h1 class="display-xl text-[3rem] md:text-[4.5rem] lg:text-[5rem] mb-8">
+        Tu título es válido.<br>
+        <span class="italic text-ocre">Hace falta</span> que el sistema lo reconozca.
+      </h1>
+      <p class="text-lg md:text-xl text-ink/80 leading-relaxed mb-10 max-w-xl">
+        Trayecto orquesta tu reválida — apostille, traducción jurada, examen de equivalencia, packaging del expediente. Te acompaña un agente IA más un coordinador humano. Pagas solo cuando ya estés ejerciendo.
+      </p>
+      <div class="flex flex-wrap items-center gap-6">
+        <a href="https://aguacate-demos.pages.dev/aguacate-012-revalida-ia-titulos-diaspora-latam/" class="btn-primary inline-flex items-center px-7 py-4 rounded-sm text-base" style="font-weight:500;">
+          Empieza tu ruta
+          <svg class="ml-2 w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a href="#como-funciona" class="text-sm link-ocre">Ver cómo funciona ↓</a>
+      </div>
+    </div>
+
+    <!-- Right: Mockup card -->
+    <div class="md:col-span-5">
+      <div class="mockup-card rounded-sm p-7 md:p-8">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-sage-soft/50">
+          <div>
+            <p class="text-[11px] uppercase tracking-[0.16em] text-sage mb-1">Tu ruta</p>
+            <p class="font-display text-xl" style="font-weight:500;">🇦🇷 Argentina · Medicina general</p>
+          </div>
+          <span class="text-xs text-ink/60">Paso 4 de 6</span>
+        </div>
+
+        <ol class="space-y-3 text-sm">
+          <li class="flex items-start gap-3">
+            <span class="numeral text-base w-4 flex-shrink-0">✓</span>
+            <div class="flex-1">
+              <p class="text-ink/90" style="text-decoration: line-through; text-decoration-color: #8FA68E;">Apostille del título — Caracas</p>
+              <p class="text-xs text-sage">Completado 14 de marzo</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="numeral text-base w-4 flex-shrink-0">✓</span>
+            <div class="flex-1">
+              <p class="text-ink/90" style="text-decoration: line-through; text-decoration-color: #8FA68E;">Traducción jurada — español neutro</p>
+              <p class="text-xs text-sage">Completado 2 de abril</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="numeral text-base w-4 flex-shrink-0">✓</span>
+            <div class="flex-1">
+              <p class="text-ink/90" style="text-decoration: line-through; text-decoration-color: #8FA68E;">Equivalencia ante el Ministerio</p>
+              <p class="text-xs text-sage">Completado 22 de abril</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 bg-ocre/8 -mx-3 px-3 py-2 rounded-sm border-l-2 border-ocre">
+            <span class="numeral text-base w-4 flex-shrink-0">4</span>
+            <div class="flex-1">
+              <p class="text-ink" style="font-weight:500;">Examen de equivalencia</p>
+              <p class="text-xs text-ink/60 mt-0.5">Agendado · 18 de mayo · Hospital de Clínicas</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 opacity-50">
+            <span class="numeral text-base w-4 flex-shrink-0">5</span>
+            <div class="flex-1">
+              <p>Matrícula provincial</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 opacity-50">
+            <span class="numeral text-base w-4 flex-shrink-0">6</span>
+            <div class="flex-1">
+              <p>Primera firma profesional</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="mt-6 pt-4 border-t border-sage-soft/50 flex items-center justify-between">
+          <p class="text-[11px] uppercase tracking-[0.16em] text-sage">Tu coordinadora</p>
+          <p class="text-sm" style="font-weight:500;">Lucía R. · responde en 6h</p>
+        </div>
+      </div>
+      <p class="text-xs text-ink/50 mt-4 text-center italic">Vista del expediente — paciente real ficticio</p>
+    </div>
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="max-w-editorial mx-auto px-6 md:px-10">
+  <svg class="divider-sage w-full h-3" viewBox="0 0 1200 12" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1">
+    <line x1="0" y1="6" x2="540" y2="6"/>
+    <circle cx="600" cy="6" r="2.5" fill="currentColor" stroke="none"/>
+    <line x1="660" y1="6" x2="1200" y2="6"/>
+  </svg>
+</div>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como-funciona" class="max-w-editorial mx-auto px-6 md:px-10 py-20 md:py-28">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 mb-16">
+    <div class="md:col-span-4">
+      <p class="text-sm uppercase tracking-[0.18em] text-sage mb-4" style="font-weight:500;">Cómo funciona</p>
+      <h2 class="display-md text-4xl md:text-5xl">Cuatro pasos. Una persona que te acompaña.</h2>
+    </div>
+    <div class="md:col-span-7 md:col-start-6 md:pt-3">
+      <p class="drop-cap text-lg leading-relaxed text-ink/80">
+        La burocracia tarda. Trayecto la navega por ti. Cada reválida tiene su propio recorrido — depende de tu profesión, tu país de origen y tu país destino. Te mostramos el mapa antes de empezar, y vamos cruzando cada paso a tu lado.
+      </p>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="space-y-14 md:space-y-20">
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
+      <div class="md:col-span-2">
+        <span class="numeral text-7xl md:text-8xl">01</span>
+      </div>
+      <div class="md:col-span-6">
+        <h3 class="font-display text-2xl md:text-3xl mb-3" style="font-weight:500;">Subes tu título por WhatsApp</h3>
+        <p class="text-ink/75 leading-relaxed max-w-lg">
+          Una foto del diploma, una del documento de identidad, y nos cuentas a qué país migraste. Eso es todo. No hace falta crear cuenta, no hace falta llenar formularios largos.
+        </p>
+      </div>
+      <div class="md:col-span-3 md:col-start-10 md:pt-2 md:border-l md:border-sage-soft/40 md:pl-6">
+        <p class="text-sm accent-italic">Promedio: 3 minutos.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
+      <div class="md:col-span-2 md:col-start-3 md:text-right">
+        <span class="numeral text-7xl md:text-8xl">02</span>
+      </div>
+      <div class="md:col-span-7 md:col-start-5">
+        <h3 class="font-display text-2xl md:text-3xl mb-3" style="font-weight:500;">Te mostramos las rutas posibles por país destino</h3>
+        <p class="text-ink/75 leading-relaxed max-w-lg">
+          El agente IA cruza tu perfil contra los requisitos vigentes del ministerio o colegio profesional correspondiente. Verás dos o tres rutas posibles, con tiempos reales, costos en USD y probabilidad de éxito según casos parecidos al tuyo.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
+      <div class="md:col-span-2">
+        <span class="numeral text-7xl md:text-8xl">03</span>
+      </div>
+      <div class="md:col-span-7">
+        <h3 class="font-display text-2xl md:text-3xl mb-3" style="font-weight:500;">El agente IA y tu coordinador arman y disparan cada paso</h3>
+        <p class="text-ink/75 leading-relaxed max-w-lg">
+          Apostille, traducción jurada certificada, agendamiento del examen de equivalencia, presentación del expediente. El sistema dispara cada trámite cuando toca, y un coordinador humano revisa antes de enviar. Tú recibes actualizaciones por WhatsApp.
+        </p>
+      </div>
+      <div class="md:col-span-3 md:col-start-10 md:pt-2 md:border-l md:border-sage-soft/40 md:pl-6">
+        <p class="text-sm accent-italic">Tu coordinador responde en menos de 6 horas, días hábiles.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-start">
+      <div class="md:col-span-2 md:col-start-3 md:text-right">
+        <span class="numeral text-7xl md:text-8xl">04</span>
+      </div>
+      <div class="md:col-span-7 md:col-start-5">
+        <h3 class="font-display text-2xl md:text-3xl mb-3" style="font-weight:500;">Pagas un porcentaje de tu primer salario credencializado</h3>
+        <p class="text-ink/75 leading-relaxed max-w-lg">
+          No pagas nada por adelantado. Cuando empieces a ejercer con tu título reconocido, devuelves un porcentaje fijo de tus primeros doce salarios. Si la reválida no llega, no pagas. Sin letra chica.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="max-w-editorial mx-auto px-6 md:px-10">
+  <svg class="divider-sage w-full h-3" viewBox="0 0 1200 12" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1">
+    <line x1="0" y1="6" x2="540" y2="6"/>
+    <circle cx="600" cy="6" r="2.5" fill="currentColor" stroke="none"/>
+    <line x1="660" y1="6" x2="1200" y2="6"/>
+  </svg>
+</div>
+
+<!-- PARA QUIÉN ES -->
+<section id="para-quien" class="max-w-editorial mx-auto px-6 md:px-10 py-20 md:py-28">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 mb-14">
+    <div class="md:col-span-5">
+      <p class="text-sm uppercase tracking-[0.18em] text-sage mb-4" style="font-weight:500;">Para quién es</p>
+      <h2 class="display-md text-4xl md:text-5xl">Tres trayectorias. Un mismo cansancio.</h2>
+    </div>
+    <div class="md:col-span-6 md:col-start-7 md:pt-4">
+      <p class="text-lg text-ink/75 leading-relaxed">
+        Cada profesión tiene su propio laberinto. Estos son los recorridos que mejor conocemos hoy — y los que te acompañamos paso a paso. Si tu profesión no aparece, escríbenos: el mapa crece cada semana.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
+
+    <article class="profile-card">
+      <h3 class="font-display text-2xl mb-4" style="font-weight:500;">Para médicos y enfermeras</h3>
+      <p class="text-ink/75 leading-relaxed">
+        El examen de equivalencia es el momento crítico — no es opcional, no se evita con experiencia. Te preparamos el expediente, te ayudamos a estudiar la parte del sistema sanitario local, y agendamos la fecha cuando ya estés lista. Si vuelves a presentar, no pagamos dos veces.
+      </p>
+    </article>
+
+    <article class="profile-card">
+      <h3 class="font-display text-2xl mb-4" style="font-weight:500;">Para ingenieros y arquitectos</h3>
+      <p class="text-ink/75 leading-relaxed">
+        El colegio profesional pesa más que el ministerio. La matriculación territorial define dónde puedes firmar planos. Trayecto identifica el colegio correcto, traduce tu portafolio cuando hace falta, y prepara la carta de motivación que la mesa directiva quiere leer.
+      </p>
+    </article>
+
+    <article class="profile-card">
+      <h3 class="font-display text-2xl mb-4" style="font-weight:500;">Para abogados y contadores</h3>
+      <p class="text-ink/75 leading-relaxed">
+        Tu título no traduce 1 a 1 — el derecho y la contabilidad son locales por diseño. Mapeamos qué materias revalidan y cuáles toca cursar. Para varias jurisdicciones existe una ruta intermedia (consultor extranjero, perito traductor) que te deja generar ingresos mientras completas la equivalencia.
+      </p>
+    </article>
+
+  </div>
+</section>
+
+<!-- Divider -->
+<div class="max-w-editorial mx-auto px-6 md:px-10">
+  <svg class="divider-sage w-full h-3" viewBox="0 0 1200 12" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1">
+    <line x1="0" y1="6" x2="540" y2="6"/>
+    <circle cx="600" cy="6" r="2.5" fill="currentColor" stroke="none"/>
+    <line x1="660" y1="6" x2="1200" y2="6"/>
+  </svg>
+</div>
+
+<!-- FAQ -->
+<section id="faq" class="max-w-editorial mx-auto px-6 md:px-10 py-20 md:py-28">
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16">
+    <div class="md:col-span-4">
+      <p class="text-sm uppercase tracking-[0.18em] text-sage mb-4" style="font-weight:500;">Preguntas</p>
+      <h2 class="display-md text-4xl md:text-5xl mb-6">Lo que la gente nos pregunta primero.</h2>
+      <p class="text-sm text-ink/65 max-w-xs">
+        ¿Tienes una duda que no aparece aquí? Escribe por WhatsApp y respondemos en el día.
+      </p>
+    </div>
+
+    <div class="md:col-span-7 md:col-start-6">
+      <details>
+        <summary>
+          <span class="font-display text-xl md:text-2xl" style="font-weight:500;">¿Cuánto cobran?</span>
+          <svg class="toggle-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+        </summary>
+        <div class="answer">
+          No cobramos nada por adelantado. Cuando ya estés ejerciendo con tu título revalidado, devuelves un porcentaje fijo de tus primeros doce salarios. Los gastos duros del trámite (apostille, traducción, tasas oficiales) los adelantamos nosotros y se descuentan del éxito.
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="font-display text-xl md:text-2xl" style="font-weight:500;">¿Cuánto tardan?</span>
+          <svg class="toggle-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+        </summary>
+        <div class="answer">
+          Depende mucho de tu profesión y país destino. Una reválida de enfermería en Argentina toma cuatro a seis meses; una de medicina en España, dieciocho a veinticuatro. Te damos el rango realista en la primera conversación, no después de que ya pagaste.
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="font-display text-xl md:text-2xl" style="font-weight:500;">¿Qué países atienden?</span>
+          <svg class="toggle-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+        </summary>
+        <div class="answer">
+          Hoy operamos para diáspora LatAm que migró a Argentina, Chile, México, España y Estados Unidos. Estamos sumando Canadá, Italia y Portugal en los próximos meses. Si tu país destino no está, escríbenos — a veces ya hay caso piloto andando.
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="font-display text-xl md:text-2xl" style="font-weight:500;">¿Qué pasa si la reválida no llega?</span>
+          <svg class="toggle-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+        </summary>
+        <div class="answer">
+          No pagas. El modelo se sostiene porque solo cobramos cuando tú ejerces, así que tenemos el mismo incentivo que tú en que la reválida salga. Si después de evaluar tu caso no vemos ruta viable, te lo decimos en la primera reunión y no avanzamos.
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="font-display text-xl md:text-2xl" style="font-weight:500;">¿Cómo se diferencia de WES o ECE?</span>
+          <svg class="toggle-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="9" y1="2" x2="9" y2="16"/><line x1="2" y1="9" x2="16" y2="9"/></svg>
+        </summary>
+        <div class="answer">
+          WES y ECE solamente certifican tu título — un papel que dice qué equivalencia tiene en el sistema educativo destino. Trayecto hace ese paso y todos los siguientes: traducción jurada, apostille, examen de equivalencia, matrícula profesional. Pasamos del "tu título equivale a X" al "ya puedes ejercer".
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="bg-ink text-cream py-24 md:py-32">
+  <div class="max-w-editorial mx-auto px-6 md:px-10">
+    <div class="max-w-3xl">
+      <p class="text-sm uppercase tracking-[0.18em] text-sage mb-6" style="font-weight:500;">Empieza ahora</p>
+      <h2 class="font-display text-4xl md:text-6xl mb-10" style="font-weight:400; letter-spacing:-0.015em; line-height:1.05;">
+        Tu identidad profesional<br>te está <span class="italic" style="color:#C8964A;">esperando.</span>
+      </h2>
+      <p class="text-lg text-cream/80 leading-relaxed mb-12 max-w-xl">
+        Subes una foto de tu título. En diez minutos tienes el mapa de tu reválida. No hay obligación de avanzar — el mapa es tuyo.
+      </p>
+      <div class="flex flex-wrap items-center gap-8">
+        <a href="https://aguacate-demos.pages.dev/aguacate-012-revalida-ia-titulos-diaspora-latam/" class="btn-primary inline-flex items-center px-8 py-4 rounded-sm text-base" style="font-weight:500;">
+          Empieza tu ruta
+          <svg class="ml-2 w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <p class="text-sm text-cream/60 max-w-xs">
+          Sin costo upfront. Sin contratos atados. Solo pagas cuando ejerces.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-cream">
+  <div class="max-w-editorial mx-auto px-6 md:px-10 pt-12 pb-10">
+    <div class="border-t border-sage/40 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="font-display text-2xl" style="font-weight:500;">Trayecto</p>
+      <p class="text-xs text-ink/45 text-center md:text-right">
+        Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
