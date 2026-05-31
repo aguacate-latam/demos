@@ -23,6 +23,12 @@ tailwind.config={theme:{extend:{
   .route{background-image:linear-gradient(90deg,#1A1625 50%,transparent 50%);background-size:12px 3px;background-repeat:repeat-x;height:3px}
   .reveal{opacity:0;transform:translateY(26px);transition:all .7s cubic-bezier(.22,1,.36,1)}
   .reveal.in{opacity:1;transform:none}
+  @keyframes pulsedot{0%{box-shadow:0 0 0 0 rgba(244,63,94,.6)}70%{box-shadow:0 0 0 7px rgba(244,63,94,0)}100%{box-shadow:0 0 0 0 rgba(244,63,94,0)}}
+  .pulse-dot{animation:pulsedot 1.7s infinite}
+  @keyframes floata{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(-2deg)}}
+  @keyframes floatb{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+  .float-a{animation:floata 3.2s ease-in-out infinite}
+  .float-b{animation:floatb 3.6s ease-in-out infinite .4s}
 </style>
 </head>
 <body>
@@ -57,26 +63,54 @@ tailwind.config={theme:{extend:{
       <p class="text-ink/45 text-sm mt-4">Sin flota nueva. Sin reintentos. Pagas por entrega exitosa.</p>
     </div>
     <div class="flex justify-center md:justify-end">
-      <div class="relative w-72 bg-white hardborder rounded-2xl p-5 shadow-card">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-[11px] font-700 text-ink/50 uppercase tracking-wide">Costo por entrega</p>
-          <span class="text-[11px] font-700 bg-lime/40 rounded-full px-2 py-0.5">98% éxito</span>
-        </div>
-        <div class="flex items-end gap-3">
-          <div>
-            <p class="text-[11px] text-ink/45">Reintento a domicilio</p>
-            <p class="font-display text-2xl font-800 text-ink/40 line-through">$3–5</p>
+      <div class="relative w-full max-w-sm">
+        <!-- mapa en vivo del barrio -->
+        <div class="bg-white hardborder rounded-3xl p-4 shadow-card">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-coral pulse-dot"></span>
+              <span class="text-[12.5px] font-700">Esquina · Catia, Caracas</span>
+            </div>
+            <span class="text-[10px] font-800 bg-lime text-ink hardborder rounded-full px-2 py-0.5">EN VIVO</span>
           </div>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14 M13 6l6 6-6 6"/></svg>
-          <div>
-            <p class="text-[11px] text-cobalt font-600">En la bodega</p>
-            <p class="font-display text-3xl font-800 text-cobalt">$2,00</p>
+          <svg viewBox="0 0 300 200" class="w-full rounded-xl hardborder" style="background:#E7ECF3" preserveAspectRatio="xMidYMid meet">
+            <!-- manzanas -->
+            <g opacity="0.85" fill="#F7F2E9" stroke="#D9D2C4" stroke-width="1">
+              <rect x="16" y="16" width="72" height="44" rx="5"/><rect x="108" y="16" width="84" height="44" rx="5"/><rect x="212" y="16" width="72" height="44" rx="5"/>
+              <rect x="16" y="82" width="84" height="52" rx="5"/><rect x="120" y="82" width="72" height="52" rx="5"/><rect x="212" y="82" width="72" height="52" rx="5"/>
+              <rect x="16" y="156" width="120" height="28" rx="5"/><rect x="156" y="156" width="128" height="28" rx="5"/>
+            </g>
+            <!-- rutas -->
+            <path id="r1" d="M47 50 C 120 64, 160 92, 236 112" fill="none" stroke="#2563EB" stroke-width="2.6" stroke-dasharray="6 6" opacity="0.75"/>
+            <path d="M47 50 C 80 110, 110 130, 150 162" fill="none" stroke="#1A1625" stroke-width="2" stroke-dasharray="5 7" opacity="0.28"/>
+            <path d="M47 50 C 130 28, 190 36, 250 46" fill="none" stroke="#1A1625" stroke-width="2" stroke-dasharray="5 7" opacity="0.28"/>
+            <!-- depósito -->
+            <rect x="30" y="36" width="30" height="28" rx="6" fill="#1A1625"/>
+            <rect x="37" y="44" width="16" height="4" rx="1" fill="#A3E635"/><rect x="37" y="52" width="16" height="4" rx="1" fill="#A3E635"/>
+            <!-- pin bodega (rosa) -->
+            <circle cx="250" cy="46" r="13" fill="#F43F5E" stroke="#1A1625" stroke-width="2"/><rect x="244" y="41" width="12" height="10" rx="2" fill="#fff"/>
+            <!-- pin bodega (cobalto) -->
+            <circle cx="150" cy="162" r="13" fill="#2563EB" stroke="#1A1625" stroke-width="2"/><rect x="144" y="157" width="12" height="10" rx="2" fill="#fff"/>
+            <!-- pin EN VIVO (lima) con pulso -->
+            <circle cx="236" cy="112" r="13" fill="none" stroke="#A3E635" stroke-width="2.5"><animate attributeName="r" values="13;28" dur="1.7s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.85;0" dur="1.7s" repeatCount="indefinite"/></circle>
+            <circle cx="236" cy="112" r="13" fill="#A3E635" stroke="#1A1625" stroke-width="2"/><rect x="230" y="107" width="12" height="10" rx="2" fill="#1A1625"/>
+            <!-- paquete viajando -->
+            <rect x="-6" y="-6" width="12" height="12" rx="2" fill="#1A1625" stroke="#A3E635" stroke-width="1.6"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#r1"/></animateMotion></rect>
+          </svg>
+          <div class="flex items-center justify-between mt-2.5 text-[12.5px]">
+            <span class="font-700 flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-cobalt"></span>38 bodegas activas</span>
+            <span class="font-700 text-cobalt">342 paquetes hoy</span>
           </div>
         </div>
-        <div class="route my-4"></div>
-        <div class="flex items-center gap-2 bg-cobalt/8 hardborder rounded-xl px-3 py-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10V21h16V10 M3 6l1-3h16l1 3 M3 6h18"/></svg>
-          <span class="text-sm font-700">38 bodegas en el barrio</span>
+        <!-- tarjeta flotante: margen -->
+        <div class="absolute -top-3 -right-2 bg-ink text-sand hardborder rounded-2xl px-3 py-2 shadow-card float-a" style="border-color:#A3E635">
+          <p class="text-[10px] text-lime font-700 uppercase tracking-wide">Entregado ✓</p>
+          <p class="font-display font-800 text-sm leading-tight">+$2,00 <span class="text-sand/55 font-400 text-[11px]">a tu margen</span></p>
+        </div>
+        <!-- tarjeta flotante: bodega -->
+        <div class="absolute -bottom-4 -left-3 bg-white hardborder rounded-2xl px-3 py-2 shadow-card float-b">
+          <p class="text-[10px] text-ink/50 font-700 uppercase tracking-wide">Bodega de don Aníbal</p>
+          <p class="font-display font-800 text-sm leading-tight">12 entregas hoy</p>
         </div>
       </div>
     </div>
