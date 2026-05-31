@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nido — Ten un pedacito de ciudad, $5 a la vez</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{
+  colors:{cream:'#FBF9F6',ink:'#2A2540',lav:'#7C5CCE','lav-soft':'#C9B8E8',butter:'#F2D45C',sky:'#4A90D9','sky-soft':'#A8D0F0',rose:'#E8B8C4',moss:'#3F9D7A'},
+  fontFamily:{display:['Newsreader','serif'],sans:['"Plus Jakarta Sans"','sans-serif']}
+}}}
+</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Plus Jakarta Sans',sans-serif;color:#2A2540}
+  .font-600{font-weight:600}.font-700{font-weight:700}.font-800{font-weight:800}
+  .reveal{opacity:0;transform:translateY(26px);transition:all .8s cubic-bezier(.22,1,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+  .soft{box-shadow:0 18px 50px -20px rgba(42,37,64,.25)}
+  .brick{transition:height 1.6s cubic-bezier(.22,1,.36,1)}
+</style>
+</head>
+<body class="bg-cream">
+
+<!-- NAV -->
+<nav class="fixed top-0 inset-x-0 z-40 backdrop-blur bg-cream/80">
+  <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-2xl bg-lav flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5"/></svg>
+      </div>
+      <span class="font-display text-2xl font-600">Nido</span>
+    </div>
+    <a href="https://aguacate-demos.pages.dev/aguacate-013-micro-inversion-inmobiliaria-automatica/" class="bg-lav text-white rounded-full px-5 py-2 text-sm font-700 soft hover:opacity-90 transition">Empieza con $5</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="relative overflow-hidden pt-16" style="background:radial-gradient(1100px 600px at 78% -10%, #E9DBFB 0%, #FBF9F6 55%, #EAF1F8 100%)">
+  <div class="max-w-6xl mx-auto px-5 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <span class="inline-block bg-butter/60 text-ink/70 rounded-full px-3 py-1 text-xs font-700 mb-5">Tu pedacito de ladrillo, $5 a la vez</span>
+      <h1 class="font-display text-5xl md:text-6xl leading-[1.05] font-600">Ten un pedacito de ciudad. <span class="text-lav">Empieza con $5.</span></h1>
+      <p class="text-ink/65 text-lg mt-5 max-w-md">Ahorra montos diminutos en automático y vuélvete dueño de departamentos que te pagan renta cada mes. Sin enganche, sin ser experto.</p>
+      <div class="flex flex-wrap items-center gap-3 mt-7">
+        <a href="https://aguacate-demos.pages.dev/aguacate-013-micro-inversion-inmobiliaria-automatica/" class="bg-lav text-white rounded-full px-7 py-3.5 font-700 soft hover:opacity-90 transition">Empieza con $5</a>
+        <a href="#como" class="text-ink/70 font-700 px-4 py-3.5 hover:text-lav transition">Ver cómo funciona →</a>
+      </div>
+      <p class="text-ink/45 text-sm mt-4">La renta es tuya, completa. Sacas tu plata cuando quieras.</p>
+    </div>
+    <!-- building fills -->
+    <div class="flex justify-center md:justify-end">
+      <div class="relative w-64 h-72 rounded-[28px] bg-white/70 soft p-5 flex items-end">
+        <div class="relative w-full h-full rounded-2xl bg-lav-soft/40 overflow-hidden border border-lav-soft">
+          <div id="fill" class="brick absolute bottom-0 inset-x-0 bg-lav/80" style="height:0%"></div>
+          <div class="absolute inset-0 grid grid-cols-3 gap-2 p-3 opacity-50">
+            <script>document.write(Array.from({length:18}).map(()=>'<div class=\"bg-white/55 rounded-[3px]\"></div>').join(''))</script>
+          </div>
+          <div class="absolute top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[42px] border-r-[42px] border-b-[28px] border-l-transparent border-r-transparent border-b-lav/80"></div>
+        </div>
+        <div class="absolute -bottom-3 -left-3 bg-white rounded-2xl px-3 py-2 soft">
+          <p class="text-[11px] text-ink/50 font-600">Tu nido</p>
+          <p class="font-display text-xl font-700 text-lav">$1.240</p>
+        </div>
+        <div class="absolute -top-3 -right-3 bg-moss text-white rounded-2xl px-3 py-2 soft">
+          <p class="text-[11px] opacity-80 font-600">Renta / mes</p>
+          <p class="font-display text-lg font-700">+$8,60</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section class="py-24 px-5 bg-cream">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="font-display text-4xl md:text-5xl font-600 leading-tight">El ladrillo siempre fue para los que ya tienen.</h2>
+    <p class="text-ink/65 text-lg mt-5">Para el enganche necesitas juntar años. La renta, en cambio, te sube todos los meses. Y el activo donde tu familia siempre guardó la plata —una casa, un local— es justo el que no alcanzas a tocar.</p>
+    <p class="font-display text-2xl text-lav mt-6 font-500">Nido te deja entrar por la puerta chica: un pedacito, automático, tuyo.</p>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="como" class="py-24 px-5" style="background:linear-gradient(180deg,#F3ECFB 0%,#EAF1F8 100%)">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-center text-ink/50 font-700 uppercase tracking-wider text-sm mb-3 reveal">Cómo se siente</p>
+    <h2 class="text-center font-display text-4xl font-600 mb-14 reveal">Tres pasos, y ya eres dueño de un pedacito</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-3xl p-7 soft reveal">
+        <div class="w-12 h-12 rounded-2xl bg-lav-soft flex items-center justify-center mb-4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C5CCE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div>
+        <p class="text-ink/40 font-700 text-sm">01</p>
+        <h3 class="font-display text-2xl font-600 mt-1">Pones $5 a la semana</h3>
+        <p class="text-ink/60 mt-2">Un débito chiquito y automático —o el vuelto de tus compras. Ni sientes que sale.</p>
+      </div>
+      <div class="bg-white rounded-3xl p-7 soft reveal" style="transition-delay:.1s">
+        <div class="w-12 h-12 rounded-2xl bg-sky-soft flex items-center justify-center mb-4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5"/></svg></div>
+        <p class="text-ink/40 font-700 text-sm">02</p>
+        <h3 class="font-display text-2xl font-600 mt-1">Se reparte en varios edificios</h3>
+        <p class="text-ink/60 mt-2">Tu plata entra a departamentos y locales que rentan. No eliges nada: se diversifica solo.</p>
+      </div>
+      <div class="bg-white rounded-3xl p-7 soft reveal" style="transition-delay:.2s">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style="background:#BFE3D4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3F9D7A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="8" cy="6" rx="5" ry="2.5"/><path d="M3 6v5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V6"/><ellipse cx="16" cy="14" rx="5" ry="2.5"/><path d="M11 14v5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-5"/></svg></div>
+        <p class="text-ink/40 font-700 text-sm">03</p>
+        <h3 class="font-display text-2xl font-600 mt-1">Cobras renta cada mes</h3>
+        <p class="text-ink/60 mt-2">Tu parte de la renta te llega completa. Mientras tanto, tu pedacito crece solo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="py-24 px-5 bg-cream">
+  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+    <div class="rounded-3xl p-8 reveal" style="background:#EFE7FA">
+      <h3 class="font-display text-2xl font-600">La renta es tuya, completa</h3>
+      <p class="text-ink/60 mt-2">No te cobramos por entrar ni te descontamos de la renta. Lo que rinde tu pedacito, llega a ti.</p>
+    </div>
+    <div class="rounded-3xl p-8 reveal" style="background:#E7F0FA;transition-delay:.1s">
+      <h3 class="font-display text-2xl font-600">Sacas tu plata en días</h3>
+      <p class="text-ink/60 mt-2">¿Necesitas el dinero? Vendes tu fracción y la tienes en días, no en años. Sin candados.</p>
+    </div>
+    <div class="rounded-3xl p-8 reveal" style="background:#FBEEF1;transition-delay:.2s">
+      <h3 class="font-display text-2xl font-600">No tienes que saber de nada</h3>
+      <p class="text-ink/60 mt-2">Nido arma y cuida el portafolio por ti. Tú solo ves crecer tu nido.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="py-24 px-5" style="background:linear-gradient(180deg,#EAF1F8 0%,#F3ECFB 100%)">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <svg class="mx-auto mb-5" width="40" height="40" viewBox="0 0 24 24" fill="#C9B8E8"><path d="M7 7h4v4c0 3-2 5-5 5V14c1 0 1.5-.5 1.5-1.5H7V7zm9 0h4v4c0 3-2 5-5 5v-2c1 0 1.5-.5 1.5-1.5H16V7z"/></svg>
+    <p class="font-display text-3xl md:text-4xl font-500 leading-snug">"Nunca pensé que podía ser dueña de algo. Hoy tengo un pedacito de tres edificios —y ni siento que el dinero sale."</p>
+    <p class="text-ink/55 mt-6 font-700">Daniela, 29 · arrienda, ahorra con Nido</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="py-24 px-5 bg-cream">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="font-display text-4xl md:text-5xl font-600 leading-tight">Tu primer pedacito te está esperando.</h2>
+    <p class="text-ink/60 text-lg mt-4">Empieza con lo que te sobra esta semana. $5 alcanzan.</p>
+    <a href="https://aguacate-demos.pages.dev/aguacate-013-micro-inversion-inmobiliaria-automatica/" class="inline-block mt-7 bg-lav text-white rounded-full px-9 py-4 text-lg font-700 soft hover:opacity-90 transition">Empieza con $5</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-ink text-cream/80 py-12 px-5">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl bg-lav flex items-center justify-center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5"/></svg></div>
+      <span class="font-display text-xl font-600 text-cream">Nido</span>
+    </div>
+    <div class="text-center md:text-right">
+      <p class="text-cream/55 text-sm">Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com</p>
+      <p class="text-cream/35 text-xs mt-1">Nido es un demo conceptual, no un producto financiero real.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // fill the building on load
+  window.addEventListener('load',()=>{ setTimeout(()=>{ document.getElementById('fill').style.height='62%'; },350); });
+  // reveal on scroll
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
