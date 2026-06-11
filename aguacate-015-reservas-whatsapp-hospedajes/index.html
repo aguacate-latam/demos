@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hospeda — Tu recepción nunca duerme</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cocoa: '#3E2A1C', cocoadeep: '#2B1D13', arena: '#F8F1E5', arenasoft: '#FDF8EF',
+        coral: '#E8604C', coraldark: '#C94B39', azafran: '#E0A43C', palma: '#1F5C45', palmasoft: '#E5F0EA'
+      },
+      fontFamily: { display: ['"Crimson Pro"','serif'], body: ['Manrope','sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+  body { background:#F8F1E5; font-family:Manrope,sans-serif; }
+  .chat-bg { background: linear-gradient(180deg,#F2E8D8 0%,#EFE3D0 100%); }
+  @keyframes popIn { 0%{opacity:0; transform:translateY(10px) scale(.97);} 100%{opacity:1; transform:translateY(0) scale(1);} }
+  .pop { animation: popIn .35s ease-out both; }
+  @keyframes blockIn { 0%{transform:scale(.4); opacity:0;} 60%{transform:scale(1.08);} 100%{transform:scale(1); opacity:1;} }
+  .block-in { animation: blockIn .5s ease-out both; }
+  @keyframes typing { 0%,80%,100%{transform:translateY(0);} 40%{transform:translateY(-4px);} }
+  .dot { animation: typing 1s infinite; }
+  .dot:nth-child(2){ animation-delay:.15s } .dot:nth-child(3){ animation-delay:.3s }
+  ::-webkit-scrollbar{ width:6px; height:6px } ::-webkit-scrollbar-thumb{ background:#d8c9b2; border-radius:3px }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const fmt = n => '$' + n.toLocaleString('en-US');
+
+const ROOMS = ['Guayacán','Ceiba','Flamboyán'];
+const DAYS = ['Lun 8','Mar 9','Mié 10','Jue 11','Vie 12','Sáb 13','Dom 14'];
+
+// Reservas base del calendario (room index, day index)
+const BASE_BOOKINGS = [
+  { room:1, day:1, label:'M. Pérez' },
+  { room:1, day:2, label:'M. Pérez' },
+  { room:2, day:4, label:'L. Gómez' },
+];
+
+const ARRIVALS_BASE = [
+  { nombre:'Marta Pérez', fechas:'Mar 9 – Jue 11', anticipo:38, rail:'Yappy' },
+  { nombre:'Luis Gómez', fechas:'Vie 12', anticipo:30, rail:'Deuna' },
+];
+
+// Guiones de conversación
+const FLOW_A = [
+  { who:'guest', text:'Hola 👋 ¿Tienen algo para este sábado, 2 personas?' },
+  { who:'agent', text:'¡Hola Carla! Sí: la cabaña Guayacán está libre el sábado 13 — $85 USD la noche, desayuno incluido. ¿Te la aparto con un anticipo de $40 USD?' },
+  { who:'guest', text:'Sí, dale. ¿Cómo pago?' },
+  { who:'agent', text:'Te dejo el link de pago. Detecté tu número de Costa Rica: puedes pagar con Sinpe Móvil o tarjeta 👇' },
+  { who:'pay' },
+  { who:'agent', text:'✓ Anticipo recibido. Reserva confirmada para el sábado 13. Te espero con estas indicaciones: del cruce principal, 800m hacia la montaña, portón de madera. Te escribo un recordatorio el viernes.' },
+];
+const FLOW_B_OPEN = [
+  { who:'guest', text:'Buenas, ¿tienen la cabaña Flamboyán para el miércoles?' },
+  { who:'agent', text:'Hola Diego — el miércoles 10 la Flamboyán está libre. $72 USD la noche. ¿La confirmo con anticipo de $35 USD?' },
+];
+const FLOW_B_BLOCKED = [
+  { who:'guest', text:'Buenas, ¿tienen la cabaña Flamboyán para el miércoles?' },
+  { who:'agent', text:'Hola Diego — el miércoles 10 la Flamboyán está en mantenimiento. Te ofrezco la fecha más cercana: jueves 11, $72 USD la noche. ¿Te sirve?' },
+];
+
+function PayCard({ paid, onPay }) {
+  return (
+    <div className="pop max-w-[240px] bg-white rounded-2xl border border-[#e6d9c4] shadow-sm overflow-hidden">
+      <div className="px-4 pt-3 pb-2">
+        <p className="text-[11px] font-semibold tracking-wide text-cocoa/60 uppercase">Hospeda · Link de pago</p>
+        <p className="font-display text-2xl text-cocoa font-semibold mt-1">$40 USD</p>
+        <p className="text-xs text-cocoa/70">Anticipo · Cabaña Guayacán · Sáb 13</p>
+      </div>
+      {paid ? (
+        <div className="bg-palmasoft px-4 py-2.5 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1F5C45"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span className="text-sm font-semibold text-palma">Pagado con Sinpe Móvil</span>
+        </div>
+      ) : (
+        <button onClick={onPay} className="w-full bg-coral hover:bg-coraldark transition-colors text-white text-sm font-bold py-2.5">
+          Pagar con Sinpe Móvil
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Bubble({ who, children }) {
+  const guest = who === 'guest';
+  return (
+    <div className={'pop flex ' + (guest ? 'justify-start' : 'justify-end')}>
+      <div className={(guest
+        ? 'bg-white text-cocoa rounded-2xl rounded-bl-sm'
+        : 'bg-palma text-white rounded-2xl rounded-br-sm')
+        + ' max-w-[78%] px-3.5 py-2.5 text-[13.5px] leading-snug shadow-sm'}>
+        {children}
+        <span className={'block text-right text-[10px] mt-1 ' + (guest ? 'text-cocoa/40' : 'text-white/60')}>11:1{guest?'4':'5'} pm ✓✓</span>
+      </div>
+    </div>
+  );
+}
+
+function Typing() {
+  return (
+    <div className="pop flex justify-end">
+      <div className="bg-palma/90 rounded-2xl rounded-br-sm px-4 py-3 flex gap-1.5">
+        <span className="dot w-1.5 h-1.5 bg-white/80 rounded-full inline-block"></span>
+        <span className="dot w-1.5 h-1.5 bg-white/80 rounded-full inline-block"></span>
+        <span className="dot w-1.5 h-1.5 bg-white/80 rounded-full inline-block"></span>
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, accent, sub }) {
+  return (
+    <div className="bg-white rounded-xl border border-[#eadfca] p-3.5 flex-1 min-w-[120px]">
+      <p className="text-[10.5px] font-bold uppercase tracking-wide text-cocoa/50">{label}</p>
+      <p className={'font-display font-semibold text-[26px] leading-tight mt-0.5 ' + accent}>{value}</p>
+      {sub && <p className="text-[11px] text-cocoa/55 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+function App() {
+  const [msgs, setMsgs] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const [flow, setFlow] = useState('A');
+  const [blocked, setBlocked] = useState({});           // 'room-day' -> true
+  const [confirmed, setConfirmed] = useState(false);     // reserva de Carla en calendario
+  const [anticipos, setAnticipos] = useState(0);
+  const [displayAnt, setDisplayAnt] = useState(0);
+  const chatRef = useRef(null);
+  const timers = useRef([]);
+
+  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+
+  // contador animado desde $0
+  useEffect(() => {
+    let raf; const start = displayAnt; const target = anticipos; const t0 = performance.now();
+    const tick = (t) => {
+      const p = Math.min((t - t0) / 700, 1);
+      setDisplayAnt(Math.round(start + (target - start) * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [anticipos]);
+
+  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [msgs, typing]);
+
+  const playScript = useCallback((script) => {
+    clearTimers(); setMsgs([]); setPaid(false); setTyping(false);
+    let delay = 500;
+    script.forEach((m) => {
+      if (m.who === 'agent') {
+        timers.current.push(setTimeout(() => setTyping(true), delay));
+        delay += 900;
+      }
+      timers.current.push(setTimeout(() => { setTyping(false); setMsgs(prev => [...prev, m]); }, delay));
+      delay += m.who === 'pay' ? 700 : 1100;
+    });
+  }, []);
+
+  // flujo A al cargar + contador del mes anima desde $0
+  useEffect(() => {
+    playScript(FLOW_A.slice(0, 5));
+    const t = setTimeout(() => setAnticipos(68), 600);
+    timers.current.push(t);
+    return clearTimers;
+  }, []);
+
+  const handlePay = () => {
+    if (paid || confirmed) return;
+    setPaid(true);
+    setAnticipos(a => a + 40);
+    setConfirmed(true);
+    timers.current.push(setTimeout(() => setTyping(true), 500));
+    timers.current.push(setTimeout(() => { setTyping(false); setMsgs(prev => [...prev, FLOW_A[5]]); }, 1500));
+  };
+
+  const replay = () => {
+    if (flow === 'A') { setFlow('B'); playScript(blocked['2-2'] ? FLOW_B_BLOCKED : FLOW_B_OPEN); }
+    else { setFlow('A'); playScript(FLOW_A.slice(0, 5)); }
+  };
+
+  const toggleBlock = (r, d) => {
+    const key = r + '-' + d;
+    const isBase = BASE_BOOKINGS.some(b => b.room === r && b.day === d);
+    const isCarla = confirmed && r === 0 && d === 5;
+    if (isBase || isCarla) return;
+    setBlocked(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const ahorroOTA = Math.round((anticipos + 102) * 0.18 + (confirmed ? 15 : 0));
+  const arrivals = confirmed
+    ? [{ nombre:'Carla Jiménez', fechas:'Sáb 13', anticipo:40, rail:'Sinpe Móvil' }, ...ARRIVALS_BASE]
+    : ARRIVALS_BASE;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Top bar */}
+      <header className="bg-cocoadeep text-arena px-5 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="3" y="10" width="26" height="18" rx="3" fill="#E8604C"/><path d="M3 14l13-9 13 9" stroke="#E0A43C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/><circle cx="16" cy="20" r="3.5" fill="#F8F1E5"/></svg>
+          <div>
+            <p className="font-display font-bold text-lg leading-none">Hospeda</p>
+            <p className="text-[10.5px] text-arena/60 leading-none mt-0.5">Tu recepción nunca duerme</p>
+          </div>
+        </div>
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold bg-white/10 rounded-full px-3 py-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-azafran inline-block"></span> Simulación en vivo
+        </span>
+      </header>
+
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-0 max-w-[1200px] w-full mx-auto">
+        {/* ——— Panel izquierdo: chat ——— */}
+        <section className="chat-bg border-r border-[#e3d5bf] flex flex-col h-[560px] lg:h-[620px]">
+          <div className="bg-palma text-white px-4 py-2.5 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-arena flex items-center justify-center font-display font-bold text-palma">M</div>
+            <div className="flex-1">
+              <p className="text-sm font-bold leading-none">Cabañas El Mirador</p>
+              <p className="text-[11px] text-white/70 leading-none mt-1">atendido por Hospeda · responde en segundos</p>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z" stroke="#fff" strokeWidth="1.6"/></svg>
+          </div>
+          <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2.5">
+            <p className="text-center"><span className="text-[10px] bg-white/70 text-cocoa/60 rounded-full px-3 py-1 font-semibold">Hoy</span></p>
+            {msgs.map((m, i) =>
+              m.who === 'pay'
+                ? <div key={i} className="flex justify-end"><PayCard paid={paid || confirmed} onPay={handlePay} /></div>
+                : <Bubble key={i} who={m.who}>{m.text}</Bubble>
+            )}
+            {typing && <Typing />}
+          </div>
+          <div className="px-4 py-3 bg-arenasoft border-t border-[#e8dcc6] flex items-center justify-between gap-3">
+            <p className="text-[11px] text-cocoa/55 leading-tight">El huésped escribe; el agente cotiza, cobra y confirma.</p>
+            <button onClick={replay} className="shrink-0 text-xs font-bold text-coral border border-coral/40 hover:bg-coral hover:text-white transition-colors rounded-full px-3.5 py-1.5">
+              {flow === 'A' ? 'Reproducir otra conversación' : 'Volver a la reserva de Carla'}
+            </button>
+          </div>
+        </section>
+
+        {/* ——— Panel derecho: la dueña ——— */}
+        <section className="bg-arena px-5 py-5 lg:px-7 overflow-y-auto h-auto lg:h-[620px]">
+          <p className="font-display text-[22px] text-cocoa font-semibold leading-tight">Buenas noches, Rosa</p>
+          <p className="text-[12.5px] text-cocoa/60 mb-4">El agente atendió mientras dormías.</p>
+
+          <div className="flex flex-wrap gap-3 mb-5">
+            <Metric label="Anticipos capturados este mes" value={fmt(displayAnt)} accent="text-coral" sub={confirmed ? 'incluye $40 de Carla (Sinpe Móvil)' : '2 reservas con anticipo'} />
+            <Metric label="No-shows evitados" value={confirmed ? '3' : '2'} accent="text-palma" sub="reservas con anticipo que sí llegaron" />
+            <Metric label="Ahorrado vs comisión de OTA" value={fmt(ahorroOTA)} accent="text-azafran" sub="reserva directa, sin 15-25%" />
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#eadfca] p-4 mb-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-extrabold text-cocoa">Semana del 8 al 14 de junio</p>
+              <p className="text-[10.5px] text-cocoa/50">toca una celda libre para bloquearla (mantenimiento)</p>
+            </div>
+            <div className="grid" style={{ gridTemplateColumns: '86px repeat(7, 1fr)', gap: '4px' }}>
+              <div></div>
+              {DAYS.map(d => <div key={d} className="text-center text-[10.5px] font-bold text-cocoa/55 pb-1">{d}</div>)}
+              {ROOMS.map((room, r) => (
+                <React.Fragment key={room}>
+                  <div className="text-[11.5px] font-bold text-cocoa/75 flex items-center">{room}</div>
+                  {DAYS.map((_, d) => {
+                    const base = BASE_BOOKINGS.find(b => b.room === r && b.day === d);
+                    const isCarla = confirmed && r === 0 && d === 5;
+                    const isBlocked = blocked[r + '-' + d];
+                    let cls = 'h-9 rounded-md text-[9.5px] font-bold flex items-center justify-center cursor-pointer transition-colors ';
+                    let label = '';
+                    if (isCarla) { cls += 'block-in bg-coral text-white'; label = 'Carla ✓'; }
+                    else if (base) { cls += 'bg-palma/85 text-white cursor-default'; label = base.label; }
+                    else if (isBlocked) { cls += 'bg-cocoa/70 text-arena'; label = 'Mant.'; }
+                    else { cls += 'bg-arenasoft border border-dashed border-[#d9c9ab] hover:border-coral/60 text-transparent'; label = '·'; }
+                    return <div key={d} className={cls} onClick={() => toggleBlock(r, d)}>{label}</div>;
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+            {blocked['2-2'] && <p className="text-[11px] text-cocoa/60 mt-2.5">La Flamboyán quedó bloqueada el miércoles — el agente ya ofrece la fecha alternativa en el chat (pruébalo con "Reproducir otra conversación").</p>}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#eadfca] p-4">
+            <p className="text-sm font-extrabold text-cocoa mb-2.5">Próximas llegadas</p>
+            <div className="space-y-2">
+              {arrivals.map((a, i) => (
+                <div key={i} className={(i === 0 && confirmed ? 'pop ' : '') + 'flex items-center justify-between text-[12.5px] border-b border-dashed border-[#eee2cb] last:border-0 pb-2 last:pb-0'}>
+                  <div>
+                    <p className="font-bold text-cocoa">{a.nombre}</p>
+                    <p className="text-cocoa/55 text-[11px]">{a.fechas}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-palma">{fmt(a.anticipo)} pagado</p>
+                    <p className="text-cocoa/55 text-[11px]">vía {a.rail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="text-center py-3">
+        <p className="text-[11px] text-cocoa/40">Hospeda es un demo conceptual. Idea original: <a className="underline hover:text-cocoa/70" href="https://aguacate-newsletter.beehiiv.com" target="_blank" rel="noopener">Aguacate newsletter — aguacate-newsletter.beehiiv.com</a></p>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
