@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hospeda — Tu recepción nunca duerme</title>
+<meta name="description" content="Hospeda responde a tus huéspedes por WhatsApp, cobra el anticipo y confirma la reserva — aunque sean las 11 de la noche." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { cocoa:'#3E2A1C', cocoadeep:'#2B1D13', arena:'#F8F1E5', arenasoft:'#FDF8EF', coral:'#E8604C', coraldark:'#C94B39', azafran:'#E0A43C', palma:'#1F5C45' },
+      fontFamily: { display:['"Crimson Pro"','serif'], body:['Manrope','sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: Manrope, sans-serif; background:#F8F1E5; color:#3E2A1C; }
+  .hero-bg {
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(224,164,60,.35), transparent 60%),
+      radial-gradient(700px 460px at -10% 110%, rgba(31,92,69,.30), transparent 60%),
+      linear-gradient(160deg, #2B1D13 0%, #3E2A1C 55%, #4a3322 100%);
+  }
+  .sol { position:absolute; border-radius:9999px; filter:blur(2px); }
+  .reveal { opacity:0; transform:translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.on { opacity:1; transform:none; }
+  .step-num { font-family:"Crimson Pro",serif; font-style:italic; }
+  .wave { display:block; width:100%; height:70px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO full-bleed ===== -->
+<header class="hero-bg relative overflow-hidden min-h-[92vh] flex flex-col">
+  <span class="sol w-40 h-40 bg-azafran/70 top-16 right-[12%] hidden md:block"></span>
+  <span class="sol w-6 h-6 bg-coral/80 top-40 right-[30%] hidden md:block"></span>
+
+  <nav class="relative z-10 flex items-center justify-between px-6 md:px-12 py-5">
+    <div class="flex items-center gap-2.5 text-arena">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="3" y="10" width="26" height="18" rx="3" fill="#E8604C"/><path d="M3 14l13-9 13 9" stroke="#E0A43C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="20" r="3.5" fill="#F8F1E5"/></svg>
+      <span class="font-display font-bold text-2xl">Hospeda</span>
+    </div>
+    <div class="hidden md:flex items-center gap-7 text-arena/80 text-sm font-semibold">
+      <a href="#como" class="hover:text-arena transition-colors">Cómo funciona</a>
+      <a href="#recuperas" class="hover:text-arena transition-colors">Lo que recuperas</a>
+      <a href="../" class="bg-coral hover:bg-coraldark transition-colors text-white px-4 py-2 rounded-full">Prueba el demo</a>
+    </div>
+    <a href="../" class="md:hidden bg-coral text-white text-sm font-bold px-4 py-2 rounded-full">Demo</a>
+  </nav>
+
+  <div class="relative z-10 flex-1 flex items-center px-6 md:px-12 pb-16">
+    <div class="max-w-3xl">
+      <p class="text-azafran font-bold tracking-[0.18em] uppercase text-xs mb-5">Para posadas, cabañas y hostales</p>
+      <h1 class="font-display text-arena font-semibold leading-[1.02] text-5xl md:text-7xl">
+        Tu recepción<br /><em class="text-coral not-italic" style="font-style:italic">nunca duerme.</em>
+      </h1>
+      <p class="text-arena/80 text-lg md:text-xl mt-6 max-w-xl leading-relaxed">
+        Hospeda responde a tus huéspedes por WhatsApp, cobra el anticipo y confirma la reserva — aunque sean las 11 de la noche.
+      </p>
+      <div class="flex flex-wrap items-center gap-4 mt-9">
+        <a href="../" class="bg-coral hover:bg-coraldark transition-colors text-white font-bold px-7 py-3.5 rounded-full text-base">Prueba el demo</a>
+        <a href="#como" class="text-arena/80 hover:text-arena font-semibold border border-arena/30 hover:border-arena/60 transition-colors px-6 py-3.5 rounded-full text-base">Mira cómo funciona</a>
+      </div>
+      <div class="mt-10 inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-2xl px-4 py-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1F5C45"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="text-arena/90 text-sm"><span class="font-bold">Anticipo de $40 recibido.</span> Reserva confirmada para el sábado.</p>
+      </div>
+    </div>
+  </div>
+
+  <svg class="wave relative z-10" viewBox="0 0 1440 70" preserveAspectRatio="none"><path d="M0,40 C240,75 480,5 720,30 C960,55 1200,20 1440,45 L1440,70 L0,70 Z" fill="#F8F1E5"/></svg>
+</header>
+
+<!-- ===== CÓMO FUNCIONA — scrolling story ===== -->
+<section id="como" class="px-6 md:px-12 py-20 max-w-5xl mx-auto">
+  <p class="text-coral font-bold tracking-[0.18em] uppercase text-xs mb-3 reveal">Cómo funciona</p>
+  <h2 class="font-display font-semibold text-4xl md:text-5xl leading-tight max-w-2xl reveal">Tres pasos que pasan solos, mientras haces otra cosa.</h2>
+
+  <div class="mt-14 space-y-16">
+    <div class="grid md:grid-cols-[90px_1fr_280px] gap-6 items-center reveal">
+      <span class="step-num text-7xl text-azafran font-semibold leading-none">1</span>
+      <div>
+        <h3 class="font-display text-2xl font-semibold mb-2">El huésped escribe al número de siempre</h3>
+        <p class="text-cocoa/75 leading-relaxed">El mismo WhatsApp que ya tienes. Hospeda contesta en segundos con fechas libres y precio — a las 7am o a las 11pm.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-[#eadfca] p-4 shadow-sm">
+        <div class="bg-arenasoft rounded-xl rounded-bl-sm px-3 py-2 text-sm mb-2">¿Tienen algo para este sábado?</div>
+        <div class="bg-palma text-white rounded-xl rounded-br-sm px-3 py-2 text-sm ml-6">Sí: cabaña Guayacán, $85 la noche ¿Te la aparto?</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-[90px_1fr_280px] gap-6 items-center reveal">
+      <span class="step-num text-7xl text-coral font-semibold leading-none">2</span>
+      <div>
+        <h3 class="font-display text-2xl font-semibold mb-2">Hospeda cotiza y cobra el anticipo</h3>
+        <p class="text-cocoa/75 leading-relaxed">Le manda al huésped un link para pagar con lo que él ya usa — Sinpe Móvil, Yappy, Deuna o tarjeta. La plata entra directo a tu cuenta, completa.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-[#eadfca] p-4 shadow-sm">
+        <p class="text-[10px] font-bold uppercase tracking-wide text-cocoa/50">Link de pago</p>
+        <p class="font-display text-3xl font-semibold mt-1">$40 <span class="text-base">USD</span></p>
+        <div class="mt-2 bg-palma/10 text-palma text-xs font-bold rounded-lg px-3 py-2">✓ Pagado con Sinpe Móvil</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-[90px_1fr_280px] gap-6 items-center reveal">
+      <span class="step-num text-7xl text-palma font-semibold leading-none">3</span>
+      <div>
+        <h3 class="font-display text-2xl font-semibold mb-2">La reserva queda en tu calendario</h3>
+        <p class="text-cocoa/75 leading-relaxed">Y tú te enteras con un mensaje, no con una llamada a medianoche. El sábado aparece bloqueado, el huésped recibe indicaciones y recordatorio.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-[#eadfca] p-4 shadow-sm">
+        <p class="text-xs font-bold mb-2">Semana del 8 al 14</p>
+        <div class="grid grid-cols-7 gap-1">
+          <div class="h-7 rounded bg-arenasoft border border-dashed border-[#ddcdae]"></div>
+          <div class="h-7 rounded bg-palma/80"></div>
+          <div class="h-7 rounded bg-palma/80"></div>
+          <div class="h-7 rounded bg-arenasoft border border-dashed border-[#ddcdae]"></div>
+          <div class="h-7 rounded bg-arenasoft border border-dashed border-[#ddcdae]"></div>
+          <div class="h-7 rounded bg-coral flex items-center justify-center text-[8px] font-bold text-white">✓</div>
+          <div class="h-7 rounded bg-arenasoft border border-dashed border-[#ddcdae]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LO QUE RECUPERAS ===== -->
+<section id="recuperas" class="bg-palma text-arena px-6 md:px-12 py-20">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-azafran font-bold tracking-[0.18em] uppercase text-xs mb-3 reveal">Lo que recuperas</p>
+    <h2 class="font-display font-semibold text-4xl md:text-5xl leading-tight max-w-2xl reveal">La plata que se te estaba escapando, de vuelta en tu cuenta.</h2>
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+      <div class="bg-white/10 rounded-2xl p-6 reveal">
+        <p class="font-display text-2xl font-semibold mb-2">Las consultas de las 11pm ya no se pierden</p>
+        <p class="text-arena/75 leading-relaxed text-[15px]">El que pregunta de noche reserva con el primero que le contesta. Ahora ese eres tú.</p>
+      </div>
+      <div class="bg-white/10 rounded-2xl p-6 reveal">
+        <p class="font-display text-2xl font-semibold mb-2">El que paga anticipo, sí llega</p>
+        <p class="text-arena/75 leading-relaxed text-[15px]">Se acabó guardar la cabaña "de palabra" y quedarte viendo la cama vacía un sábado de temporada.</p>
+      </div>
+      <div class="bg-white/10 rounded-2xl p-6 reveal">
+        <p class="font-display text-2xl font-semibold mb-2">La comisión se queda contigo</p>
+        <p class="text-arena/75 leading-relaxed text-[15px]">Cada reserva directa es plata que no se va a la agencia online. Tu WhatsApp, tu huésped, tu tarifa completa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIO ===== -->
+<section class="bg-cocoadeep text-arena px-6 md:px-12 py-24">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <svg class="mx-auto mb-6" width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M10 11H6a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v8a4 4 0 01-4 4M20 11h-4a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v8a4 4 0 01-4 4" stroke="#E0A43C" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <p class="font-display text-3xl md:text-4xl font-medium leading-snug" style="font-style:italic">"Antes contestaba entre el desayuno y la lavadora. Ahora amanezco con reservas pagadas."</p>
+    <p class="mt-6 text-arena/60 font-semibold text-sm">Rosa · Cabañas El Mirador</p>
+  </div>
+</section>
+
+<!-- ===== CIERRE ===== -->
+<section class="px-6 md:px-12 py-20 text-center">
+  <div class="max-w-2xl mx-auto reveal">
+    <h2 class="font-display font-semibold text-4xl md:text-5xl leading-tight">Deja que tu WhatsApp atienda esta noche.</h2>
+    <p class="text-cocoa/70 mt-4 text-lg">Juega con la simulación: reserva como huésped y mira lo que ve la dueña.</p>
+    <a href="../" class="inline-block mt-8 bg-coral hover:bg-coraldark transition-colors text-white font-bold px-8 py-4 rounded-full text-lg">Prueba el demo</a>
+    <p class="text-cocoa/50 text-xs mt-5">Hospeda es un demo conceptual — no un producto real.</p>
+  </div>
+</section>
+
+<footer class="border-t border-[#e6d8bf] px-6 md:px-12 py-8 text-center">
+  <p class="text-cocoa/50 text-xs">
+    Idea original: <a href="https://aguacate-newsletter.beehiiv.com" target="_blank" rel="noopener" class="underline hover:text-cocoa/80">Aguacate newsletter — aguacate-newsletter.beehiiv.com</a>
+    · <a href="https://app.notion.com/p/37a95c8691d78132a7f7f9ec521c54b5" target="_blank" rel="noopener" class="underline hover:text-cocoa/80">Replícalo en tu IA</a>
+  </p>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
