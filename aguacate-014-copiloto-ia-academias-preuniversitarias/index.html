@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cumbre — Cada alumno llega listo a su examen</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#1C1B1A',
+          paper: '#F4EFE4',
+          card: '#FBF8F0',
+          ochre: '#C8892A',
+          teal: '#3F7A6B',
+          rust: '#B14A33',
+          line: '#DAD2C0',
+          muted: '#7A736455',
+        },
+        fontFamily: {
+          display: ['Newsreader', 'Georgia', 'serif'],
+          sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html, body { background: #F4EFE4; }
+  body { font-family: 'Instrument Sans', system-ui, sans-serif; color: #1C1B1A; }
+  .rule-line { background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, #DAD2C0 27px, #DAD2C0 28px); }
+  .fade-in { animation: fadeIn .35s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+  .tick { transition: width .6s cubic-bezier(.22,.61,.36,1); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ---- Íconos (SVG línea fina) ----
+const Icon = ({ d, className="w-5 h-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
+);
+const BookIcon = (p) => <Icon {...p} d={<><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M18 17H6a2 2 0 0 0-2 2"/></>} />;
+const SparkIcon = (p) => <Icon {...p} d={<><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M18 18l-2.5-2.5M6 18l2.5-2.5M18 6l-2.5 2.5"/></>} />;
+const UsersIcon = (p) => <Icon {...p} d={<><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-4-5.6"/></>} />;
+const CheckIcon = (p) => <Icon {...p} d={<path d="M20 6 9 17l-5-5"/>} />;
+const XIcon = (p) => <Icon {...p} d={<><path d="M18 6 6 18M6 6l12 12"/></>} />;
+const ChartIcon = (p) => <Icon {...p} d={<><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></>} />;
+const ClockIcon = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>} />;
+
+// ---- Datos: bancos de preguntas por examen ----
+const EXAMS = {
+  PAES: { pais:"🇨🇱 Chile", nombre:"PAES", sub:"Prueba de Acceso a la Educación Superior",
+    q:[
+      {materia:"Matemática M1", texto:"Si 3(x − 2) = 2x + 5, ¿cuál es el valor de x?", op:["7","11","−1","3"], ok:0, exp:"3x − 6 = 2x + 5 → x = 11. Revisa: muchos olvidan distribuir el 3. El resultado correcto es 11."},
+      {materia:"Competencia Lectora", texto:"\"El autor matiza su tesis inicial\". La palabra \"matiza\" implica que el autor:", op:["La abandona","La defiende sin cambios","La precisa con reservas","La contradice"], ok:2, exp:"\"Matizar\" es introducir precisiones o reservas a una idea, sin abandonarla ni contradecirla."},
+    ]},
+  "San Marcos": { pais:"🇵🇪 Perú", nombre:"San Marcos", sub:"Examen de Admisión UNMSM",
+    q:[
+      {materia:"Razonamiento Matemático", texto:"En una serie, 2, 6, 12, 20, 30, … ¿qué número sigue?", op:["40","42","36","44"], ok:1, exp:"Las diferencias son 4, 6, 8, 10, 12 → 30 + 12 = 42. Es una serie de diferencias crecientes."},
+      {materia:"Aptitud Verbal", texto:"EFÍMERO es a DURADERO como ESCASO es a:", op:["Raro","Abundante","Pequeño","Pobre"], ok:1, exp:"Es una analogía de antónimos: efímero/duradero ↔ escaso/abundante."},
+    ]},
+  POMA: { pais:"🇩🇴 R. Dominicana", nombre:"POMA", sub:"Prueba de Orientación y Medición Académica",
+    q:[
+      {materia:"Matemática", texto:"El 20% de un número es 35. ¿Cuál es el número?", op:["70","140","175","700"], ok:2, exp:"Si 0,20·n = 35, entonces n = 35 / 0,20 = 175."},
+      {materia:"Lengua Española", texto:"Señala la oración escrita correctamente:", op:["Hubieron muchos postulantes","Habían pocos cupos","Hubo muchos postulantes","Habemos cuatro"], ok:2, exp:"\"Haber\" como impersonal va en singular: \"hubo muchos postulantes\"."},
+    ]},
+  USAC: { pais:"🇬🇹 Guatemala", nombre:"USAC", sub:"Pruebas de Conocimientos Básicos",
+    q:[
+      {materia:"Matemática", texto:"¿Cuál es el área de un triángulo de base 8 y altura 5?", op:["40","20","13","26"], ok:1, exp:"Área = (base × altura) / 2 = (8 × 5) / 2 = 20."},
+      {materia:"Lenguaje", texto:"\"Conciso\" significa que un texto es:", op:["Largo y detallado","Breve y preciso","Confuso","Repetitivo"], ok:1, exp:"Conciso = que dice mucho con pocas palabras: breve y preciso."},
+    ]},
+};
+
+const ROSTER_BASE = [
+  { name:"Lucía M.", weak:"Matemática", score:482, tu:true },
+  { name:"Diego R.", weak:"Comprensión lectora", score:514 },
+  { name:"Camila S.", weak:"Ciencias", score:455 },
+  { name:"Andrés P.", weak:"Matemática", score:603 },
+  { name:"Valentina C.", weak:"Lenguaje", score:528 },
+];
+
+function useCountUp(target, deps, dur=900){
+  const [v,setV]=useState(target);
+  const prev=useRef(target);
+  useEffect(()=>{
+    const start=prev.current, delta=target-start, t0=performance.now();
+    let raf;
+    const step=(t)=>{ const p=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-p,3); setV(Math.round(start+delta*e)); if(p<1) raf=requestAnimationFrame(step); else prev.current=target; };
+    raf=requestAnimationFrame(step);
+    return ()=>cancelAnimationFrame(raf);
+  // eslint-disable-next-line
+  },deps);
+  return v;
+}
+
+function App(){
+  const [exam,setExam]=useState("PAES");
+  const [qi,setQi]=useState(0);
+  const [picked,setPicked]=useState(null);
+  const [projected,setProjected]=useState(482);
+  const [weak,setWeak]=useState({ "Matemática":58, "Comprensión lectora":74, "Ciencias":66, "Lenguaje":71 });
+  const [roster,setRoster]=useState(ROSTER_BASE);
+  const [corrected,setCorrected]=useState(128);
+  const [hours,setHours]=useState(34);
+  const [tab,setTab]=useState("cohorte");
+  const [gen,setGen]=useState({open:false, exam:"PAES", materia:"Matemática", items:[], sent:false});
+  const [toast,setToast]=useState(null);
+
+  const cohortAvg = Math.round(roster.reduce((a,b)=>a+b.score,0)/roster.length);
+  const atRisk = roster.filter(s=>s.score<500).length;
+  const animScore = useCountUp(projected,[projected]);
+  const animAvg = useCountUp(cohortAvg,[cohortAvg]);
+  const animCorr = useCountUp(corrected,[corrected]);
+  const animHours = useCountUp(hours,[hours]);
+
+  const bank = EXAMS[exam].q;
+  const q = bank[qi % bank.length];
+
+  function answer(i){
+    if(picked!==null) return;
+    setPicked(i);
+    const right = i===q.ok;
+    // actualizar mapa de debilidades de la materia tocada
+    setWeak(w=>({...w, [q.materia]: Math.max(20, Math.min(98, (w[q.materia]??60) + (right?7:-3))) }));
+    if(right){
+      setProjected(p=>Math.min(820, p+9));
+      setRoster(r=>r.map(s=>s.tu?{...s, score:Math.min(820,s.score+9)}:s));
+      setCorrected(c=>c+1);
+      if(corrected%4===0) setHours(h=>h+1);
+    } else {
+      setRoster(r=>r.map(s=>s.tu?{...s, score:Math.max(300,s.score+2)}:s));
+      setCorrected(c=>c+1);
+    }
+  }
+  function next(){ setPicked(null); setQi(n=>n+1); }
+
+  function generar(){
+    const qs = EXAMS[gen.exam].q.filter(x=>x.materia.includes(gen.materia)||true).slice(0,1);
+    const base = EXAMS[gen.exam].q;
+    setGen(g=>({...g, items:[], sent:false}));
+    // animar aparición de preguntas generadas
+    const draft = [base[0].texto, base[1].texto, "Ítem nuevo generado por IA · "+gen.materia, "Ítem nuevo generado por IA · "+gen.materia].slice(0,4);
+    draft.forEach((txt,idx)=> setTimeout(()=> setGen(g=> g.open ? {...g, items:[...g.items, txt]} : g), 420*(idx+1)) );
+  }
+  function enviar(){
+    setGen(g=>({...g, sent:true}));
+    setExam(gen.exam); setQi(0); setPicked(null);
+    setCorrected(c=>c+12);
+    setToast("Simulacro enviado a la cohorte ("+EXAMS[gen.exam].nombre+" · "+gen.materia+")");
+    setTimeout(()=>setGen({open:false, exam:gen.exam, materia:gen.materia, items:[], sent:false}),900);
+    setTimeout(()=>setToast(null),3200);
+  }
+
+  const weeks=[ {w:"S-5",v:absScale(458)},{w:"S-4",v:absScale(470)},{w:"S-3",v:absScale(476)},{w:"S-2",v:absScale(489)},{w:"S-1",v:absScale(498)},{w:"Hoy",v:absScale(cohortAvg)} ];
+  function absScale(n){ return Math.max(8, Math.min(100, ((n-420)/ (820-420))*100 )); }
+
+  return (
+    <div className="min-h-screen font-sans text-ink">
+      {/* Header */}
+      <header className="border-b border-line bg-paper/90 backdrop-blur sticky top-0 z-20">
+        <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-sm bg-ink text-paper grid place-items-center font-display text-lg leading-none">C</div>
+            <div className="leading-tight">
+              <div className="font-display text-xl font-semibold">Cumbre</div>
+              <div className="text-[11px] tracking-wide text-ink/55 -mt-0.5">Cada alumno llega listo a su examen</div>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-[11px] text-ink/55 border border-line rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal inline-block"></span> Demo · datos de ejemplo
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-5 py-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        {/* ============ PANEL ALUMNO ============ */}
+        <section className="bg-card border border-line rounded-lg overflow-hidden">
+          <div className="px-5 py-3 border-b border-line flex items-center gap-2">
+            <BookIcon className="w-4 h-4 text-teal" />
+            <span className="text-xs uppercase tracking-[.14em] text-ink/55">El alumno · Lucía</span>
+          </div>
+          <div className="p-5">
+            {/* selector examen */}
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {Object.keys(EXAMS).map(k=>(
+                <button key={k} onClick={()=>{setExam(k);setQi(0);setPicked(null);}}
+                  className={"text-xs px-2.5 py-1 rounded-full border transition "+(exam===k?"bg-ink text-paper border-ink":"border-line text-ink/70 hover:border-ink/40")}>
+                  {EXAMS[k].nombre}
+                </button>
+              ))}
+            </div>
+            <div className="text-[11px] text-ink/50 mb-3">{EXAMS[exam].pais} · {EXAMS[exam].sub}</div>
+
+            {/* pregunta */}
+            <div key={exam+qi} className="fade-in border border-line rounded-md bg-paper/60 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-ochre uppercase tracking-wide">{q.materia}</span>
+                <span className="text-[11px] text-ink/45">Tu simulacro de hoy</span>
+              </div>
+              <p className="font-display text-lg leading-snug mb-3">{q.texto}</p>
+              <div className="space-y-2">
+                {q.op.map((o,i)=>{
+                  let cls="border-line hover:border-ink/40";
+                  if(picked!==null){
+                    if(i===q.ok) cls="border-teal bg-teal/10";
+                    else if(i===picked) cls="border-rust bg-rust/10";
+                    else cls="border-line opacity-60";
+                  }
+                  return (
+                    <button key={i} onClick={()=>answer(i)} disabled={picked!==null}
+                      className={"w-full text-left text-sm px-3 py-2 rounded border flex items-center justify-between transition "+cls}>
+                      <span>{o}</span>
+                      {picked!==null && i===q.ok && <CheckIcon className="w-4 h-4 text-teal" />}
+                      {picked!==null && i===picked && i!==q.ok && <XIcon className="w-4 h-4 text-rust" />}
+                    </button>
+                  );
+                })}
+              </div>
+              {picked!==null && (
+                <div className="fade-in mt-3 text-sm bg-paper border-l-2 border-ochre pl-3 py-2 text-ink/80">
+                  <span className="font-semibold">{picked===q.ok?"Correcto. ":"Repasemos. "}</span>{q.exp}
+                </div>
+              )}
+              {picked!==null && (
+                <button onClick={next} className="mt-3 text-sm font-semibold text-teal hover:underline">Siguiente pregunta →</button>
+              )}
+            </div>
+
+            {/* mapa debilidades + puntaje */}
+            <div className="mt-5 grid grid-cols-3 gap-4 items-start">
+              <div className="col-span-2">
+                <div className="text-[11px] uppercase tracking-wide text-ink/50 mb-2">Mapa de debilidades</div>
+                <div className="space-y-2">
+                  {Object.entries(weak).map(([k,v])=>(
+                    <div key={k}>
+                      <div className="flex justify-between text-[11px] text-ink/65"><span>{k}</span><span>{v}%</span></div>
+                      <div className="h-1.5 bg-line/70 rounded-full overflow-hidden">
+                        <div className="tick h-full rounded-full" style={{width:v+"%", background: v>=70?"#3F7A6B":v>=50?"#C8892A":"#B14A33"}}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center border border-line rounded-md py-3 bg-paper/60">
+                <div className="text-[10px] uppercase tracking-wide text-ink/50">Puntaje proyectado</div>
+                <div className="font-display text-4xl font-semibold text-ink leading-none mt-1">{animScore}</div>
+                <div className="text-[10px] text-teal mt-1">sube con la práctica</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ PANEL ACADEMIA ============ */}
+        <section className="bg-card border border-line rounded-lg overflow-hidden">
+          <div className="px-5 py-3 border-b border-line flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UsersIcon className="w-4 h-4 text-ochre" />
+              <span className="text-xs uppercase tracking-[.14em] text-ink/55">La academia · panel del operador</span>
+            </div>
+            <button onClick={()=>setGen(g=>({...g, open:true, items:[], sent:false}))}
+              className="text-xs font-semibold bg-ochre text-paper px-3 py-1.5 rounded hover:bg-ochre/90 flex items-center gap-1">
+              <SparkIcon className="w-3.5 h-3.5" /> Generar simulacro
+            </button>
+          </div>
+
+          <div className="p-5">
+            {/* métricas */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+              <Metric label="Puntaje prom. cohorte" value={animAvg} accent="teal" />
+              <Metric label="Alumnos en riesgo" value={atRisk} accent="rust" />
+              <Metric label="Simulacros corregidos" value={animCorr} sub="esta semana" accent="ink" />
+              <Metric label="Horas de profesor ahorradas" value={animHours} accent="ochre" />
+            </div>
+
+            <div className="flex gap-2 border-b border-line mb-3">
+              {["cohorte","resultados"].map(t=>(
+                <button key={t} onClick={()=>setTab(t)}
+                  className={"text-xs px-2 py-1.5 -mb-px border-b-2 transition "+(tab===t?"border-ink text-ink font-semibold":"border-transparent text-ink/50")}>
+                  {t==="cohorte"?"Cohorte":"Resultados"}
+                </button>
+              ))}
+            </div>
+
+            {tab==="cohorte" ? (
+              <div className="fade-in">
+                <table className="w-full text-sm">
+                  <thead><tr className="text-[11px] uppercase tracking-wide text-ink/45 text-left">
+                    <th className="py-1.5 font-medium">Alumno</th><th className="font-medium">Materia más débil</th><th className="font-medium text-right">Proyectado</th>
+                  </tr></thead>
+                  <tbody>
+                    {roster.map((s,i)=>(
+                      <tr key={i} className={"border-t border-line/70 "+(s.tu?"bg-ochre/5":"")}>
+                        <td className="py-2 font-medium">{s.name}{s.tu && <span className="ml-1.5 text-[10px] text-ochre">(en vivo)</span>}</td>
+                        <td className="text-ink/70">{s.weak}</td>
+                        <td className="text-right tabular-nums font-semibold" style={{color: s.score<500?"#B14A33":s.score<560?"#C8892A":"#3F7A6B"}}>{s.score}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="text-[11px] text-ink/50 mt-3 leading-relaxed">La IA corrige y detecta dónde falla cada alumno; el profesor usa la clase para enseñar. Plan personalizado para 200 alumnos sin contratar a nadie más.</p>
+              </div>
+            ) : (
+              <div className="fade-in">
+                <div className="text-[11px] uppercase tracking-wide text-ink/50 mb-2 flex items-center gap-1.5"><ChartIcon className="w-3.5 h-3.5"/> Puntaje promedio por semana</div>
+                <div className="flex items-end justify-between gap-2 h-32 border-b border-line pb-0">
+                  {weeks.map((d,i)=>(
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                      <div className="tick w-full rounded-t" style={{height:d.v+"%", background: i===weeks.length-1?"#3F7A6B":"#C8892A88"}}></div>
+                      <span className="text-[10px] text-ink/45 mt-1">{d.w}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 text-[11px] uppercase tracking-wide text-ink/50 mb-1 flex items-center gap-1.5"><ClockIcon className="w-3.5 h-3.5"/> Mayor mejora este mes</div>
+                <ol className="text-sm space-y-1">
+                  <li className="flex justify-between"><span>Andrés P.</span><span className="text-teal font-semibold">+121 pts</span></li>
+                  <li className="flex justify-between"><span>Valentina C.</span><span className="text-teal font-semibold">+96 pts</span></li>
+                  <li className="flex justify-between"><span>Lucía M.</span><span className="text-teal font-semibold">+{Math.max(0,roster.find(s=>s.tu).score-482)} pts</span></li>
+                </ol>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* modal generar */}
+      {gen.open && (
+        <div className="fixed inset-0 z-30 bg-ink/40 grid place-items-center p-4" onClick={()=>setGen(g=>({...g,open:false}))}>
+          <div className="bg-paper border border-line rounded-lg w-full max-w-md p-5 fade-in" onClick={e=>e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-3"><SparkIcon className="w-4 h-4 text-ochre"/><h3 className="font-display text-lg font-semibold">Generar simulacro con IA</h3></div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <label className="text-xs text-ink/60">Examen
+                <select value={gen.exam} onChange={e=>setGen(g=>({...g,exam:e.target.value,items:[]}))} className="mt-1 w-full border border-line rounded px-2 py-1.5 text-sm bg-card text-ink">
+                  {Object.keys(EXAMS).map(k=><option key={k}>{k}</option>)}
+                </select>
+              </label>
+              <label className="text-xs text-ink/60">Materia
+                <select value={gen.materia} onChange={e=>setGen(g=>({...g,materia:e.target.value,items:[]}))} className="mt-1 w-full border border-line rounded px-2 py-1.5 text-sm bg-card text-ink">
+                  {["Matemática","Comprensión lectora","Lenguaje","Ciencias"].map(m=><option key={m}>{m}</option>)}
+                </select>
+              </label>
+            </div>
+            {gen.items.length===0 ? (
+              <button onClick={generar} className="w-full bg-ink text-paper text-sm font-semibold py-2 rounded hover:bg-ink/90">La IA genera las preguntas →</button>
+            ) : (
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-ink/50 mb-2">Preguntas generadas</div>
+                <ul className="space-y-1.5 mb-3 max-h-40 overflow-auto">
+                  {gen.items.map((t,i)=>(<li key={i} className="fade-in text-xs border border-line rounded px-2.5 py-1.5 bg-card flex gap-2"><span className="text-ochre font-semibold">{i+1}</span><span className="text-ink/80">{t}</span></li>))}
+                </ul>
+                <button onClick={enviar} disabled={gen.items.length<2} className="w-full bg-teal text-paper text-sm font-semibold py-2 rounded hover:bg-teal/90 disabled:opacity-50">Enviar a la cohorte</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {toast && <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-ink text-paper text-sm px-4 py-2 rounded-full fade-in shadow-lg flex items-center gap-2"><CheckIcon className="w-4 h-4 text-teal"/>{toast}</div>}
+
+      <footer className="text-center text-[11px] text-ink/40 py-6">Idea original: Aguacate newsletter — aguacate-newsletter.beehiiv.com</footer>
+    </div>
+  );
+}
+
+function Metric({label,value,sub,accent}){
+  const col = {teal:"#3F7A6B",ochre:"#C8892A",rust:"#B14A33",ink:"#1C1B1A"}[accent]||"#1C1B1A";
+  return (
+    <div className="border border-line rounded-md p-2.5 bg-paper/60">
+      <div className="font-display text-2xl font-semibold tabular-nums leading-none" style={{color:col}}>{value}</div>
+      <div className="text-[10px] text-ink/55 mt-1 leading-tight">{label}{sub && <span className="block text-ink/40">{sub}</span>}</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
