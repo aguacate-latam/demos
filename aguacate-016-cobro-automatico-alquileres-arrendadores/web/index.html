@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Puntual — El alquiler llega solo. Tú no persigues a nadie.</title>
+<meta name="description" content="Puntual programa el débito de tu alquiler el día pactado, emite el recibo y ajusta el contrato. Tú solo ves llegar el pago." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800&display=swap" rel="stylesheet" />
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { tinta:'#2A2438', lavanda:'#7C6FC4', lavandaSoft:'#EDEAF8', mantequilla:'#F5D98B', cielo:'#BFD9F2', cieloSoft:'#EAF2FB', rosa:'#E3B7B0', rosaSoft:'#F8ECEA', crema:'#FBF9F4' },
+    fontFamily: { sans: ['"Inter Tight"','sans-serif'] }
+  }}
+}
+</script>
+<style>
+  body { background:#FBF9F4; color:#2A2438; font-family:'Inter Tight',sans-serif; }
+  .reveal { opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.8,.3,1); }
+  .reveal.in { opacity:1; transform:none; }
+  .card-hover { transition:transform .25s ease, box-shadow .25s ease; }
+  .card-hover:hover { transform:translateY(-3px); box-shadow:0 12px 30px -12px rgba(42,36,56,.18); }
+  .btn-main { transition:transform .15s ease, box-shadow .2s ease, opacity .2s; }
+  .btn-main:hover { transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(124,111,196,.7); }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- NAV -->
+<nav class="max-w-6xl mx-auto flex items-center justify-between px-5 py-5">
+  <div class="flex items-center gap-2.5">
+    <div class="w-9 h-9 rounded-xl bg-lavanda text-white flex items-center justify-center font-extrabold text-lg">P</div>
+    <span class="font-extrabold text-lg tracking-tight">Puntual</span>
+  </div>
+  <a href="https://aguacate-demos.pages.dev/aguacate-016-cobro-automatico-alquileres-arrendadores/" class="btn-main rounded-full bg-lavanda text-white text-sm font-semibold px-5 py-2.5">Pruébalo con una propiedad</a>
+</nav>
+
+<!-- HERO -->
+<header class="max-w-6xl mx-auto px-5 pt-10 pb-16 grid md:grid-cols-2 gap-10 items-center">
+  <div class="reveal in">
+    <p class="inline-block rounded-full bg-mantequilla/40 border border-mantequilla text-[12px] font-semibold px-3 py-1 mb-5">Para arrendadores de 1 a 3 propiedades</p>
+    <h1 class="text-4xl md:text-[3.4rem] leading-[1.05] font-extrabold tracking-tight">El alquiler llega solo.<br/>Tú no persigues a nadie.</h1>
+    <p class="mt-5 text-lg text-tinta/65 max-w-md">El débito corre el día pactado sobre el rail de pago de tu país, el recibo se emite solo y el ajuste anual se avisa solo. Tú ves todo en un panel.</p>
+    <div class="mt-7 flex flex-wrap items-center gap-4">
+      <a href="https://aguacate-demos.pages.dev/aguacate-016-cobro-automatico-alquileres-arrendadores/" class="btn-main rounded-full bg-lavanda text-white font-semibold px-7 py-3.5">Pruébalo con una propiedad</a>
+      <span class="text-[13px] text-tinta/45">Autorización única del inquilino · sin tarjeta</span>
+    </div>
+  </div>
+
+  <!-- mockup mini-panel -->
+  <div class="reveal in">
+    <div class="card-hover rounded-3xl bg-white border border-lavandaSoft shadow-lg p-6 max-w-sm mx-auto">
+      <div class="text-[12px] font-medium text-tinta/50">Cobrado este mes</div>
+      <div class="text-5xl font-extrabold tracking-tight mt-1">$770 <span class="text-base text-tinta/40">USD</span></div>
+      <div class="mt-3 h-2 rounded-full bg-lavandaSoft overflow-hidden"><div class="h-full w-[73%] bg-lavanda"></div></div>
+      <div class="mt-1 text-[11px] text-tinta/40">de $1.050 USD esperados</div>
+      <div class="mt-5 space-y-2.5">
+        <div class="flex items-center justify-between rounded-xl bg-crema border border-lavandaSoft px-3.5 py-2.5">
+          <span class="text-[13px] font-semibold">Las Acacias 2B</span>
+          <span class="text-[11px] font-semibold text-lavanda bg-lavandaSoft rounded-full px-2 py-0.5">Pagado ✓</span>
+        </div>
+        <div class="flex items-center justify-between rounded-xl bg-crema border border-lavandaSoft px-3.5 py-2.5">
+          <span class="text-[13px] font-semibold">Mirador 704</span>
+          <span class="text-[11px] font-semibold text-tinta bg-mantequilla/50 rounded-full px-2 py-0.5">Plan activo · 50%</span>
+        </div>
+        <div class="flex items-center justify-between rounded-xl bg-crema border border-lavandaSoft px-3.5 py-2.5">
+          <span class="text-[13px] font-semibold">Casa Lote 12</span>
+          <span class="text-[11px] font-semibold text-tinta/50 bg-white border border-lavandaSoft rounded-full px-2 py-0.5">Debita el 10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- LA CONVERSACIÓN -->
+<section class="max-w-3xl mx-auto px-5 py-14">
+  <h2 class="reveal text-2xl md:text-3xl font-extrabold tracking-tight text-center">Un mes de Puntual, en seis mensajes</h2>
+  <p class="reveal text-center text-tinta/55 mt-2 mb-10">Esto es lo que hace tu agente mientras tú no miras el celular.</p>
+
+  <div class="space-y-4">
+    <div class="reveal max-w-[85%]"><div class="rounded-2xl rounded-tl-md bg-cieloSoft border border-cielo/60 px-4 py-3 text-[14px]">Mañana es <b>día 5</b> — el alquiler de Las Acacias 2B se debitará de la cuenta autorizada de Diego.</div></div>
+    <div class="reveal max-w-[85%] ml-auto"><div class="rounded-2xl rounded-tr-md bg-lavanda text-white px-4 py-3 text-[14px] text-right"><b>✓ Pago recibido: $350 USD</b> — directo a tu cuenta. Puntual nunca toca tu plata.</div></div>
+    <div class="reveal max-w-[85%]"><div class="rounded-2xl rounded-tl-md bg-white border border-lavandaSoft px-4 py-3 text-[14px]">Recibo de junio emitido y enviado a ambos. Tu registro del año queda listo para el impuesto anual.</div></div>
+    <div class="reveal max-w-[85%] ml-auto"><div class="rounded-2xl rounded-tr-md bg-rosaSoft border border-rosa/50 px-4 py-3 text-[14px] text-right">El débito de Mirador 704 no pasó. Le ofrecí a Carla dividirlo en dos — aceptó. <b>50% ya está en tu cuenta.</b></div></div>
+    <div class="reveal max-w-[85%]"><div class="rounded-2xl rounded-tl-md bg-cieloSoft border border-cielo/60 px-4 py-3 text-[14px]">El contrato de Las Acacias 2B se ajusta <b>5,1%</b> el 1-jul. Ya avisé a tu inquilino — con 30 días de anticipación.</div></div>
+    <div class="reveal max-w-[85%] ml-auto"><div class="rounded-2xl rounded-tr-md bg-mantequilla/40 border border-mantequilla px-4 py-3 text-[14px] text-right">Cierre del mes: <b>$980 USD cobrados, 0 mensajes incómodos enviados por ti.</b></div></div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA EN TU PAÍS -->
+<section class="max-w-6xl mx-auto px-5 py-14">
+  <h2 class="reveal text-2xl md:text-3xl font-extrabold tracking-tight text-center">Funciona con el rail de pago de tu país</h2>
+  <p class="reveal text-center text-tinta/55 mt-2 mb-10">Tu inquilino autoriza una sola vez. Después, el cobro corre solo.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="reveal card-hover rounded-2xl bg-white border border-lavandaSoft p-5">
+      <div class="text-2xl">🇨🇴</div>
+      <h3 class="font-extrabold mt-2">Colombia</h3>
+      <p class="text-[13px] text-tinta/60 mt-1.5">Débito automático con la <b>llave Bre-B</b> de tu inquilino, desde su cuenta o billetera.</p>
+    </div>
+    <div class="reveal card-hover rounded-2xl bg-white border border-lavandaSoft p-5">
+      <div class="text-2xl">🇵🇪</div>
+      <h3 class="font-extrabold mt-2">Perú</h3>
+      <p class="text-[13px] text-tinta/60 mt-1.5">Cobro recurrente con <b>Yape o Plin</b> y los nuevos pagos automáticos del sistema peruano.</p>
+    </div>
+    <div class="reveal card-hover rounded-2xl bg-white border border-lavandaSoft p-5">
+      <div class="text-2xl">🇸🇻</div>
+      <h3 class="font-extrabold mt-2">El Salvador</h3>
+      <p class="text-[13px] text-tinta/60 mt-1.5">Débito por <b>Transfer365</b>, en USD, directo de cuenta a cuenta el mismo día.</p>
+    </div>
+    <div class="reveal card-hover rounded-2xl bg-white border border-lavandaSoft p-5">
+      <div class="text-2xl">🇦🇷</div>
+      <h3 class="font-extrabold mt-2">Argentina</h3>
+      <p class="text-[13px] text-tinta/60 mt-1.5">Débito inmediato <b>recurrente</b> + ajuste del contrato por índice, avisado a ambas partes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIO -->
+<section class="max-w-3xl mx-auto px-5 py-14">
+  <div class="reveal card-hover rounded-3xl bg-tinta text-white p-8 md:p-10">
+    <p class="text-xl md:text-2xl font-extrabold leading-snug tracking-tight">"Llevo 9 meses sin escribir '¿me confirmas el pago?'. El día 5 me llega la plata y el recibo ya está hecho."</p>
+    <div class="mt-5 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-mantequilla text-tinta flex items-center justify-center font-extrabold">M</div>
+      <div class="leading-tight"><div class="font-semibold text-sm">Marta G.</div><div class="text-white/55 text-[12px]">Arrendadora · 2 propiedades</div></div>
+    </div>
+  </div>
+  <div class="reveal text-center mt-10">
+    <a href="https://aguacate-demos.pages.dev/aguacate-016-cobro-automatico-alquileres-arrendadores/" class="btn-main inline-block rounded-full bg-lavanda text-white font-semibold px-8 py-4">Pruébalo con una propiedad</a>
+    <p class="text-[12px] text-tinta/45 mt-3">Demo interactivo — sin registro, sin tarjeta.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-lavandaSoft mt-10">
+  <div class="max-w-6xl mx-auto px-5 py-8 flex flex-col md:flex-row items-center justify-between gap-3">
+    <p class="text-[11px] text-tinta/40 text-center md:text-left">Puntual es un demo conceptual — no es un producto financiero real.<br/>Idea original: <a class="underline hover:text-tinta/70" href="https://aguacate-newsletter.beehiiv.com" target="_blank" rel="noopener">Aguacate newsletter — aguacate-newsletter.beehiiv.com</a></p>
+    <a class="text-[12px] font-semibold text-lavanda hover:underline" href="https://app.notion.com/p/37c95c8691d78133bd1bc79f31603a1d" target="_blank" rel="noopener">Replícalo en tu IA →</a>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
