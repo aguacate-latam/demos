@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ficha — el presupuesto que tu cliente sí cree</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300;400;500;700;800&family=Architects+Daughter&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = { theme: { extend: {
+    colors:{ navy:'#10263F', navy2:'#0B1B2E', cyan:'#6BD5FF', paper:'#D7EBF7', obra:'#FF8A3D', muted:'#5E86A6' },
+    fontFamily:{ mono:['"Chivo Mono"','monospace'], hand:['"Architects Daughter"','cursive'] }
+  }}}
+</script>
+<style>
+  html,body{margin:0;background:#10263F;}
+  *{font-family:'Chivo Mono',monospace;}
+  .grid-bg{
+    background-color:#10263F;
+    background-image:
+      linear-gradient(rgba(107,213,255,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(107,213,255,.07) 1px, transparent 1px),
+      linear-gradient(rgba(107,213,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(107,213,255,.04) 1px, transparent 1px);
+    background-size:80px 80px,80px 80px,16px 16px,16px 16px;
+  }
+  .frame{border:1.5px solid #6BD5FF;}
+  .frame-d{border:1.5px dashed rgba(107,213,255,.55);}
+  .hand{font-family:'Architects Daughter',cursive;}
+  .tick{letter-spacing:.18em;text-transform:uppercase;}
+  .stamp{border:2px solid #FF8A3D;color:#FF8A3D;transform:rotate(-7deg);display:inline-block;padding:2px 12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:13px;}
+  .link-u{background-image:linear-gradient(#6BD5FF,#6BD5FF);background-size:0% 1.5px;background-repeat:no-repeat;background-position:0 100%;transition:background-size .35s;}
+  .link-u:hover{background-size:100% 1.5px;}
+  .draw{stroke-dasharray:300;stroke-dashoffset:300;animation:draw 1.4s ease forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  html{scroll-behavior:smooth;}
+</style>
+</head>
+<body class="grid-bg text-paper">
+<div class="max-w-5xl mx-auto p-3 sm:p-6">
+  <div class="frame">
+
+    <!-- CARTELA -->
+    <header class="border-b-[1.5px] border-cyan grid grid-cols-2 sm:grid-cols-4">
+      <div class="p-3 sm:border-r-[1.5px] border-cyan">
+        <div class="tick text-[9px] text-muted">producto</div>
+        <div class="text-cyan font-extrabold text-xl leading-none">FICHA</div>
+      </div>
+      <div class="p-3 sm:border-r-[1.5px] border-cyan">
+        <div class="tick text-[9px] text-muted">para</div>
+        <div class="text-paper text-sm mt-1">talleres mecánicos</div>
+      </div>
+      <div class="p-3 border-t-[1.5px] sm:border-t-0 border-cyan sm:border-r-[1.5px]">
+        <div class="tick text-[9px] text-muted">hoja</div>
+        <div class="text-paper text-sm mt-1">01 / B</div>
+      </div>
+      <div class="p-3 border-t-[1.5px] sm:border-t-0 border-cyan flex items-center">
+        <a href="https://aguacate-demos.pages.dev/aguacate-018-presupuestos-transparentes-ia-talleres/" class="tick text-[10px] text-navy bg-cyan px-3 py-2 font-bold hover:opacity-80 w-full text-center">ver ficha funcionando →</a>
+      </div>
+    </header>
+
+    <!-- HERO / fig.01 -->
+    <section class="p-6 sm:p-12 border-b-[1.5px] border-cyan relative">
+      <div class="tick text-[10px] text-muted mb-4">fig. 01 — el problema de todo taller honesto</div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight text-paper">El presupuesto<br/>que tu cliente <span class="text-obra">sí cree.</span></h1>
+      <p class="hand text-cyan text-xl sm:text-2xl mt-4 max-w-2xl">La IA arma el diagnóstico con foto y precio por pieza. El cliente lo aprueba desde el celular. Tú dejas de perder el trabajo porque "te van a ver la cara".</p>
+      <div class="mt-7 flex flex-wrap gap-3 items-center">
+        <a href="https://aguacate-demos.pages.dev/aguacate-018-presupuestos-transparentes-ia-talleres/" class="frame bg-obra text-navy font-extrabold tick text-sm px-6 py-3 hover:bg-obra/80">ver ficha funcionando →</a>
+        <a href="#como" class="tick text-xs text-cyan link-u">cómo funciona</a>
+      </div>
+      <div class="absolute top-6 right-6 hidden sm:block stamp">rev. b</div>
+    </section>
+
+    <!-- EL PROBLEMA (anotaciones a mano) -->
+    <section class="p-6 sm:p-10 border-b-[1.5px] border-cyan">
+      <div class="tick text-[10px] text-muted mb-5">tabla — lo que te pasa cada semana</div>
+      <div class="grid sm:grid-cols-3 gap-5">
+        <div class="frame-d p-4">
+          <div class="text-obra font-extrabold text-3xl">01</div>
+          <p class="hand text-cyan text-lg mt-2 leading-snug">"El cliente cree que le estás inflando el precio."</p>
+        </div>
+        <div class="frame-d p-4">
+          <div class="text-obra font-extrabold text-3xl">02</div>
+          <p class="hand text-cyan text-lg mt-2 leading-snug">"Se va a pedir 'otra opinión' y no vuelve más."</p>
+        </div>
+        <div class="frame-d p-4">
+          <div class="text-obra font-extrabold text-3xl">03</div>
+          <p class="hand text-cyan text-lg mt-2 leading-snug">"Lo que arreglaste el mes pasado, nadie lo recuerda."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓMO FUNCIONA (diagrama 3 nodos) -->
+    <section id="como" class="p-6 sm:p-10 border-b-[1.5px] border-cyan">
+      <div class="tick text-[10px] text-muted mb-6">fig. 02 — tres pasos, sin cambiar tu forma de trabajar</div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div class="frame p-4 flex-1">
+          <div class="tick text-[9px] text-muted">nodo 01</div>
+          <div class="text-paper font-bold mt-1">Sacas la foto</div>
+          <p class="text-muted text-xs mt-1 leading-snug">Foto de la pieza y dictas el síntoma. Como ya lo haces.</p>
+        </div>
+        <svg width="40" height="20" class="self-center rotate-90 sm:rotate-0"><line x1="0" y1="10" x2="36" y2="10" stroke="#FF8A3D" stroke-width="1.6" stroke-dasharray="5 4" class="draw"/><path d="M30 5l6 5-6 5" fill="none" stroke="#FF8A3D" stroke-width="1.6"/></svg>
+        <div class="frame p-4 flex-1">
+          <div class="tick text-[9px] text-muted">nodo 02</div>
+          <div class="text-paper font-bold mt-1">La IA lo explica</div>
+          <p class="text-muted text-xs mt-1 leading-snug">Qué es, por qué falla y el precio separado: repuesto y mano de obra.</p>
+        </div>
+        <svg width="40" height="20" class="self-center rotate-90 sm:rotate-0"><line x1="0" y1="10" x2="36" y2="10" stroke="#FF8A3D" stroke-width="1.6" stroke-dasharray="5 4" class="draw"/><path d="M30 5l6 5-6 5" fill="none" stroke="#FF8A3D" stroke-width="1.6"/></svg>
+        <div class="frame p-4 flex-1">
+          <div class="tick text-[9px] text-muted">nodo 03</div>
+          <div class="text-paper font-bold mt-1">El cliente aprueba</div>
+          <p class="text-muted text-xs mt-1 leading-snug">Desde su celular, ítem por ítem. Lo urgente y lo que puede esperar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUÉ GANAS (tabla de especificaciones) -->
+    <section class="p-6 sm:p-10 border-b-[1.5px] border-cyan">
+      <div class="tick text-[10px] text-muted mb-5">tabla de especificaciones — qué ganas</div>
+      <div class="divide-y divide-cyan/30 frame-d">
+        <div class="grid grid-cols-3 p-3 text-[10px] tick text-muted">
+          <span>punto</span><span class="col-span-2">qué cambia</span>
+        </div>
+        <div class="grid grid-cols-3 p-3 items-center">
+          <span class="text-cyan tick text-[11px]">confianza</span>
+          <span class="col-span-2 text-paper text-sm">Pierdes menos trabajos porque el cliente ve la foto y el precio, no tu palabra.</span>
+        </div>
+        <div class="grid grid-cols-3 p-3 items-center">
+          <span class="text-cyan tick text-[11px]">recompra</span>
+          <span class="col-span-2 text-paper text-sm">El cliente vuelve porque su carro tiene historial, y el historial está contigo.</span>
+        </div>
+        <div class="grid grid-cols-3 p-3 items-center">
+          <span class="text-cyan tick text-[11px]">tiempo</span>
+          <span class="col-span-2 text-paper text-sm">Cotizas en segundos con foto, no media hora discutiendo de memoria.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA cierre (orden de trabajo) -->
+    <section class="p-6 sm:p-12 border-b-[1.5px] border-cyan text-center">
+      <div class="tick text-[10px] text-muted mb-4">orden de trabajo</div>
+      <h2 class="text-2xl sm:text-4xl font-extrabold text-paper leading-tight">Conviértete en el taller<br/>en el que <span class="text-obra">sí confían.</span></h2>
+      <div class="mt-7 flex flex-col items-center gap-4">
+        <a href="https://aguacate-demos.pages.dev/aguacate-018-presupuestos-transparentes-ia-talleres/" class="frame bg-obra text-navy font-extrabold tick text-sm px-8 py-3 hover:bg-obra/80">ver ficha funcionando →</a>
+        <span class="stamp">aprobado</span>
+      </div>
+    </section>
+
+    <!-- PIE DE PLANO -->
+    <footer class="p-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span class="tick text-[9px] text-muted">ficha · hoja 1 de 1 · demo conceptual</span>
+      <span class="text-[10px] text-muted">Idea original: <a href="https://aguacate-newsletter.beehiiv.com" class="text-cyan/70 hover:text-cyan link-u">Aguacate newsletter</a> · <a href="https://app.notion.com/p/38395c8691d781369c78f96a7559c3b0" class="text-cyan/70 hover:text-cyan link-u">ver cómo se construyó</a></span>
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>
