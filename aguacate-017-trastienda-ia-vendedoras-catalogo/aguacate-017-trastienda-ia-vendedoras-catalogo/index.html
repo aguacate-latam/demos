@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Libreta — tu trastienda se escribe sola</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: { colors: {
+    kraft: '#E3D3B5', papel: '#FFFDF6', crema: '#FFF6D8', sello: '#B6452C',
+    tinta: '#3E3528', chatbg: '#F4F6F8', chatin: '#FFFFFF', chatout: '#E7F0E4'
+  }, fontFamily: {
+    type: ['"Special Elite"','monospace'], hand: ['Caveat','cursive'], body: ['Lora','serif']
+  } } }
+}
+</script>
+<style>
+  body { background:#E3D3B5; }
+  .grain { background-image: radial-gradient(rgba(120,95,55,.10) 1px, transparent 1px); background-size: 5px 5px; }
+  .paper { background:#FFFDF6; box-shadow: 2px 4px 10px rgba(110,85,45,.28); position:relative; transition: transform .25s ease; }
+  .paper:hover { transform: rotate(0deg) !important; }
+  .tape { position:absolute; top:-9px; left:50%; transform:translateX(-50%) rotate(-3deg); width:74px; height:20px; background:rgba(247,227,107,.75); box-shadow:0 1px 2px rgba(0,0,0,.12); }
+  .tape-corner { left:12px; transform:rotate(-32deg); }
+  .torn { clip-path: polygon(0 4%, 3% 0, 7% 5%, 12% 1%, 18% 5%, 24% 0, 30% 4%, 37% 1%, 44% 5%, 51% 0, 58% 4%, 65% 1%, 72% 5%, 79% 0, 86% 4%, 93% 1%, 100% 5%, 100% 96%, 96% 100%, 89% 96%, 81% 100%, 73% 96%, 64% 100%, 55% 96%, 46% 100%, 37% 96%, 28% 100%, 19% 96%, 10% 100%, 3% 96%, 0 100%); }
+  .pin { position:absolute; top:-7px; right:14px; width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #e98978, #B6452C 65%, #7c2a18); box-shadow:0 2px 3px rgba(0,0,0,.35); }
+  .stamp { display:inline-block; border:3px double #B6452C; color:#B6452C; font-family:'Special Elite',monospace; padding:1px 8px; transform:rotate(-8deg); letter-spacing:1px; opacity:.92; }
+  .stamp-anim { animation: stampIn .35s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes stampIn { 0%{ transform:rotate(-8deg) scale(2.2); opacity:0;} 100%{ transform:rotate(-8deg) scale(1); opacity:.92;} }
+  .entry-in { animation: slideIn .4s ease both; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(10px) rotate(var(--rot,0deg)); } to { opacity:1; transform:translateY(0) rotate(var(--rot,0deg)); } }
+  .wavy { text-decoration: underline wavy #B6452C 2px; text-underline-offset: 4px; }
+  .tachon { position:relative; }
+  .tachon::after { content:""; position:absolute; left:-2px; right:-2px; top:50%; height:2px; background:#3E3528; transform:rotate(-4deg); }
+  .bubble-in { background:#fff; border-radius:14px 14px 14px 4px; }
+  .bubble-out { background:#E7F0E4; border-radius:14px 14px 4px 14px; }
+  .msg-in { animation: msgIn .3s ease both; }
+  @keyframes msgIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+</style>
+</head>
+<body class="grain">
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const CATALOGO_INICIAL = [
+  { id:'labial', nombre:'Labial 24 Rojo Coral', stock:3, precio:7 },
+  { id:'perfume', nombre:'Perfume Brisa', stock:2, precio:22 },
+  { id:'crema', nombre:'Crema de manos', stock:5, precio:6 },
+  { id:'ollas', nombre:'Set de ollas', stock:0, precio:38 },
+];
+
+const GUION = [
+  { id:1, lado:'in', autor:'Rosa', texto:'Carmen ¿me apartas dos del labial 24 Rojo Coral? 💄 Paso por ellos en la tarde' },
+  { id:2, lado:'out', autor:'Carmen', texto:'¡Claro Rosa! Te los dejo listos. Son $14, me pagas al recoger 🙌' },
+  { id:3, lado:'libreta', accion:'pedidoRosa' },
+  { id:4, lado:'voz', autor:'Dilcia', transcripcion:'"Carmen, el perfume Brisa me lo dejas para el viernes que cobro, ¿sí? Te pago completo, te lo prometo."' },
+  { id:5, lado:'out', autor:'Carmen', texto:'Dale Dilcia, te lo guardo. Quedan $22 anotados para el viernes 📝' },
+  { id:6, lado:'libreta', accion:'fiadoDilcia' },
+  { id:7, lado:'comprobante', autor:'Patricia', texto:'Transferencia enviada — $18.00', nota:'"Carmen ahí te pagué la crema de manos que te debía 🙏"' },
+  { id:8, lado:'in', autor:'Mabel', texto:'¿Tienes el set de ollas todavía?' },
+  { id:9, lado:'out', autor:'Carmen', texto:'Se me agotó Mabel, me llegan el lunes. Te aviso apenas lleguen 🙏' },
+  { id:10, lado:'libreta', accion:'demandaOllas' },
+];
+
+function useContador(objetivo) {
+  const [valor, setValor] = useState(0);
+  const ref = useRef(0);
+  useEffect(() => {
+    const inicio = ref.current, delta = objetivo - inicio;
+    if (delta === 0) return;
+    const t0 = performance.now(), dur = 700;
+    let raf;
+    const tick = (t) => {
+      const p = Math.min((t - t0) / dur, 1);
+      const v = inicio + delta * (1 - Math.pow(1 - p, 3));
+      setValor(v);
+      if (p < 1) raf = requestAnimationFrame(tick); else ref.current = objetivo;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [objetivo]);
+  return valor;
+}
+
+function Sello({ texto }) { return <span className="stamp stamp-anim text-sm">{texto}</span>; }
+
+function Nota({ rot, children, alerta }) {
+  return (
+    <div className={"paper entry-in p-3 mb-3 " + (alerta ? "bg-crema" : "")} style={{ '--rot': rot, transform:`rotate(${rot})` }}>
+      <div className="tape"></div>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  const [paso, setPaso] = useState(0);
+  const [reproduciendo, setReproduciendo] = useState(false);
+  const [patriciaPagado, setPatriciaPagado] = useState(false);
+  const [vistaSemana, setVistaSemana] = useState(false);
+  const [tabMovil, setTabMovil] = useState('chat');
+  const chatRef = useRef(null);
+
+  const mensajes = GUION.slice(0, paso);
+  const hizo = (accion) => mensajes.some(m => m.lado === 'libreta' && m.accion === accion);
+  const pedidoRosa = hizo('pedidoRosa');
+  const fiadoDilcia = hizo('fiadoDilcia');
+  const demandaOllas = hizo('demandaOllas');
+  const comprobanteVisible = mensajes.some(m => m.lado === 'comprobante');
+
+  const caja = (pedidoRosa ? 14 : 0) + (patriciaPagado ? 18 : 0);
+  const porCobrar = (patriciaPagado ? 0 : 18) + (fiadoDilcia ? 22 : 0);
+  const cajaAnim = useContador(caja);
+
+  const stockLabial = pedidoRosa ? 1 : 3;
+
+  useEffect(() => {
+    if (!reproduciendo || paso >= GUION.length) { setReproduciendo(false); return; }
+    const t = setTimeout(() => setPaso(p => p + 1), GUION[paso] && GUION[paso].lado === 'libreta' ? 500 : 1400);
+    return () => clearTimeout(t);
+  }, [reproduciendo, paso]);
+
+  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [paso]);
+
+  const Chat = (
+    <div className="flex flex-col h-full bg-chatbg rounded-xl overflow-hidden shadow-lg">
+      <div className="px-4 py-3 bg-white border-b flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-sello/80 text-white flex items-center justify-center font-bold">C</div>
+        <div>
+          <p className="font-semibold text-sm text-tinta leading-tight">Ventas de Carmen</p>
+          <p className="text-xs text-gray-400">4 clientas · hoy</p>
+        </div>
+        <button onClick={() => { if (paso >= GUION.length) { setPaso(0); setPatriciaPagado(false); setVistaSemana(false); setTimeout(()=>setReproduciendo(true),50);} else setReproduciendo(r => !r); }}
+          className="ml-auto bg-sello text-white text-xs font-semibold px-3 py-2 rounded-full shadow hover:opacity-90">
+          {paso >= GUION.length ? '↻ Repetir día' : reproduciendo ? '⏸ Pausar' : '▶ Reproducir día'}
+        </button>
+      </div>
+      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+        {paso === 0 && <p className="text-center text-sm text-gray-400 mt-10 font-body italic">Presiona "▶ Reproducir día" y mira cómo<br/>la libreta de la derecha se escribe sola.</p>}
+        {mensajes.map(m => {
+          if (m.lado === 'libreta') return null;
+          if (m.lado === 'voz') return (
+            <div key={m.id} className="msg-in max-w-[85%]">
+              <p className="text-[11px] text-gray-400 ml-1 mb-0.5">{m.autor}</p>
+              <div className="bubble-in p-3 shadow-sm">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <span className="tracking-widest text-xs">▁▂▅▂▆▃▁▄▂▅▁ 0:09</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 italic font-body"><span className="not-italic">✨ Transcripción IA:</span> {m.transcripcion}</p>
+              </div>
+            </div>
+          );
+          if (m.lado === 'comprobante') return (
+            <div key={m.id} className="msg-in max-w-[85%]">
+              <p className="text-[11px] text-gray-400 ml-1 mb-0.5">{m.autor}</p>
+              <button onClick={() => setPatriciaPagado(true)} disabled={patriciaPagado}
+                className={"bubble-in p-3 shadow-sm text-left w-full border-2 " + (patriciaPagado ? "border-green-300" : "border-dashed border-sello/50 hover:border-sello")}>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded bg-green-100 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-tinta">{m.texto}</p>
+                    <p className="text-[11px] text-gray-400">{patriciaPagado ? 'Registrado en la libreta ✓' : 'Toca el comprobante para registrarlo →'}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 font-body italic">{m.nota}</p>
+              </button>
+            </div>
+          );
+          const propio = m.lado === 'out';
+          return (
+            <div key={m.id} className={"msg-in max-w-[85%] " + (propio ? "ml-auto" : "")}>
+              {!propio && <p className="text-[11px] text-gray-400 ml-1 mb-0.5">{m.autor}</p>}
+              <div className={(propio ? "bubble-out" : "bubble-in") + " p-3 shadow-sm"}>
+                <p className="text-sm text-tinta">{m.texto}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const Resumen = (
+    <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="paper p-3 text-center" style={{transform:'rotate(-1.5deg)'}}>
+        <div className="tape" style={{width:'46px'}}></div>
+        <p className="font-type text-[11px] text-tinta/70 uppercase">Caja de hoy</p>
+        <p className="font-hand text-3xl font-bold text-tinta">${cajaAnim.toFixed(0)}</p>
+      </div>
+      <div className="paper p-3 text-center" style={{transform:'rotate(1deg)'}}>
+        <div className="tape" style={{width:'46px'}}></div>
+        <p className="font-type text-[11px] text-tinta/70 uppercase">Por cobrar</p>
+        <p className="font-hand text-3xl font-bold text-sello">${porCobrar}</p>
+      </div>
+      <div className="paper p-3 text-center" style={{transform:'rotate(-0.5deg)'}}>
+        <div className="tape" style={{width:'46px'}}></div>
+        <p className="font-type text-[11px] text-tinta/70 uppercase">Stock bajo</p>
+        <p className="font-hand text-3xl font-bold text-tinta">{(stockLabial<=1?1:0)+(demandaOllas?1:0)+1}</p>
+      </div>
+    </div>
+  );
+
+  const Libreta = (
+    <div className="h-full overflow-y-auto rounded-xl p-4 grain" style={{background:'rgba(255,246,216,.5)', border:'2px solid rgba(120,95,55,.25)'}}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-type text-xl text-tinta">📒 La libreta</h2>
+        <div className="flex gap-1 font-type text-xs">
+          <button onClick={()=>setVistaSemana(false)} className={"px-3 py-1.5 " + (!vistaSemana ? "bg-sello text-white" : "bg-papel text-tinta")} style={{borderRadius:'3px 10px 4px 9px'}}>Hoy</button>
+          <button onClick={()=>setVistaSemana(true)} className={"px-3 py-1.5 " + (vistaSemana ? "bg-sello text-white" : "bg-papel text-tinta")} style={{borderRadius:'9px 4px 10px 3px'}}>Ver semana</button>
+        </div>
+      </div>
+      {Resumen}
+      {vistaSemana ? (
+        <div className="paper torn p-5" style={{transform:'rotate(-0.8deg)'}}>
+          <div className="pin"></div>
+          <h3 className="font-type text-sm text-tinta mb-3 wavy">Resumen de la semana</h3>
+          <p className="font-hand text-2xl text-tinta">Total vendido: <b>$186</b></p>
+          <p className="font-hand text-xl text-sello mt-2">Fiado pendiente: $22 — Dilcia (viernes)</p>
+          <p className="font-type text-xs text-tinta/70 mt-4 uppercase">Lo más vendido</p>
+          <ul className="font-hand text-xl text-tinta leading-snug">
+            <li>1. Labial 24 Rojo Coral — 9 uds</li>
+            <li>2. Crema de manos — 6 uds</li>
+            <li>3. Perfume Brisa — 4 uds</li>
+          </ul>
+          <p className="font-body italic text-xs text-tinta/60 mt-3">Escrito por tu agente IA — tú solo vendiste.</p>
+        </div>
+      ) : (
+      <div>
+        <p className="font-type text-xs text-tinta/70 uppercase mb-2">Pedidos de hoy</p>
+        {!pedidoRosa && !fiadoDilcia && <p className="font-body italic text-sm text-tinta/50 mb-3">Todavía nada — reproduce el chat.</p>}
+        {pedidoRosa && (
+          <Nota rot="-1.2deg">
+            <p className="font-body text-sm text-tinta"><b>Rosa</b> — 2 × Labial 24 Rojo Coral</p>
+            <div className="flex items-center justify-between mt-1">
+              <span className="font-hand text-2xl text-tinta">$14</span>
+              <Sello texto="APARTADO" />
+            </div>
+            <p className="font-body text-xs text-tinta/60 mt-1">Recoge hoy en la tarde · paga al recoger</p>
+          </Nota>
+        )}
+        {fiadoDilcia && (
+          <Nota rot="1.4deg">
+            <p className="font-body text-sm text-tinta"><b>Dilcia</b> — Perfume Brisa</p>
+            <div className="flex items-center justify-between mt-1">
+              <span className="font-hand text-2xl text-sello">$22 fiado</span>
+              <span className="font-hand text-lg text-tinta/80">cobrar el viernes ✍️</span>
+            </div>
+          </Nota>
+        )}
+        <p className="font-type text-xs text-tinta/70 uppercase mb-2 mt-4">Por cobrar</p>
+        <Nota rot="0.8deg">
+          <p className="font-body text-sm text-tinta flex items-center justify-between">
+            <span className={patriciaPagado ? "tachon" : ""}><b>Patricia</b> — Crema de manos — $18 <span className="text-tinta/50">(desde el lunes)</span></span>
+            {patriciaPagado && <Sello texto="PAGADO" />}
+          </p>
+          {fiadoDilcia && <p className="font-body text-sm text-tinta mt-2"><b>Dilcia</b> — Perfume Brisa — $22 <span className="text-tinta/50">(viernes)</span></p>}
+        </Nota>
+        <p className="font-type text-xs text-tinta/70 uppercase mb-2 mt-4">Inventario</p>
+        <Nota rot="-0.6deg">
+          {CATALOGO_INICIAL.map(p => {
+            const stock = p.id === 'labial' ? stockLabial : p.stock;
+            const cambio = p.id === 'labial' && pedidoRosa;
+            return (
+              <p key={p.id} className="font-body text-sm text-tinta flex justify-between py-0.5">
+                <span>{p.nombre}</span>
+                <span className="font-hand text-lg">
+                  {cambio && <span className="tachon text-tinta/50 mr-2">3</span>}
+                  {stock === 0 ? <span className="text-sello">agotado</span> : `${stock} uds`}
+                </span>
+              </p>
+            );
+          })}
+        </Nota>
+        {pedidoRosa && stockLabial <= 1 && (
+          <Nota rot="2deg" alerta>
+            <p className="font-hand text-xl text-sello">⚠ Queda 1 Labial 24 — ¿pides al proveedor?</p>
+          </Nota>
+        )}
+        {demandaOllas && (
+          <Nota rot="-1.8deg" alerta>
+            <p className="font-body text-sm text-tinta"><b>Demanda sin stock:</b> Set de ollas — 1 consulta hoy (Mabel). El agente le avisa cuando llegue.</p>
+          </Nota>
+        )}
+      </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{maxWidth:'1100px', margin:'0 auto'}}>
+      <header className="px-4 pt-6 pb-4 text-center">
+        <h1 className="font-type text-3xl text-tinta">Libreta</h1>
+        <p className="font-hand text-2xl text-sello -mt-1">tú vendes — la libreta se escribe sola</p>
+        <p className="font-body text-sm text-tinta/70 mt-1">Tu agente IA lee tus chats de venta y arma pedidos, fiado, inventario y caja. Demo con datos de ejemplo.</p>
+      </header>
+      <div className="md:hidden flex gap-2 px-4 mb-3 font-type text-sm">
+        <button onClick={()=>setTabMovil('chat')} className={"flex-1 py-2 rounded " + (tabMovil==='chat' ? "bg-sello text-white" : "bg-papel text-tinta")}>El chat</button>
+        <button onClick={()=>setTabMovil('libreta')} className={"flex-1 py-2 rounded " + (tabMovil==='libreta' ? "bg-sello text-white" : "bg-papel text-tinta")}>La libreta</button>
+      </div>
+      <main className="flex-1 grid md:grid-cols-2 gap-4 px-4 pb-4" style={{minHeight:'560px'}}>
+        <div className={"h-[560px] " + (tabMovil==='chat' ? "" : "hidden md:block")}>{Chat}</div>
+        <div className={"h-[560px] " + (tabMovil==='libreta' ? "" : "hidden md:block")}>{Libreta}</div>
+      </main>
+      <footer className="text-center pb-5">
+        <p className="text-xs" style={{color:'rgba(62,53,40,.45)'}}>Idea original: Aguacate newsletter — <a className="underline" href="https://aguacate-newsletter.beehiiv.com">aguacate-newsletter.beehiiv.com</a></p>
+      </footer>
+    </div>
+  );
+}
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>

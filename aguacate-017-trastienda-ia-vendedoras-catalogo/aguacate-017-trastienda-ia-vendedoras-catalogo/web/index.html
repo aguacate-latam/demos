@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Libreta — tú vendes, tu libreta se escribe sola</title>
+<meta name="description" content="El agente IA que lee tus chats de venta y anota pedidos, fiado, inventario y caja por ti." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { kraft:'#E3D3B5', papel:'#FFFDF6', crema:'#FFF6D8', sello:'#B6452C', tinta:'#3E3528' },
+  fontFamily: { type:['"Special Elite"','monospace'], hand:['Caveat','cursive'], body:['Lora','serif'] }
+} } }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background:#E3D3B5; background-image: radial-gradient(rgba(120,95,55,.10) 1px, transparent 1px); background-size:5px 5px; color:#3E3528; }
+  .paper { background:#FFFDF6; box-shadow:2px 5px 12px rgba(110,85,45,.30); position:relative; transition:transform .25s ease; }
+  .paper:hover { transform: rotate(0deg) !important; }
+  .tape { position:absolute; top:-10px; left:50%; transform:translateX(-50%) rotate(-3deg); width:84px; height:22px; background:rgba(247,227,107,.75); box-shadow:0 1px 2px rgba(0,0,0,.12); }
+  .tape-l { left:24px; transform:rotate(-28deg); }
+  .torn { clip-path: polygon(0 6%, 4% 0, 9% 6%, 15% 1%, 21% 6%, 28% 0, 34% 5%, 41% 1%, 48% 6%, 55% 0, 62% 5%, 69% 1%, 76% 6%, 83% 0, 90% 5%, 96% 1%, 100% 6%, 100% 94%, 95% 100%, 88% 95%, 80% 100%, 71% 95%, 62% 100%, 53% 95%, 44% 100%, 35% 95%, 26% 100%, 17% 95%, 8% 100%, 0 94%); }
+  .pin { position:absolute; top:-8px; left:50%; margin-left:-8px; width:16px; height:16px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #e98978, #B6452C 65%, #7c2a18); box-shadow:0 2px 4px rgba(0,0,0,.35); z-index:2; }
+  .stamp { display:inline-block; border:3px double #B6452C; color:#B6452C; font-family:'Special Elite',monospace; padding:2px 10px; transform:rotate(-8deg); letter-spacing:1.5px; }
+  .wavy { text-decoration: underline wavy #B6452C 2.5px; text-underline-offset:6px; }
+  .polaroid { background:#fff; padding:10px 10px 36px 10px; box-shadow:3px 6px 16px rgba(90,70,35,.35); }
+</style>
+</head>
+<body class="font-body">
+
+<!-- NAV -->
+<nav class="max-w-5xl mx-auto px-4 pt-6 flex items-center gap-3 flex-wrap">
+  <a href="#" class="paper px-4 py-2 font-type text-lg" style="transform:rotate(-2deg)"><span class="tape" style="width:50px"></span>Libreta</a>
+  <a href="#como" class="paper px-3 py-1.5 font-type text-sm hidden sm:inline-block" style="transform:rotate(1.5deg)"><span class="tape" style="width:40px"></span>Cómo funciona</a>
+  <a href="https://aguacate-demos.pages.dev/aguacate-017-trastienda-ia-vendedoras-catalogo/" class="paper px-3 py-1.5 font-type text-sm ml-auto bg-crema" style="transform:rotate(-1deg)"><span class="tape" style="width:40px"></span>Probar demo →</a>
+</nav>
+
+<!-- HERO -->
+<header class="max-w-5xl mx-auto px-4 pt-14 pb-10 grid md:grid-cols-5 gap-10 items-center">
+  <div class="md:col-span-3">
+    <div class="paper torn inline-block px-6 py-3" style="transform:rotate(-2deg)">
+      <h1 class="font-type text-3xl sm:text-5xl tracking-tight">TÚ VENDES.</h1>
+    </div>
+    <div class="paper torn inline-block px-6 py-3 mt-3 bg-crema" style="transform:rotate(1.3deg)">
+      <h1 class="font-type text-3xl sm:text-5xl tracking-tight">TU LIBRETA SE<br class="sm:hidden"/> ESCRIBE SOLA.</h1>
+    </div>
+    <p class="font-hand text-3xl mt-6 text-tinta/90" style="transform:rotate(-1deg)">los pedidos, el fiado y la caja — sin pasar nada al cuaderno ✍️</p>
+    <p class="font-body mt-4 max-w-md text-tinta/80">Libreta es un agente IA que lee tus chats de venta de WhatsApp e Instagram (audios incluidos) y anota todo por ti, apenas pasa.</p>
+    <a href="https://aguacate-demos.pages.dev/aguacate-017-trastienda-ia-vendedoras-catalogo/" class="paper torn inline-block mt-7 px-7 py-4 bg-sello" style="transform:rotate(-1.5deg)">
+      <span class="font-type text-xl text-papel">Prueba el demo →</span>
+    </a>
+    <p class="font-type text-xs mt-3 text-tinta/60">2 minutos, sin registrarte.</p>
+  </div>
+  <div class="md:col-span-2 flex justify-center">
+    <div class="polaroid" style="transform:rotate(3deg); max-width:260px">
+      <div class="pin"></div>
+      <div class="bg-papel p-4 border border-kraft">
+        <p class="font-type text-[11px] uppercase text-tinta/60">Pedido — hoy 4:12 pm</p>
+        <p class="font-body text-sm mt-1"><b>Rosa</b> — 2 × Labial 24 Rojo Coral</p>
+        <p class="font-hand text-3xl mt-1">$14</p>
+        <p class="mt-2"><span class="stamp text-sm">PAGADO</span></p>
+        <p class="font-body text-xs text-tinta/60 mt-2 italic">anotado del chat, solita</p>
+      </div>
+      <p class="font-hand text-2xl text-center mt-2">tu libreta, cada noche</p>
+    </div>
+  </div>
+</header>
+
+<!-- TABLERO 3 NOTAS -->
+<section class="max-w-5xl mx-auto px-4 py-12">
+  <h2 class="font-type text-2xl mb-8"><span class="wavy">Lo que el agente anota por ti</span></h2>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="paper p-6" style="transform:rotate(-1.8deg)">
+      <div class="pin"></div>
+      <h3 class="font-type text-lg">Ni un pedido perdido</h3>
+      <p class="font-body text-sm mt-3 text-tinta/85">Lee tus chats — audios incluidos — y anota cada pedido apenas pasa. El "¿me apartas dos?" de las 11 de la noche ya quedó en la libreta.</p>
+    </div>
+    <div class="paper p-6 bg-crema" style="transform:rotate(1.2deg)">
+      <div class="pin"></div>
+      <h3 class="font-type text-lg">El fiado, con nombre y fecha</h3>
+      <p class="font-body text-sm mt-3 text-tinta/85">Quién te debe, cuánto y para cuándo. Y el viernes, cuando Dilcia cobra, la libreta te recuerda cobrarle a ella.</p>
+      <p class="font-hand text-2xl mt-3 text-sello">Dilcia — $22 — viernes</p>
+    </div>
+    <div class="paper p-6" style="transform:rotate(-0.7deg)">
+      <div class="pin"></div>
+      <h3 class="font-type text-lg">La caja, cada noche</h3>
+      <p class="font-body text-sm mt-3 text-tinta/85">Cuánto vendiste hoy, qué se está agotando y qué pedir al proveedor. Sin calculadora, sin trasnocho.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CARTA TESTIMONIO -->
+<section class="max-w-3xl mx-auto px-4 py-12">
+  <div class="paper p-8 sm:p-10" style="transform:rotate(-0.6deg)">
+    <span class="tape"></span>
+    <span class="tape tape-l"></span>
+    <p class="font-body text-lg leading-relaxed text-tinta/90">Yo vendía todo el día y de noche copiaba el chat al cuaderno. Dos horas, y siempre se me escapaba un fiado. Ahora termino de vender, abro la Libreta y ya está escrita. La semana pasada me avisó que me debían un perfume desde el lunes. Cobré ese mismo viernes.</p>
+    <div class="flex items-end justify-between mt-6">
+      <div>
+        <p class="font-hand text-3xl">Carmen R.</p>
+        <p class="font-type text-xs text-tinta/60">vende por catálogo desde hace 9 años</p>
+      </div>
+      <span class="stamp">COMPROBADO</span>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section id="como" class="max-w-5xl mx-auto px-4 py-12">
+  <h2 class="font-type text-2xl mb-8"><span class="wavy">Cómo funciona</span></h2>
+  <div class="space-y-5 max-w-2xl">
+    <div class="paper torn px-6 py-4 flex items-center gap-5" style="transform:rotate(-1deg)">
+      <span class="font-hand text-5xl text-sello">1</span>
+      <p class="font-type text-sm sm:text-base">Conecta el WhatsApp con el que ya vendes.</p>
+    </div>
+    <div class="paper torn px-6 py-4 flex items-center gap-5 bg-crema" style="transform:rotate(0.9deg)">
+      <span class="font-hand text-5xl text-sello">2</span>
+      <p class="font-type text-sm sm:text-base">Vende como siempre. Texto, audios, comprobantes.</p>
+    </div>
+    <div class="paper torn px-6 py-4 flex items-center gap-5" style="transform:rotate(-0.6deg)">
+      <span class="font-hand text-5xl text-sello">3</span>
+      <p class="font-type text-sm sm:text-base">Abre tu libreta: pedidos, fiado, inventario y caja, ya escritos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="max-w-5xl mx-auto px-4 py-14 text-center">
+  <a href="https://aguacate-demos.pages.dev/aguacate-017-trastienda-ia-vendedoras-catalogo/" class="paper torn inline-block px-8 py-5 bg-sello" style="transform:rotate(-1.2deg)">
+    <span class="font-type text-xl sm:text-2xl text-papel">Mira tu libreta escribiéndose →</span>
+  </a>
+  <p class="font-hand text-2xl mt-5 text-tinta/85">funciona con el número que ya usas. tus chats son tuyos.</p>
+</section>
+
+<!-- FOOTER -->
+<footer class="max-w-5xl mx-auto px-4 pb-10 pt-6 text-center">
+  <p class="font-type text-sm text-tinta/80">Libreta — hecho para las que venden por chat</p>
+  <p class="font-type text-[11px] text-tinta/55 mt-2">Demo conceptual — Libreta no es un producto real (todavía).</p>
+  <p class="font-type text-[11px] text-tinta/55 mt-1">Idea original: Aguacate newsletter — <a class="underline" href="https://aguacate-newsletter.beehiiv.com">aguacate-newsletter.beehiiv.com</a></p>
+  <p class="font-type text-[11px] mt-1"><a class="underline text-tinta/55" href="https://app.notion.com/p/37c95c8691d78159b6a7c58bee9aa292">¿Quieres construir algo así? Replícalo con tu IA →</a></p>
+</footer>
+
+</body>
+</html>
